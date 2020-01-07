@@ -23,7 +23,7 @@ You can try this demo [here](https://developers.curvsurf.com/WebDemo) in advance
 
 The demo client itself will work on your local machine (just by executing index.html on your web browser), but we **strongly recommend you to build your own local server for the client**, at least, in order to try this demo; otherwise, loading preset files will fail due to security issues since the demo client uses XMLHttpRequest to load the preset files.
 
-In case of running the demo without a local server, you may download [these files](xyz/README.md) and load them using the [Use Local File] menu in the demo.
+In case of running the demo without a local server, you may download [these files](xyz) and load them using the [Use Local File] menu in the demo.
 
 A user manual can be found at [here](https://developers.curvsurf.com/WebDemo/Manual/overview.html).
 
