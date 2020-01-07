@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Interface of FindSurfaceWeb</title>
+<link rel="stylesheet" type="text/css" href="css/vs.css">
+<link rel="stylesheet" type="text/css" href="css/github_markdown.css">
+<link rel="stylesheet" type="text/css" href="css/manual.css">
+</head>
+<body>
+<div id="MENU_AREA">
+	<div style="padding: 8px;">
+		<img style="width:70%; height: auto;" src="img/find_surface.png" /> <strong>for Web</strong>
+	</div>
+	<div class="sidenav">
+		<a href="overview.html">Overview</a>
+		<a href="interface.html">Interface</a>
+		<a href="stepbystep.html">Step-by-Step</a>
+	</div>
+</div>
+<div id="PREVIEW_AREA" class="markdown-body" style="padding: 20px;"><h1 id="inteface-of-findsurfaceweb">Interface of FindSurfaceWeb</h1>
+<p><img src="img/FindSurfaceWeb-manual.png" alt=""></p>
+<table>
+<tbody>
+<tr>
+<td>&#9312;</td>
+<td><strong>Menu bar</strong></td>
+<td>Provides buttons to control FindSurfaceWeb's behavior.</td>
+</tr>
+<tr>
+<td>&#9313;</td>
+<td><strong>WebGL canvas</strong></td>
+<td>Visualizes point clouds and geometries.</td>
+</tr>
+<tr>
+<td>&#9314;</td>
+<td><strong>Information panel</strong></td>
+<td>Prints geometries' information such as size, position, orientation.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="buttons-in-the-menu-bar">Buttons in the menu bar</h2>
+<h3 id="open-point-cloud-data">Open Point Cloud Data</h3>
+<table>
+<tbody>
+<tr>
+<td><img src="img/open.png" alt=""></td>
+<td style="text-align:center">Open</td>
+<td style="text-align:left">Opens a point cloud file. You may select one of the preset data, which our server provides, or choose your own file (.xyz or .obj) to upload it to the server.</td>
+</tr>
+<tr>
+<td><img src="img/reset-scene.png" alt=""></td>
+<td style="text-align:center">Reset Scene</td>
+<td style="text-align:left">Removes all works done and initializes the point cloud.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="manipulate-the-view">Manipulate the view</h3>
+<table>
+<tbody>
+<tr>
+<td><img src="img/normal.png" alt=""></td>
+<td style="text-align:center">Normal</td>
+<td style="text-align:left">Disables user mouse events on the WebGL canvas.</td>
+</tr>
+<tr>
+<td><img src="img/rotate.png" alt=""></td>
+<td style="text-align:center">Rotate</td>
+<td style="text-align:left">Enables user mouse events on the WebGL canvas, so you can drag your mouse cursor to rotate the point cloud.</td>
+</tr>
+<tr>
+<td><img src="img/zoom.png" alt=""></td>
+<td style="text-align:center">Zoom</td>
+<td style="text-align:left">Enables user mouse events on the WebGL canvas, so you can drag your mouse cursor horizontally to zoom in/out the point cloud.</td>
+</tr>
+<tr>
+<td><img src="img/move.png" alt=""></td>
+<td style="text-align:center">Move</td>
+<td style="text-align:left">Enables user mouse events on the WebGL canvas, so you can drag your mouse cursor to move the point cloud.</td>
+</tr>
+<tr>
+<td><img src="img/top-view.png" alt=""></td>
+<td style="text-align:center">Top View</td>
+<td style="text-align:left">Sets the camera to the top view (the camera is located at a point on Y axis).</td>
+</tr>
+<tr>
+<td><img src="img/front-view.png" alt=""></td>
+<td style="text-align:center">Front View</td>
+<td style="text-align:left">Sets the camera to the front view (the camera is located at a point on Z axis).</td>
+</tr>
+<tr>
+<td><img src="img/side-view.png" alt=""></td>
+<td style="text-align:center">Side View</td>
+<td style="text-align:left">Sets the camera to the side view (the camera is located at a point on X axis).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="run-findsurface">Run FindSurface</h3>
+<table>
+<tbody>
+<tr>
+<td><img src="img/setting-parameters.png" alt=""></td>
+<td style="text-align:center">Setting Parameters</td>
+<td style="text-align:left">Adjusts FindSurface's parameters.</td>
+</tr>
+<tr>
+<td><img src="img/find-plane.png" alt=""></td>
+<td style="text-align:center">Find Plane</td>
+<td style="text-align:left">Sets FindSurface's target type to plane.</td>
+</tr>
+<tr>
+<td><img src="img/find-sphere.png" alt=""></td>
+<td style="text-align:center">Find Sphere</td>
+<td style="text-align:left">Sets FindSurface's target type to sphere.</td>
+</tr>
+<tr>
+<td><img src="img/find-cylinder.png" alt=""></td>
+<td style="text-align:center">Find Cylinder</td>
+<td style="text-align:left">Sets FindSurface's target type to cylinder.</td>
+</tr>
+<tr>
+<td><img src="img/find-cone.png" alt=""></td>
+<td style="text-align:center">Find Cone</td>
+<td style="text-align:left">Sets FindSurface's target type to cone.</td>
+</tr>
+<tr>
+<td><img src="img/find-torus.png" alt=""></td>
+<td style="text-align:center">Find Torus</td>
+<td style="text-align:left">Sets FindSurface's target type to torus.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="etc">ETC</h3>
+<table>
+<tbody>
+<tr>
+<td><img src="img/info.png" alt=""></td>
+<td style="text-align:center">Info</td>
+<td style="text-align:left">Shows information about this web application.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="webgl-canvas">WebGL Canvas</h2>
+<table>
+<tbody>
+<tr>
+<td style="text-align:center; background-color: #1D1D1D;"><img src="img/unit-frame.png" alt=""></td>
+<td style="text-align:center">Unit Frame</td>
+<td style="text-align:left">(Top-Left side of screen) Visualizes the axes of reference frame in model-space coordinates.</td>
+</tr>
+<tr>
+<td style="text-align:center; background-color: #1D1D1D;"><img src="img/ruler.png" alt=""></td>
+<td style="text-align:center">Ruler</td>
+<td style="text-align:left">(Bottom-Left side of screen) Provides a visual cue to help users to assume length of the object in a screen to estimate how long it is in a real life.</td>
+</tr>
+<tr>
+<td style="text-align:center; background-color: #1D1D1D;"><img src="img/mesh.png" alt=""></td>
+<td style="text-align:center">Geometry mesh</td>
+<td style="text-align:left">A geometry model's mesh that is found by FindSurface.</td>
+</tr>
+<tr>
+<td style="text-align:center; background-color: #1D1D1D;"><img src="img/inliers.png" alt=""></td>
+<td style="text-align:center">Geometry inlier points</td>
+<td style="text-align:left">The points that are included by a geometry model.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="information-panel">Information Panel</h2>
+<p>This panel shows you geometry items that are found by FindSurface. Users can click an item to show the information of the item.</p>
+<h3 id="item-actions">Item Actions</h3>
+<table>
+<tbody>
+<tr>
+<td><img src="img/palette.png" alt=""></td>
+<td style="text-align:center">Color Palette</td>
+<td style="text-align:left">Allows users to change the color of a geometry's mesh or inlier points.</td>
+</tr>
+<tr>
+<td><img src="img/visibility.png" alt=""></td>
+<td style="text-align:center">Visibility</td>
+<td style="text-align:left">Allows users to show/hide a geometry's mesh or inlier points.</td>
+</tr>
+<tr>
+<td><img src="img/remove.png" alt=""></td>
+<td style="text-align:center">Remove</td>
+<td style="text-align:left">Allows users to remove the mesh and inlier points of a geometry.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

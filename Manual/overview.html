@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Interface of FindSurfaceWeb</title>
+<link rel="stylesheet" type="text/css" href="css/vs.css">
+<link rel="stylesheet" type="text/css" href="css/github_markdown.css">
+<link rel="stylesheet" type="text/css" href="css/manual.css">
+</head>
+<body>
+<div id="MENU_AREA">
+	<div style="padding: 8px;">
+		<img style="width:70%; height: auto;" src="img/find_surface.png" /> <strong>for Web</strong>
+	</div>
+	<div class="sidenav">
+		<a href="overview.html">Overview</a>
+		<a href="interface.html">Interface</a>
+		<a href="stepbystep.html">Step-by-Step</a>
+	</div>
+</div>
+<div id="PREVIEW_AREA" class="markdown-body" style="padding: 20px;"><h1 id="what-are-the-functions,-characteristics-and-specialties-of-findsurfaceweb?">What are the functions, characteristics and specialties of FindSurfaceWeb?</h1>
+<p>The purpose of FindSurfaceWeb is to provide an experience of fundamental features of FindSurface to users. With just simple clicks on point cloud scan data, users can find primitive shapes, along with information on its size, location, and etc. Users can also upload their own point cloud files to test them (a file size should not be bigger than 70 MB). Furthermore, they can also test files which CurvSurf provides. Depending on the size of the file, it may take some time to print the results onto the users' screen, as point cloud data is first sent to the CurvSurf server to handle them, and then sent back to the client.</p>
+<h1 id="what-are-users-can-do-and-can't-do-with-findsurfaceweb?">What are users can do and can't do with FindSurfaceWeb?</h1>
+<h3 id="findsurfaceweb-supports-the-following:">FindSurfaceWeb supports the following:</h3>
+<ul>
+<li>Visualizing point cloud data by using WebGL.</li>
+<li>Obtaining a primitive shape of an object by clicking point clouds data.</li>
+<li>Visualizing inlier points of the found geometry shape and informing users the size, location, and orientation of the geometry.</li>
+</ul>
+<h3 id="following-functions-are-not-including-but-not-limited-to:">Following functions are not Including but not limited to:</h3>
+<ul>
+<li>Saving the geometry's information that has been found, such as the shape, location, and orientation into files.</li>
+<li>Finding irregularly shaped geometry that is not one of the five primitive shapes listed above.</li>
+<li>Saving the user's current progress and recovering or reloading the progress later on</li>
+</ul>
+<h1 id="functional-limits-and-precautions-of-findsurfaceweb">Functional limits and precautions of FindSurfaceWeb</h1>
+<p>Every process in FindSurfaceWeb relating to FindSurface is done through a web server (the client only visualizes its results). Therefore, we have limited the size of point cloud data that can be uploaded to be [70 MB], so point cloud data bigger than [70 MB] cannot be uploaded. If it is to exceed [70 MB], we recommend you to equally decimate the point cloud data even if the geometry's level of detail has to be lowered. FindSurface does not require such subtle details to find the primitive-shaped geometry.</p>
+</div>
+</body>
+</html>

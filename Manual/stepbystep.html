@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Interface of FindSurfaceWeb</title>
+<link rel="stylesheet" type="text/css" href="css/vs.css">
+<link rel="stylesheet" type="text/css" href="css/github_markdown.css">
+<link rel="stylesheet" type="text/css" href="css/manual.css">
+</head>
+<style>
+.markdown-body img { border: 1px solid #333 !important; vertical-align: middle !important;  } 
+</style>
+<body>
+<div id="MENU_AREA">
+	<div style="padding: 8px;">
+		<img style="width:70%; height: auto;" src="img/find_surface.png" /> <strong>for Web</strong>
+	</div>
+	<div class="sidenav">
+		<a href="overview.html">Overview</a>
+		<a href="interface.html">Interface</a>
+		<a href="stepbystep.html">Step-by-Step</a>
+	</div>
+</div>
+<div id="PREVIEW_AREA" class="markdown-body" style="padding: 20px;"><h2 id="how-to-open-point-cloud-data">How to Open Point Cloud Data</h2>
+<ol>
+<li>Click <img src="img/open.png" alt="Open"> button on Top Menu.</li>
+<li><p>Select Point Cloud Data you want.</p><p><img src="img/open_dialog.png" alt="open dialog"></p></li>
+</ol>
+<ul>
+<li>Preset Data
+<ol>
+<li>Select Preset Data from Select Box.</li>
+<li>Click [ Apply ] button.</li>
+</ol>
+</li>
+<li>Local Data
+<ol>
+<li>Select [ <em>Use Local File (.xyz or .obj)</em> ] from Select Box.</li>
+<li>Select the file on your local system. We only support <em>ascii .xyz</em> ( first 3 columns always X Y Z coordinates ) and <em><a href="https://en.wikipedia.org/wiki/Wavefront_.obj_file">obj</a></em> format.</li>
+<li>Click [ Apply ] button.</li>
+</ol>
+</li>
+</ul>
+<h2 id="how-to-manipulate-camera-view">How to Manipulate Camera View</h2>
+<p>To manipulate the view, click one of the menu buttons listed below and follow the instructions below.</p>
+<table>
+<tbody>
+<tr>
+<td><img src="img/normal.png" alt=""></td>
+<td style="text-align:left">No actions.</td>
+</tr>
+<tr>
+<td><img src="img/rotate.png" alt=""></td>
+<td style="text-align:left">Drag your mouse cursor to rotate the view (the rotation axis is always at the center of point cloud data).</td>
+</tr>
+<tr>
+<td><img src="img/zoom.png" alt=""></td>
+<td style="text-align:left">Drag your mouse cursor <strong>horizontally</strong> to zoom in/out.</td>
+</tr>
+<tr>
+<td><img src="img/move.png" alt=""></td>
+<td style="text-align:left">Drag your mouse cursor to move the view.</td>
+</tr>
+</tbody>
+</table>
+<p>You can also reset the view by clicking one of the menu buttons below.</p>
+<table>
+<tbody>
+<tr>
+<td><img src="img/top-view.png" alt=""></td>
+<td style="text-align:left">Reset the camera view to the top view</td>
+</tr>
+<tr>
+<td><img src="img/front-view.png" alt=""></td>
+<td style="text-align:left">Reset the camera view to the front view</td>
+</tr>
+<tr>
+<td><img src="img/side-view.png" alt=""></td>
+<td style="text-align:left">Reset the camera view to the side view</td>
+</tr>
+</tbody>
+</table>
+<h2 id="how-to-setup-findsurface-parameters">How to Setup <strong>FindSurface</strong> Parameters</h2>
+<p>You can skip this section if you loaded one of the preset data that our server provides. The parameters are automatically set to appropriate values. Before running the <strong>FindSurface</strong> Algorithm, you have to set the algorithm parameters.</p>
+<ol>
+<li>
+<p>Click <img src="img/setting-parameters.png" alt="Parameters"> button on top menu.</p>
+<p><img src="img/parameter_dialog.png" alt="parameter dialog"></p>
+</li>
+<li>
+<p>After adjusting the parameter values, then click [ Apply ] button.</p>
+<table>
+<tbody>
+<tr>
+<td>Accuracy</td>
+<td style="text-align:left">Point measurement accuracy</td>
+</tr>
+<tr>
+<td>Mean Distance</td>
+<td style="text-align:left">Mean distance between neighboring points</td>
+</tr>
+<tr>
+<td>Touch Radius</td>
+<td style="text-align:left">Radius of seed region (also, it means minimum target object size)</td>
+</tr>
+<tr>
+<td>Radial Expansion</td>
+<td style="text-align:left">Level of segmentation referenced to the direction of surface normal</td>
+</tr>
+<tr>
+<td>Lateral Extension</td>
+<td style="text-align:left">Level of region growing in lateral direction (for plane, cylinder, cone)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Note: Parameter values are dependent on a measurement unit of point cloud data. For example, if a measurement unit is <em>meter</em> and measurement accuracy is less than <em>5 mm</em>, an appropriate value of <em>Accuracy</em> may be 0.005. If a measurement unit is <em>millimeter</em> and measurement accuracy is less than <em>3 mm</em>, an appropriate value of <em>Accuracy</em> may be 3.</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="how-to-run-findsurface">How to Run <strong>FindSurface</strong></h2>
+<ol>
+<li>
+<p>Click the button of surface types to find on Top Menu.</p>
+<p><img src="img/find-plane.png" alt="Plane">
+<img src="img/find-sphere.png" alt="Sphere">
+<img src="img/find-cylinder.png" alt="Cylinder">
+<img src="img/find-cone.png" alt="Cone">
+<img src="img/find-torus.png" alt="Torus"></p>
+</li>
+<li>
+<p>Click the ROI ( Region of Interest ) point on screen.</p>
+<p><img src="img/touch_screen.png" alt=""></p>
+</li>
+<li>
+<p>Wait for the server response.</p>
+<p><img src="img/request_01.png" alt=""> <img src="img/request_02.png" alt=""></p>
+</li>
+<li>
+<p>If <strong>FindSurface</strong> succeeds, you can see the mesh and inliers points on screen as a result.</p>
+<p><img src="img/found.png" alt=""></p>
+<p>Otherwise, [ Not Found ] dialog will pop up.</p>
+<p><img src="img/notfound_dialog.png" alt=""></p>
+</li>
+</ol>
+</div>
+</body>
+</html>

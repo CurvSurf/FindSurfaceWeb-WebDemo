@@ -1,0 +1,13 @@
+#MENU_AREA { position:fixed; left: 0; top: 0; bottom: 0; width: 250px; background-color: #DCDCDC; border-right-style: double; }
+#MENU_AREA .sidenav a {
+	padding: 8px 8px 8px 24px;
+	text-decoration: none;
+	font-size: 20px;
+	font-weight: bold;
+	color: #333;
+	display: block;
+	box-sizing: border-box;
+}
+#MENU_AREA .sidenav a:hover { background-color: #F0F0F0; }
+#MENU_AREA .sidenav a.disabled { pointer-events: none; color: red; cursor: default; }
+#PREVIEW_AREA { margin-left: 250px; }
