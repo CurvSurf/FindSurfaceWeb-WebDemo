@@ -1,22 +1,37 @@
+"use strict";
 /*!
  * File: webglapp_fs.js
  * Author: Sunggoo Kim <sg.kim@curvsurf.com>
- * 
+ *
  * Released under the MIT license
  * Copyright 2019 CurvSurf, Inc.
  */
-
-"use strict";
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
+var Constants = (function () {
+    function Constants() {
+    }
+    Constants.PI = 2.0 * Math.acos(0);
+    return Constants;
+}());
 function isNumber(n) {
     return typeof (n) === 'number';
 }
@@ -543,6 +558,13 @@ var vec3 = (function (_super) {
             sign /= Math.abs(sign);
             return Math.acos(v0.dot(v1)) * sign;
         }
+    };
+    vec3.absoluteAngleBetween = function (v0, v1, ref) {
+        var signedAngle = this.angleBetween(v0, v1, ref);
+        if (signedAngle < 0.0)
+            return 2 * Constants.PI + signedAngle;
+        else
+            return signedAngle;
     };
     Object.defineProperty(vec3.prototype, "xx", {
         get: function () { return new vec2(this._x, this._x); },
@@ -3705,7 +3727,7 @@ function GenerateWireSphereVertexData(subdiv) {
             var p12 = p1.add(p2).normalize();
             var p20 = p2.add(p0).normalize();
             points.push(p01, p12, p20);
-            vertices.push.apply(vertices, p01.toArray().concat(p12.toArray(), p20.toArray()));
+            vertices.push.apply(vertices, __spreadArrays(p01.toArray(), p12.toArray(), p20.toArray()));
             var i01 = points.length - 3;
             var i12 = i01 + 1;
             var i20 = i12 + 1;
@@ -3754,7 +3776,7 @@ function GenerateSphereVertexData(subdiv) {
             var p12 = p1.add(p2).normalize();
             var p20 = p2.add(p0).normalize();
             points.push(p01, p12, p20);
-            vertices.push.apply(vertices, p01.toArray().concat(p12.toArray(), p20.toArray()));
+            vertices.push.apply(vertices, __spreadArrays(p01.toArray(), p12.toArray(), p20.toArray()));
             var i01 = points.length - 3;
             var i12 = i01 + 1;
             var i20 = i12 + 1;
@@ -4549,13 +4571,13 @@ var WebGLApp = (function (_super) {
         };
         return _this;
     }
-    WebGLApp.prototype.GetFrameOriginColor = function () { return this.frame.color.origin.slice(); };
+    WebGLApp.prototype.GetFrameOriginColor = function () { return __spreadArrays(this.frame.color.origin); };
     WebGLApp.prototype.SetFrameOriginColor = function (r, g, b) { this.frame.color.origin = [r, g, b]; };
-    WebGLApp.prototype.GetFrameAxisXColor = function () { return this.frame.color.xaxis.slice(); };
+    WebGLApp.prototype.GetFrameAxisXColor = function () { return __spreadArrays(this.frame.color.xaxis); };
     WebGLApp.prototype.SetFrameAxisXColor = function (r, g, b) { this.frame.color.xaxis = [r, g, b]; };
-    WebGLApp.prototype.GetFrameAxisYColor = function () { return this.frame.color.yaxis.slice(); };
+    WebGLApp.prototype.GetFrameAxisYColor = function () { return __spreadArrays(this.frame.color.yaxis); };
     WebGLApp.prototype.SetFrameAxisYColor = function (r, g, b) { this.frame.color.yaxis = [r, g, b]; };
-    WebGLApp.prototype.GetFrameAxisZColor = function () { return this.frame.color.zaxis.slice(); };
+    WebGLApp.prototype.GetFrameAxisZColor = function () { return __spreadArrays(this.frame.color.zaxis); };
     WebGLApp.prototype.SetFrameAxisZColor = function (r, g, b) { this.frame.color.zaxis = [r, g, b]; };
     WebGLApp.prototype.GetOriginRadius = function () { return this.frame.scale.origin_radius; };
     WebGLApp.prototype.SetOriginRadius = function (radius) { this.frame.scale.origin_radius = radius; };
@@ -4567,7 +4589,7 @@ var WebGLApp = (function (_super) {
     WebGLApp.prototype.SetFramePos = function (x, y) { this.frame.pos.x = x; this.frame.pos.y = y; };
     WebGLApp.prototype.GetFrameSize = function () { return { width: this.frame.size.width, height: this.frame.size.height }; };
     WebGLApp.prototype.SetFrameSize = function (w, h) { this.frame.size.width = w; this.frame.size.height = h; };
-    WebGLApp.prototype.GetRulerBarColor = function () { return this.ruler.color.slice(); };
+    WebGLApp.prototype.GetRulerBarColor = function () { return __spreadArrays(this.ruler.color); };
     WebGLApp.prototype.SetRulerBarColor = function (r, g, b) { this.ruler.color = [r, g, b]; };
     WebGLApp.prototype.GetRulerPos = function () { return { x: this.ruler.pos.x, y: this.ruler.pos.y }; };
     WebGLApp.prototype.SetRulerPos = function (x, y) { this.ruler.pos.x = x; this.ruler.pos.y = y; };
@@ -4788,6 +4810,8 @@ var WebGLApp = (function (_super) {
             barycentric.z += v.z;
         });
         barycentric = barycentric.div(inlierPoints.length);
+        if (barycentric.length == 0)
+            return { tb: [0, 0, 0], ta: Constants.PI * 2.0 };
         var elbowMiddle = barycentric.normalize();
         var angles = [];
         inlierPoints.forEach(function (v) {
@@ -4807,7 +4831,7 @@ var WebGLApp = (function (_super) {
                 max_index = i;
             }
         });
-        return { tb: inlierPoints[min_index].toArray(), ta: vec3.angleBetween(inlierPoints[min_index], inlierPoints[max_index]) };
+        return { tb: inlierPoints[min_index].toArray(), ta: vec3.absoluteAngleBetween(inlierPoints[min_index], inlierPoints[max_index], n) };
     };
     WebGLApp.prototype.initialUpdate = function (gl) {
         return true;
@@ -5098,10 +5122,9 @@ var WebGLApp = (function (_super) {
         var pixel_length = this.trackball.zoomFactor;
         x *= this.width * 0.5 * this.trackball.zoomFactor;
         y *= this.height * 0.5 * this.trackball.zoomFactor;
-        var epos = new vec3(x, y, 1);
         var invView = this.trackball.transformMatrix.transpose().mul(mat4.lookAtInv(this.trackball.eye, this.trackball.at, this.trackball.up));
-        var ray_org = invView.mul(new vec4(x, y, -1, 1)).xyz;
-        var ray_dir = invView.mul(new vec4(x, y, 1, 1)).xyz.sub(ray_org).normalize();
+        var ray_org = invView.mul(new vec4(x, y, 0, 1)).xyz;
+        var ray_dir = invView.mul(new vec4(x, y, -1, 1)).xyz.sub(ray_org).normalize();
         var ray_radius = pixel_length * 4;
         var min_index = -1;
         var min_dist = Number.MAX_VALUE;
@@ -5110,6 +5133,9 @@ var WebGLApp = (function (_super) {
         for (var k = 0; k < this.vertexData.length; k += 3) {
             var pt = new vec3(this.vertexData[k], this.vertexData[k + 1], this.vertexData[k + 2]);
             var pto = pt.sub(ray_org);
+            var is_behind_cam = pto.dot(ray_dir) < 0;
+            if (is_behind_cam)
+                continue;
             var dist = pto.sub(ray_dir.mul(ray_dir.dot(pto))).length;
             if (dist < ray_radius) {
                 candidate_point_indices.push({ index: k / 3, point: pt });
