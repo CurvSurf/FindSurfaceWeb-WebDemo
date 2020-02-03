@@ -1,6 +1,6 @@
 "use strict";
 /*!
- * File: webglapp_fs.js
+ * File: webglapp_fs.ts
  * Author: Sunggoo Kim <sg.kim@curvsurf.com>
  *
  * Released under the MIT license
@@ -4491,6 +4491,7 @@ var WebGLApp = (function (_super) {
         _this.programDebug = null;
         _this.programPointCloud = null;
         _this.programWireGeometry = null;
+        _this.programCircle = null;
         _this.plane = null;
         _this.sphere = null;
         _this.cylinder = null;
@@ -4511,6 +4512,7 @@ var WebGLApp = (function (_super) {
         _this.picked_point = null;
         _this.ray_org = null;
         _this.ray_dir = null;
+        _this.proveRadius = 4;
         _this.touchID = 0;
         _this.touchStartTime = 0;
         _this.touchStartPos = new vec2();
@@ -4608,6 +4610,8 @@ var WebGLApp = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    WebGLApp.prototype.GetProveRadius = function () { return this.proveRadius; };
+    WebGLApp.prototype.SetProveRadius = function (radiusInPixels) { return this.proveRadius; };
     WebGLApp.prototype.SetTrackballRotate = function () { this._trackballBehavior = CameraBehavior.OBJECT_ROTATING; };
     WebGLApp.prototype.SetTrackballZoom = function () { this._trackballBehavior = CameraBehavior.CAMERA_ZOOMING; };
     WebGLApp.prototype.SetTrackballPan = function () { this._trackballBehavior = CameraBehavior.CAMERA_PANNING; };
@@ -4639,10 +4643,12 @@ var WebGLApp = (function (_super) {
         if (gl === null)
             return false;
         this.programDebug = CreateShaderProgram(gl, WebGLApp.vsDebugES2, WebGLApp.fsDebugES2);
+        this.programCircle = CreateShaderProgram(gl, WebGLApp.vsCircleES2, WebGLApp.fsCircleES2);
         this.programPointCloud = CreateShaderProgram(gl, WebGLApp.vsPointCloudES2, WebGLApp.fsPointCloudES2);
         this.programWireGeometry = CreateShaderProgram(gl, WebGLApp.vsWireGeometryES2, WebGLApp.fsWireGeometryES2);
         this.programGeometry = CreateShaderProgram(gl, WebGLApp.vsGeometryES2, WebGLApp.fsGeometryES2);
         this.pointcloud = CreateVertexBuffer(gl, this.vertexData);
+        this.attributeLessIndices = CreateVertexBuffer(gl, Array.apply(null, { length: 38 }).map(function (i) { return i; }, Number));
         this.plane = CreateVertexBufferIndexed(gl, [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3], [0, 1, 1, 2, 2, 3, 3, 0]);
         this.sphere = CreateVertexBufferIndexed(gl, GenerateWireSphereVertexData(2));
         this.cylinder = CreateVertexBufferIndexed(gl, GenerateWireCylinderVertexData(3, 18));
@@ -4862,6 +4868,8 @@ var WebGLApp = (function (_super) {
         }
         this.renderUnitFrame(gl);
         this.renderRuler(gl);
+        this.renderCircles(gl, this.touchRadius);
+        this.renderCircles(gl, this.proveRadius * this.trackball.zoomFactor);
     };
     WebGLApp.prototype.renderPointCloud = function (gl) {
         gl.useProgram(this.programPointCloud);
@@ -5099,6 +5107,26 @@ var WebGLApp = (function (_super) {
         var rh = h;
         this.text.fillRect(rx, ry, rw, rh);
     };
+    WebGLApp.prototype.renderCircles = function (gl, radius) {
+        var vertexCount = 38;
+        var depthTest = gl.getParameter(gl.DEPTH_TEST);
+        gl.enable(gl.DEPTH_TEST);
+        gl.useProgram(this.programCircle);
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programCircle, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.attributeLessIndices.vbo);
+        gl.enableVertexAttribArray(0);
+        gl.vertexAttribPointer(0, 1, gl.FLOAT, false, 0, 0);
+        gl.uniform2f(gl.getUniformLocation(this.programCircle, "pos"), this.mouseX, this.mouseY);
+        gl.uniform1f(gl.getUniformLocation(this.programCircle, "radius"), radius);
+        gl.uniform1i(gl.getUniformLocation(this.programCircle, "vertexCount"), this.attributeLessIndices.count);
+        gl.uniform3f(gl.getUniformLocation(this.programCircle, "color"), 1, 1, 1);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, this.attributeLessIndices.count);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.useProgram(null);
+        if (depthTest == false) {
+            gl.disable(gl.DEPTH_TEST);
+        }
+    };
     WebGLApp.prototype.finalUpdate = function (gl) {
         return true;
     };
@@ -5125,7 +5153,7 @@ var WebGLApp = (function (_super) {
         var invView = this.trackball.transformMatrix.transpose().mul(mat4.lookAtInv(this.trackball.eye, this.trackball.at, this.trackball.up));
         var ray_org = invView.mul(new vec4(x, y, 0, 1)).xyz;
         var ray_dir = invView.mul(new vec4(x, y, -1, 1)).xyz.sub(ray_org).normalize();
-        var ray_radius = pixel_length * 4;
+        var ray_radius = pixel_length * this.proveRadius;
         var min_index = -1;
         var min_dist = Number.MAX_VALUE;
         var min_pt = null;
@@ -5187,6 +5215,8 @@ var WebGLApp = (function (_super) {
     WebGLApp.prototype.onMouseMove = function (event) {
         var x = event.x / this.width;
         var y = event.y / this.height;
+        this.mouseX = clamp(2 * x - 1, -1, 1);
+        this.mouseY = clamp(1 - 2 * y, -1, 1);
         this.trackball.motion(x, y);
     };
     WebGLApp.prototype.onMouseOut = function (event) {
@@ -5266,5 +5296,7 @@ var WebGLApp = (function (_super) {
     WebGLApp.vsGeometryES2 = "#version 100\n\tattribute vec3 pos;\n\t\n\tuniform int subroutine_index;\t// 0: plane, 1: sphere, 2: cylinder, 3: cone, 4: torus\n\tuniform vec3 quad[4];\t// ll, lr, ur, ul\n\tuniform float radius0;\t// bottom or tube\n\tuniform float radius1;\t// top or mean\n\tuniform mat4 model_matrix;\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\n\tvec4 Plane() { return vec4(quad[int(pos.x)], 1); }\n\tvec4 Sphere() { return vec4(pos, 1); }\n\tvec4 Cylinder() { return vec4(pos, 1); }\n\tvec4 Cone() {\n\t\tfloat height = (pos.y + 1.0)*0.5;\n\t\tfloat interpolated_radius = mix(radius0, radius1, height);\n\t\treturn vec4(vec3(interpolated_radius, 1, interpolated_radius)*pos, 1);\n\t}\n\tvec4 Torus() {\n\t\tvec3 tdir = normalize(vec3(pos.x, 0, pos.z));\n\t\tvec3 pdir = normalize(pos-tdir);\n\t\treturn vec4(radius1*tdir+radius0*pdir, 1);\n\t}\n\tvoid main() {\n\t\tvec4 pos;\n\t\tif(subroutine_index==0) pos = Plane();\n\t\telse if(subroutine_index==1) pos = Sphere();\n\t\telse if(subroutine_index==2) pos = Cylinder();\n\t\telse if(subroutine_index==3) pos = Cone();\n\t\telse if(subroutine_index==4) pos = Torus();\n\t\tgl_Position = proj_matrix*view_matrix*model_matrix*pos;\n\t}\n\t";
     WebGLApp.fsWireGeometryES2 = "#version 100\n\tprecision mediump float;\n\t\n\tuniform vec3 color;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color, 0.5);\n\t}\n\t";
     WebGLApp.fsGeometryES2 = "#version 100\n\tprecision mediump float;\n\n\tuniform vec3 color;\n\n\t/*http://codeflow.org/entries/2012/aug/02/easy-wireframe-display-with-barycentric-coordinates/*/\n\t/*float edgeFactor() { \n\t\tvec3 d=fwidth(bary); \n\t\tvec3 a3=smoothstep(vec3(0.0), d*1.5, bary); \n\t\treturn min(min(a3.x, a3.y), a3.z); \n\t}*/\n\tvoid main() {\n\t\t/*float edge = edgeFactor();\n\t\tif(edge==0.0) discard;\n\t\tgl_FragColor = vec4(mix(color, vec3(0.5), edge), 1.0);*/\n\t\tgl_FragColor = vec4(color, 1.0);\n\t}\n\t";
+    WebGLApp.vsCircleES2 = "#version 100\n\t#define PI 3.141592653589793\n\tattribute float vertexID;\n\n\tuniform vec2 pos;\n\tuniform float radius;\n\tuniform int vertexCount; // ex) 38 = 36(points on circle) + 1(center) + 1(point enclosing circle)\n\tuniform mat4 proj_matrix;\n\n\tvarying float alphaFactor;\n  \n\tvoid main() {\n\t\talphaFactor = 0.0;\n\t\tint ID = int(vertexID);\n\t\tif (ID == 0) {\n\t\t\tgl_Position = proj_matrix * vec4(pos, 0, 0);\n\t\t} else {\n\t\t\tint count = vertexCount - 2;\n\t\t\tint index = int(mod(float(ID - 1), float(count)));\n\t\t\tfloat angle = 2.0 * float(PI) * float(index) / float(count);\n\t\t\tfloat x = radius * cos(angle);\n\t\t\tfloat y = radius * sin(angle);\n\t\t\tgl_Position = proj_matrix * vec4(pos.x + x, pos.y + y, 0, 0);\n\t\t\talphaFactor = 1.0;\n\t\t}\n\t}\n\t";
+    WebGLApp.fsCircleES2 = "#version 100\n\tprecision mediump float;\n\t\n\tuniform vec3 color;\n\tvarying float alphaFactor;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color, alphaFactor*alphaFactor*alphaFactor*alphaFactor);\n\t}\n\t";
     return WebGLApp;
 }(WebGLAppBase));

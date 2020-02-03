@@ -3030,11 +3030,14 @@ abstract class WebGLAppBase extends AppBase {
 
 	private _glContext: WebGLRenderingContext = null;
 	public get WebGLContext(): WebGLRenderingContext { return this._glContext; }
-
+	protected canvas: HTMLCanvasElement = null;
+	protected GetNormalizedMousePosition(event: MouseEvent): vec2 {
+		return new vec2(event.offsetX / this.canvas.clientWidth, event.offsetY / this.canvas.clientHeight);
+	}
 	public constructor(canvas: HTMLCanvasElement) {
 		super(canvas);
 		this._glContext = canvas.getContext("webgl") as WebGLRenderingContext || canvas.getContext("experimental-webgl") as WebGLRenderingContext;
-
+		this.canvas = canvas;
 		if(this._glContext !== null) {
 			canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
 			canvas.addEventListener("mouseup", this.onMouseUp.bind(this));
@@ -3534,11 +3537,57 @@ class WebGLApp extends WebGLAppBase {
 	}
 	`;
 
+	private static vsCircleES2: string=`#version 100
+	#define PI 3.141592653589793
+	attribute float vertexID;
+
+	uniform vec2 pos;
+	uniform float radius;
+	uniform int vertexCount; // ex) 38 = 36(points on circle) + 1(center) + 1(point enclosing circle)
+	uniform mat4 proj_matrix;
+
+	varying float alphaFactor;
+  
+	void main() {
+		
+		int ID = int(vertexID) - 1;
+		if (ID == 0) {
+			vec4 npos = proj_matrix * vec4(pos, -1, 1);
+			gl_Position = vec4(npos.xy, 0, 1);
+			alphaFactor = 0.0;
+		} else {
+			int count = vertexCount - 2;
+			int index = int(mod(float(ID - 1), float(count)));
+			float angle = 2.0 * float(PI) * float(index) / float(count);
+			float x = radius * cos(angle);
+			float y = radius * sin(angle);
+			vec4 npos = proj_matrix * vec4(pos.x + x, pos.y + y, -1, 1);
+			gl_Position = vec4(npos.xy, 0, 1);
+			alphaFactor = 1.0;
+		}
+	}
+	`;
+
+	private static fsCircleES2: string=`#version 100
+	precision mediump float;
+	
+	uniform vec3 color;
+	uniform float alphaExp;
+	uniform float alphaMin;
+	uniform float alphaMax;
+	varying float alphaFactor;
+
+	void main() {
+		gl_FragColor = vec4(color, clamp(pow(alphaFactor, alphaExp), alphaMin, alphaMax));
+	}
+	`;
+
 	private trackball: Trackball<OrthographicCamera>;
 
 	private programDebug: WebGLProgram = null;
 	private programPointCloud: WebGLProgram = null;
 	private programWireGeometry: WebGLProgram = null;
+	private programCircle: WebGLProgram = null;
 	
 	private plane: iVertexBufferIndexed = null;
 	private sphere: iVertexBufferIndexed = null;
@@ -3547,6 +3596,7 @@ class WebGLApp extends WebGLAppBase {
 	private torus: iVertexBufferIndexed = null;
 	
 	private pointcloud: iVertexBuffer;
+	private attributeLessIndices: iVertexBuffer;
 	private objectNames: string[] = [];
 	private inlierVAO: iVertexBufferMap = {};
 	private inlierObjects: iPrimitiveDataMap = {};
@@ -3606,6 +3656,9 @@ class WebGLApp extends WebGLAppBase {
 	private picked_point: vec3 = null;
 	private ray_org: vec3 = null;
 	private ray_dir: vec3 = null;
+	private proveRadius: number = 4;
+	public GetProveRadius(): number { return this.proveRadius; }
+	public SetProveRadius(radiusInPixels: number) { return this.proveRadius; }
 
 	private touchID: number = 0;
 	private touchStartTime: number = 0;
@@ -3624,6 +3677,9 @@ class WebGLApp extends WebGLAppBase {
 	private text: CanvasRenderingContext2D = null;	
 
 	private touchRadius: number=0.1;
+	public SetTouchRadius(radius: number): void {
+		this.touchRadius = radius;
+	}
 	private bTouchAreaVisible: boolean=false;
 	public ShowTouchArea(show: boolean, radius?: number): void {
 		if(typeof radius !== "undefined") {
@@ -3631,6 +3687,38 @@ class WebGLApp extends WebGLAppBase {
 		}
 		this.bTouchAreaVisible = show;
 	}
+
+	private showTouchRadiusCircle: boolean = true;
+	private touchRadiusCircleExp: number = 32;
+	private touchRadiusCircleMin: number = 0.1;
+	private touchRadiusCircleMax: number = 1.0;
+	private touchRadiusCircleColor: vec3 = new vec3(1, 1, 1);
+	public ShowTouchRadiusCircle(visible: boolean): void { this.showTouchRadiusCircle = visible; }
+	public ShouldShowTouchRadiusCircle(): boolean { return this.showTouchRadiusCircle; }
+	public SetTouchRadiusCircleExp(exp: number): void { this.touchRadiusCircleExp = exp; }
+	public GetTouchRadiusCircleExp(): number { return this.touchRadiusCircleExp; }
+	public SetTouchRadiusCircleMin(min: number): void { this.touchRadiusCircleMin = min; }
+	public GetTouchRadiusCircleMin(): number { return this.touchRadiusCircleMin; }
+	public SetTouchRadiusCircleMax(max: number): void { this.touchRadiusCircleMax = max; }
+	public GetTouchRadiusCircleMax(): number { return this.touchRadiusCircleMax; }
+	public SetTouchRadiusCircleColor(r: number, g: number, b: number): void { this.touchRadiusCircleColor.assign(r, g, b); }
+	public GetTouchRadiusCircleColor(): number[] { return this.touchRadiusCircleColor.toArray(); }
+
+	private showProveRadiusCircle: boolean = true;
+	private proveRadiusCircleExp: number = 0;
+	private proveRadiusCircleMin: number = 0.1;
+	private proveRadiusCircleMax: number = 0.1;
+	private proveRadiusCircleColor: vec3 = new vec3(1, 1, 1);
+	public ShowProveRadiusCircle(visible: boolean): void { this.showProveRadiusCircle = visible; }
+	public ShouldShowProveRadiusCircle(): boolean { return this.showProveRadiusCircle; }
+	public SetProveRadiusCircleExp(exp: number): void { this.proveRadiusCircleExp = exp; }
+	public GetProveRadiusCircleExp(): number { return this.proveRadiusCircleExp; }
+	public SetProveRadiusCircleMin(min: number): void { this.proveRadiusCircleMin = min; }
+	public GetProveRadiusCircleMin(): number { return this.proveRadiusCircleMin; }
+	public SetProveRadiusCircleMax(max: number): void { this.proveRadiusCircleMax = max; }
+	public GetProveRadiusCircleMax(): number { return this.proveRadiusCircleMax; }
+	public SetProveRadiusCircleColor(r: number, g: number, b: number): void { this.proveRadiusCircleColor.assign(r, g, b); }
+	public GetProveRadiusCircleColor(): number[] { return this.proveRadiusCircleColor.toArray(); }
 
 	public Resize(width: number, height: number) { 
 		this.width = width; this.height = height;
@@ -3711,6 +3799,7 @@ class WebGLApp extends WebGLAppBase {
 
 		// shaders and program
 		this.programDebug = CreateShaderProgram(gl, WebGLApp.vsDebugES2, WebGLApp.fsDebugES2);
+		this.programCircle = CreateShaderProgram(gl, WebGLApp.vsCircleES2, WebGLApp.fsCircleES2);
 		this.programPointCloud = CreateShaderProgram(gl, WebGLApp.vsPointCloudES2, WebGLApp.fsPointCloudES2);
 		this.programWireGeometry = CreateShaderProgram(gl, WebGLApp.vsWireGeometryES2, WebGLApp.fsWireGeometryES2);
 
@@ -3718,7 +3807,8 @@ class WebGLApp extends WebGLAppBase {
 
 		// VAO and VBOs
 		this.pointcloud = CreateVertexBuffer(gl, this.vertexData);
-		
+		this.attributeLessIndices = CreateVertexBuffer(gl, Array.apply(0, {length: 38}).map((_:number, i: number) => i + 1));
+		this.attributeLessIndices.count = 38;
 		this.plane = CreateVertexBufferIndexed(gl, [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3], [0, 1, 1, 2, 2, 3, 3, 0]);
 		this.sphere = CreateVertexBufferIndexed(gl, GenerateWireSphereVertexData(2));
 		this.cylinder = CreateVertexBufferIndexed(gl, GenerateWireCylinderVertexData(3, 18));
@@ -3966,7 +4056,14 @@ class WebGLApp extends WebGLAppBase {
 			gl.bindBuffer(gl.ARRAY_BUFFER, null);
 			gl.useProgram(null);
 		}
-
+		if (this.isMouseOut == false) {
+			if (this.showTouchRadiusCircle == true) {
+				this.renderCircles(gl, this.touchRadius, this.touchRadiusCircleColor, this.touchRadiusCircleExp, this.touchRadiusCircleMin, this.touchRadiusCircleMax);
+			}
+			if (this.showProveRadiusCircle == true) {
+				this.renderCircles(gl, this.proveRadius * this.trackball.zoomFactor, this.proveRadiusCircleColor, this.proveRadiusCircleExp, this.proveRadiusCircleMin, this.proveRadiusCircleMax);
+			}
+		}
 		this.renderUnitFrame(gl);
 		this.renderRuler(gl);
 	}
@@ -4277,6 +4374,42 @@ class WebGLApp extends WebGLAppBase {
 		
 	}
 
+	private renderCircles(gl: WebGLRenderingContext, radius: number, color: vec3, aExp: number, aMin: number, aMax: number): void {
+		let vertexCount: number = 38;
+		let depthTest: GLboolean = gl.getParameter(gl.DEPTH_TEST);
+		gl.disable(gl.DEPTH_TEST);
+		let blend: GLboolean = gl.getParameter(gl.BLEND);
+		gl.enable(gl.BLEND);
+		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+		gl.useProgram(this.programCircle);
+		gl.uniformMatrix4fv(gl.getUniformLocation(this.programCircle, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.attributeLessIndices.vbo);
+		gl.vertexAttribPointer(0, 1, gl.FLOAT, false, 0, 0);
+
+		gl.uniform2f(gl.getUniformLocation(this.programCircle, "pos"), this.mouseX * 0.5 * this.width * this.trackball.zoomFactor, this.mouseY * 0.5 * this.height * this.trackball.zoomFactor);
+		gl.uniform1f(gl.getUniformLocation(this.programCircle, "radius"), radius);
+		gl.uniform1i(gl.getUniformLocation(this.programCircle, "vertexCount"), this.attributeLessIndices.count);
+		gl.uniform3f(gl.getUniformLocation(this.programCircle, "color"), color.x, color.y, color.z);
+		
+		gl.uniform1f(gl.getUniformLocation(this.programCircle, "alphaExp"), aExp);
+		gl.uniform1f(gl.getUniformLocation(this.programCircle, "alphaMin"), aMin);
+		gl.uniform1f(gl.getUniformLocation(this.programCircle, "alphaMax"), aMax);
+
+		gl.drawArrays(gl.TRIANGLE_FAN, 0, this.attributeLessIndices.count);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, null);
+		gl.useProgram(null);
+
+		if (blend==false) {
+			gl.disable(gl.BLEND);
+		}
+		if (depthTest==true) {
+			gl.enable(gl.DEPTH_TEST);
+		}
+	}
+
     protected finalUpdate(gl: WebGLRenderingContext): Boolean {
         
         return true;
@@ -4315,7 +4448,7 @@ class WebGLApp extends WebGLAppBase {
 		let invView: mat4 = this.trackball.transformMatrix.transpose().mul(mat4.lookAtInv(this.trackball.eye, this.trackball.at, this.trackball.up));
 		let ray_org: vec3 = invView.mul(new vec4(x, y, 0, 1)).xyz;
 		let ray_dir: vec3 = invView.mul(new vec4(x, y, -1, 1)).xyz.sub(ray_org).normalize();
-		let ray_radius: number = pixel_length*4; // 4 px radius
+		let ray_radius: number = pixel_length*this.proveRadius; // 4 px radius
 
 		let min_index: number = -1;
 		let min_dist: number = Number.MAX_VALUE;
@@ -4372,33 +4505,52 @@ class WebGLApp extends WebGLAppBase {
 	}
 
    	protected onMouseDown(event: MouseEvent): void {
-		let x: number = event.x/this.width;
-		let y: number = event.y/this.height;
+		let pos: vec2 = this.GetNormalizedMousePosition(event);
+		let x: number = pos.x;
+		let y: number = pos.y;
 
 		if(event.button==0) {
 			this.trackball.mouse(x, y, this._trackballBehavior);
 		}
     }
 	protected onMouseUp(event: MouseEvent): void {
-		let x: number = event.x/this.width;
-		let y: number = event.y/this.height;
+		let pos: vec2 = this.GetNormalizedMousePosition(event);
+		let x: number = pos.x;
+		let y: number = pos.y;
 
 		if(event.button==0) {
 			this.trackball.mouse(x, y, CameraBehavior.NOTHING);
 		}
-    }
+	}
+	private mouseX: number;
+	private mouseY: number;
+	private isMouseOut: boolean = true;
 	protected onMouseMove(event: MouseEvent): void {
-		let x: number = event.x/this.width;
-		let y: number = event.y/this.height;
+		let pos: vec2 = this.GetNormalizedMousePosition(event);
+		let x: number = pos.x;
+		let y: number = pos.y;
+		this.mouseX = clamp(2 * x - 1, -1, 1);
+		this.mouseY = clamp(1 - 2 * y, -1, 1);
 		this.trackball.motion(x, y);
+		this.isMouseOut = false;
 	}
 	
 	protected onMouseOut(event: MouseEvent): void {
-		let x: number = event.x/this.width;
-		let y: number = event.y/this.height;
+		let pos: vec2 = this.GetNormalizedMousePosition(event);
+		let x: number = pos.x;
+		let y: number = pos.y;
 		if(event.button==0) {
 			this.trackball.mouse(x, y, CameraBehavior.NOTHING);
 		}
+		this.isMouseOut = true;
+	}
+
+	private _TouchScreen2Client(t: Touch): vec2{
+		let canvasBB: DOMRect = this.canvas.getBoundingClientRect();
+		return new vec2(
+			t.clientX - canvasBB.left,
+			t.clientY - canvasBB.top
+		);
 	}
 
 	protected onTouchStart(event: TouchEvent): void {
@@ -4407,11 +4559,11 @@ class WebGLApp extends WebGLAppBase {
 		if(event.touches.length==1) {
 			this.touchID = event.touches[0].identifier;
 			this.touchStartTime = (new Date()).getTime();
-			let x = event.touches[0].clientX;
-			let y = event.touches[0].clientY;
-			this.touchStartPos.assign(x, y);
 
-			this.trackball.mouse(x/this.width, y/this.height, this._trackballBehavior);
+			let pos: vec2 = this._TouchScreen2Client(event.touches[0]);
+			this.touchStartPos.assign(pos.x, pos.y);
+
+			this.trackball.mouse(pos.x/this.width, pos.y/this.height, this._trackballBehavior);
 		}
 	}
 
@@ -4421,10 +4573,11 @@ class WebGLApp extends WebGLAppBase {
 		for(let k = 0; k < event.changedTouches.length; k++) {
 			let touch: Touch = event.changedTouches[k];
 			if(touch.identifier === this.touchID) {
-				let x = touch.clientX;
-				let y = touch.clientY;
+				let pos: vec2 = this._TouchScreen2Client(touch);
 
-				this.trackball.motion(x/this.width, y/this.height);
+				this.trackball.motion(pos.x/this.width, pos.y/this.height);
+
+				return;
 			}
 		}
 	}
@@ -4435,13 +4588,12 @@ class WebGLApp extends WebGLAppBase {
 		for( let k = 0; k < event.changedTouches.length; k++) {
 			let touch: Touch = event.changedTouches[k];
 			if(touch.identifier === this.touchID) {
-				let x = touch.clientX;
-				let y = touch.clientY;
+				let pos: vec2 = this._TouchScreen2Client(touch);
 				
-				this.trackball.mouse(x/this.width, y/this.height, CameraBehavior.NOTHING);
+				this.trackball.mouse(pos.x/this.width, pos.y/this.height, CameraBehavior.NOTHING);
 
 				let diffTime = (new Date()).getTime() - this.touchStartTime;
-				let diffDist = this.touchStartPos.sub(x, y).length;
+				let diffDist = this.touchStartPos.sub(pos.x, pos.y).length;
 				
 				if(diffTime < 500 && diffDist < 4) {
 					let eventInit: MouseEventInit = {
@@ -4465,6 +4617,7 @@ class WebGLApp extends WebGLAppBase {
 					}
 					event.target.dispatchEvent(mouseEvent);
 				}
+				return;
 			}
 		}
 	}
@@ -4475,10 +4628,9 @@ class WebGLApp extends WebGLAppBase {
 		for(let k = 0; k < event.changedTouches.length; k++) {
 			let touch: Touch = event.changedTouches[k];
 			if(touch.identifier === this.touchID) {
-				let x = touch.clientX;
-				let y = touch.clientY;
+				let pos: vec2 = this._TouchScreen2Client(touch);
 
-				this.trackball.mouse(x/this.width, y/this.height, CameraBehavior.NOTHING);
+				this.trackball.mouse(pos.x/this.width, pos.y/this.height, CameraBehavior.NOTHING);
 			}
 		}
 	}
