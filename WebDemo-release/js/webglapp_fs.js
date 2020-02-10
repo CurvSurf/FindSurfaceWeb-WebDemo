@@ -87,10 +87,27 @@ var vec2 = (function (_super) {
         if (x === void 0) { x = 0; }
         if (y === void 0) { y = 0; }
         var _this = _super.call(this) || this;
-        _this.x = x;
-        _this.y = y;
+        _this._x = x;
+        _this._y = y;
         return _this;
     }
+    Object.defineProperty(vec2.prototype, "x", {
+        get: function () { return this._x; },
+        set: function (value) { this._x = value; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(vec2.prototype, "y", {
+        get: function () { return this._y; },
+        set: function (value) { this._y = value; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(vec2.prototype, "length2", {
+        get: function () { return this.dot(this); },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(vec2.prototype, "length", {
         get: function () { return Math.pow(this.dot(this), 0.5); },
         enumerable: true,
@@ -98,41 +115,41 @@ var vec2 = (function (_super) {
     });
     vec2.prototype.assign = function (arg0, arg1) {
         if (arg0 instanceof vec2) {
-            this.x = arg0.x;
-            this.y = arg0.y;
+            this._x = arg0._x;
+            this._y = arg0._y;
         }
         else {
-            this.x = arg0;
-            this.y = arg1;
+            this._x = arg0;
+            this._y = arg1;
         }
         return this;
     };
     vec2.prototype.negate = function () {
-        return new vec2(-this.x, -this.y);
+        return new vec2(-this._x, -this._y);
     };
     vec2.prototype.normalize = function () {
         return this.div(this.length);
     };
     vec2.prototype.add = function (arg0, arg1) {
-        return arg0 instanceof vec2 ? new vec2(this.x + arg0.x, this.y + arg0.y) :
-            isNumber(arg1) ? new vec2(this.x + arg0, this.y + arg1) :
-                new vec2(this.x + arg0, this.y + arg0);
+        return arg0 instanceof vec2 ? new vec2(this._x + arg0._x, this._y + arg0._y) :
+            isNumber(arg1) ? new vec2(this._x + arg0, this._y + arg1) :
+                new vec2(this._x + arg0, this._y + arg0);
     };
     vec2.prototype.sub = function (arg0, arg1) {
-        return arg0 instanceof vec2 ? new vec2(this.x - arg0.x, this.y - arg0.y) :
-            isNumber(arg1) ? new vec2(this.x - arg0, this.y - arg1) :
-                new vec2(this.x - arg0, this.y - arg0);
+        return arg0 instanceof vec2 ? new vec2(this._x - arg0._x, this._y - arg0._y) :
+            isNumber(arg1) ? new vec2(this._x - arg0, this._y - arg1) :
+                new vec2(this._x - arg0, this._y - arg0);
     };
     vec2.prototype.mul = function (arg0, arg1) {
         return arg0 instanceof mat2 ? new vec2(this.dot(arg0.column(0)), this.dot(arg0.column(1))) :
-            arg0 instanceof vec2 ? new vec2(this.x * arg0.x, this.y * arg0.y) :
-                isNumber(arg1) ? new vec2(this.x * arg0, this.y * arg1) :
-                    new vec2(this.x * arg0, this.y * arg0);
+            arg0 instanceof vec2 ? new vec2(this._x * arg0._x, this._y * arg0._y) :
+                isNumber(arg1) ? new vec2(this._x * arg0, this._y * arg1) :
+                    new vec2(this._x * arg0, this._y * arg0);
     };
     vec2.prototype.div = function (arg0, arg1) {
-        return arg0 instanceof vec2 ? new vec2(this.x / arg0.x, this.y / arg0.y) :
-            isNumber(arg1) ? new vec2(this.x / arg0, this.y / arg1) :
-                new vec2(this.x / arg0, this.y / arg0);
+        return arg0 instanceof vec2 ? new vec2(this._x / arg0._x, this._y / arg0._y) :
+            isNumber(arg1) ? new vec2(this._x / arg0, this._y / arg1) :
+                new vec2(this._x / arg0, this._y / arg0);
     };
     vec2.prototype.dot = function (arg0, arg1) {
         return arg0 instanceof vec2 ? this.mul(arg0).sum() :
@@ -140,37 +157,37 @@ var vec2 = (function (_super) {
     };
     vec2.prototype.clamp = function (vmin, vmax) {
         return vmin instanceof vec2 && vmax instanceof vec2 ?
-            new vec2(clamp(this.x, vmin.x, vmax.x), clamp(this.y, vmin.y, vmax.y)) :
-            new vec2(clamp(this.x, vmin, vmax), clamp(this.y, vmin, vmax));
+            new vec2(clamp(this._x, vmin._x, vmax._x), clamp(this._y, vmin._y, vmax._y)) :
+            new vec2(clamp(this._x, vmin, vmax), clamp(this._y, vmin, vmax));
     };
-    vec2.prototype.sum = function () { return this.x + this.y; };
+    vec2.prototype.sum = function () { return this._x + this._y; };
     vec2.prototype.toArray = function () {
-        return [this.x, this.y];
+        return [this._x, this._y];
     };
     vec2.prototype.greaterThan = function (arg0, arg1) {
         if (arg0 instanceof vec2) {
-            return this.x > arg0.x && this.y > arg0.y;
+            return this._x > arg0._x && this._y > arg0._y;
         }
         else {
-            return this.x > arg0 && this.y > arg1;
+            return this._x > arg0 && this._y > arg1;
         }
     };
     vec2.prototype.lessThan = function (arg0, arg1) {
         if (arg0 instanceof vec2) {
-            return this.x < arg0.x && this.y < arg0.y;
+            return this._x < arg0._x && this._y < arg0._y;
         }
         else {
-            return this.x < arg0 && this.y < arg1;
+            return this._x < arg0 && this._y < arg1;
         }
     };
     vec2.prototype.equalTo = function (arg0, arg1) {
         if (arg0 instanceof vec2) {
-            return Math.abs(this.x - arg0.x) < Number.EPSILON &&
-                Math.abs(this.y - arg0.y) < Number.EPSILON;
+            return Math.abs(this._x - arg0._x) < Number.EPSILON &&
+                Math.abs(this._y - arg0._y) < Number.EPSILON;
         }
         else {
-            return Math.abs(this.x - arg0) < Number.EPSILON &&
-                Math.abs(this.y - arg1) < Number.EPSILON;
+            return Math.abs(this._x - arg0) < Number.EPSILON &&
+                Math.abs(this._y - arg1) < Number.EPSILON;
         }
     };
     vec2.prototype.greaterThanOrEqualTo = function (arg0, arg1) {
@@ -190,45 +207,45 @@ var vec2 = (function (_super) {
         }
     };
     vec2.prototype.maxElement = function () {
-        return Math.max(this.x, this.y);
+        return Math.max(this._x, this._y);
     };
     vec2.prototype.minElement = function () {
-        return Math.min(this.x, this.y);
+        return Math.min(this._x, this._y);
     };
     vec2.prototype.maxElements = function (arg0, arg1) {
         if (arg0 instanceof vec2) {
-            return new vec2(Math.max(this.x, arg0.x), Math.max(this.y, arg0.y));
+            return new vec2(Math.max(this._x, arg0._x), Math.max(this._y, arg0._y));
         }
         else {
-            return new vec2(Math.max(this.x, arg0), Math.max(this.y, arg1));
+            return new vec2(Math.max(this._x, arg0), Math.max(this._y, arg1));
         }
     };
     vec2.prototype.minElements = function (arg0, arg1) {
         if (arg0 instanceof vec2) {
-            return new vec2(Math.min(this.x, arg0.x), Math.min(this.y, arg0.y));
+            return new vec2(Math.min(this._x, arg0._x), Math.min(this._y, arg0._y));
         }
         else {
-            return new vec2(Math.min(this.x, arg0), Math.min(this.y, arg1));
+            return new vec2(Math.min(this._x, arg0), Math.min(this._y, arg1));
         }
     };
     vec2.prototype.clone = function () { return new vec2().assign(this); };
     Object.defineProperty(vec2.prototype, "xx", {
-        get: function () { return new vec2(this.x, this.x); },
+        get: function () { return new vec2(this._x, this._x); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(vec2.prototype, "xy", {
-        get: function () { return new vec2(this.x, this.y); },
+        get: function () { return new vec2(this._x, this._y); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(vec2.prototype, "yx", {
-        get: function () { return new vec2(this.y, this.x); },
+        get: function () { return new vec2(this._y, this._x); },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(vec2.prototype, "yy", {
-        get: function () { return new vec2(this.y, this.y); },
+        get: function () { return new vec2(this._y, this._y); },
         enumerable: true,
         configurable: true
     });
@@ -261,6 +278,11 @@ var vec3 = (function (_super) {
     Object.defineProperty(vec3.prototype, "z", {
         get: function () { return this._z; },
         set: function (value) { this._z = value; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(vec3.prototype, "length2", {
+        get: function () { return this.dot(this); },
         enumerable: true,
         configurable: true
     });
@@ -783,6 +805,11 @@ var vec4 = (function (_super) {
     Object.defineProperty(vec4.prototype, "w", {
         get: function () { return this._w; },
         set: function (value) { this._w = value; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(vec4.prototype, "length2", {
+        get: function () { return this.dot(this); },
         enumerable: true,
         configurable: true
     });
@@ -3309,9 +3336,10 @@ var mat4 = (function (_super) {
         return new mat4(u.x, u.y, u.z, -u.dot(eye), v.x, v.y, v.z, -v.dot(eye), n.x, n.y, n.z, -n.dot(eye), 0, 0, 0, 1);
     };
     mat4.lookAtInv = function (eye, at, up) {
-        var v3 = mat4.lookAt(eye, at, up).mat3().transpose();
-        var v4 = new mat4(v3[0][0], v3[0][1], v3[0][2], 0, v3[1][0], v3[1][1], v3[1][2], 0, v3[2][0], v3[2][1], v3[2][2], 0, 0, 0, 0, 1);
-        return mat4.translate(eye).mul(v4);
+        var n = eye.sub(at).normalize();
+        var u = up.cross(n).normalize();
+        var v = n.cross(u).normalize();
+        return new mat4(u.x, v.x, n.x, eye.x, u.y, v.y, n.y, eye.y, u.z, v.z, n.z, eye.z, 0, 0, 0, 1);
     };
     mat4.orthographic = function (width, height, near, far) {
         return new mat4(2 / width, 0, 0, 0, 0, 2 / height, 0, 0, 0, 0, 2 / (near - far), (near + far) / (near - far), 0, 0, 0, 1);
@@ -3323,389 +3351,363 @@ var mat4 = (function (_super) {
     };
     return mat4;
 }(mat));
-var Camera = (function () {
-    function Camera(eye, at, up, near, far) {
-        this.eye = eye;
-        this.at = at;
-        this.up = up;
-        this.near = near;
-        this.far = far;
-        this.updateViewMatrix();
-    }
-    Camera.prototype.updateViewMatrix = function () {
-        this.view = mat4.lookAt(this.eye, this.at, this.up);
-    };
-    Camera.prototype.assign = function (c) {
-        this.eye.assign(c.eye);
-        this.at.assign(c.at);
-        this.up.assign(c.up);
-        this.near = c.near;
-        this.far = c.far;
-        this.updateViewMatrix();
-        return this;
-    };
-    return Camera;
-}());
-var OrthographicCamera = (function (_super) {
-    __extends(OrthographicCamera, _super);
-    function OrthographicCamera(eye, at, up, width, height, near, far, zoomFactor) {
-        if (zoomFactor === void 0) { zoomFactor = 1; }
-        var _this = _super.call(this, eye, at, up, near, far) || this;
-        _this.width = width;
-        _this.height = height;
-        _this.zoomFactor = zoomFactor;
-        _this.updateProjMatrix();
-        return _this;
-    }
-    OrthographicCamera.prototype.updateProjMatrix = function () {
-        this.proj = mat4.orthographic(this.width * this.zoomFactor, this.height * this.zoomFactor, this.near, this.far);
-    };
-    OrthographicCamera.prototype.assign = function (c) {
-        _super.prototype.assign.call(this, c);
-        this.width = c.width;
-        this.height = c.height;
-        this.zoomFactor = c.zoomFactor;
-        this.updateProjMatrix();
-        return this;
-    };
-    OrthographicCamera.prototype.clone = function () {
-        return new OrthographicCamera(new vec3().assign(this.eye), new vec3().assign(this.at), new vec3().assign(this.up), this.width, this.height, this.near, this.far, this.zoomFactor);
-    };
-    return OrthographicCamera;
-}(Camera));
-var PerspectiveCamera = (function (_super) {
-    __extends(PerspectiveCamera, _super);
-    function PerspectiveCamera(eye, at, up, fovy, aspectRatio, near, far) {
-        var _this = _super.call(this, eye, at, up, near, far) || this;
-        _this.fovy = fovy;
-        _this.aspectRatio = aspectRatio;
-        _this.updateProjMatrix();
-        return _this;
-    }
-    PerspectiveCamera.prototype.updateProjMatrix = function () {
-        this.proj = mat4.perspective(this.fovy, this.aspectRatio, this.near, this.far);
-    };
-    PerspectiveCamera.prototype.assign = function (c) {
-        _super.prototype.assign.call(this, c);
-        this.fovy = c.fovy;
-        this.aspectRatio = c.aspectRatio;
-        this.updateProjMatrix();
-        return this;
-    };
-    PerspectiveCamera.prototype.clone = function () {
-        return new PerspectiveCamera(new vec3().assign(this.eye), new vec3().assign(this.at), new vec3().assign(this.up), this.fovy, this.aspectRatio, this.near, this.far);
-    };
-    return PerspectiveCamera;
-}(Camera));
-var CameraBehavior;
-(function (CameraBehavior) {
-    CameraBehavior[CameraBehavior["NOTHING"] = 0] = "NOTHING";
-    CameraBehavior[CameraBehavior["CAMERA_ORBITING"] = 1] = "CAMERA_ORBITING";
-    CameraBehavior[CameraBehavior["CAMERA_PANNING"] = 2] = "CAMERA_PANNING";
-    CameraBehavior[CameraBehavior["CAMERA_ZOOMING"] = 3] = "CAMERA_ZOOMING";
-    CameraBehavior[CameraBehavior["CAMERA_ROLLING"] = 4] = "CAMERA_ROLLING";
-    CameraBehavior[CameraBehavior["OBJECT_ROTATING"] = 5] = "OBJECT_ROTATING";
-    CameraBehavior[CameraBehavior["OBJECT_SCALING"] = 6] = "OBJECT_SCALING";
-    CameraBehavior[CameraBehavior["OBJECT_ROLLING"] = 7] = "OBJECT_ROLLING";
-})(CameraBehavior || (CameraBehavior = {}));
-var CameraMovement = (function () {
-    function CameraMovement() {
-        this.up = false;
-        this.down = false;
-        this.left = false;
-        this.right = false;
-        this.forward = false;
-        this.backward = false;
-    }
-    CameraMovement.prototype.reset = function () {
-        this.up = false;
-        this.down = false;
-        this.left = false;
-        this.right = false;
-        this.forward = false;
-        this.backward = false;
-    };
-    CameraMovement.prototype.any = function () {
-        return this.up || this.down || this.left || this.right || this.forward || this.backward;
-    };
-    return CameraMovement;
-}());
-var Trackball = (function () {
-    function Trackball(currentCam) {
-        this._mode = CameraBehavior.NOTHING;
-        this._move = new CameraMovement();
-        this._curr = currentCam.clone();
-        this._prev = currentCam.clone();
-        this._home = currentCam.clone();
-        this._mouse = new vec2();
-        this._speed = { zooming: 0.5, panning: 0.1, rotation: 0.75, translation: 0.0005 };
-        this._transform = new mat4();
-        this._objRoll = new mat4();
-        this._objRotate = new mat4();
-        this._objScale = new mat4();
-        this._bUpdateTransform = false;
-    }
-    Object.defineProperty(Trackball.prototype, "eye", {
-        get: function () { return this._curr.eye.add(0); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Trackball.prototype, "at", {
-        get: function () { return this._curr.at.add(0); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Trackball.prototype, "up", {
-        get: function () { return this._curr.up.add(0); },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Trackball.prototype, "zoomFactor", {
-        get: function () { return this._curr.zoomFactor; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Trackball.prototype, "zoomingSpeed", {
-        get: function () { return this._speed.zooming; },
-        set: function (value) { this._speed.zooming = value; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Trackball.prototype, "panningSpeed", {
-        get: function () { return this._speed.panning; },
-        set: function (value) { this._speed.panning = value; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Trackball.prototype, "rotationSpeed", {
-        get: function () { return this._speed.rotation; },
-        set: function (value) { this._speed.rotation = value; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Trackball.prototype, "translationSpeed", {
-        get: function () { return this._speed.translation; },
-        set: function (value) { this._speed.translation = value; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Trackball.prototype, "movement", {
-        get: function () { return this._move; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Trackball.prototype, "viewMatrix", {
-        get: function () { return this._curr.view; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Trackball.prototype, "projectionMatrix", {
-        get: function () { return this._curr.proj; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Trackball.prototype, "transformMatrix", {
-        get: function () { return this._bUpdateTransform ? this._objScale.mul(this._objRoll.mul(this._objRotate.mul(this._transform))) : this._transform; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Trackball.prototype, "updateTransform", {
-        set: function (b) { this._bUpdateTransform = b; },
-        enumerable: true,
-        configurable: true
-    });
-    Trackball.prototype.cameraOrbit = function (d) {
-        var eye = this._prev.eye;
-        var center = this._prev.at;
-        var up = this._prev.up;
-        var yawPitch = d.mul(Math.PI * 0.5);
-        var yawAxis = up;
-        var pitchAxis = center.sub(eye).cross(yawAxis).normalize();
-        var T = mat4.translate(center);
-        var Y = mat4.rotate(yawAxis, yawPitch.x);
-        var P = mat4.rotate(pitchAxis, yawPitch.y);
-        var invT = mat4.translate(center.negate());
-        this._curr.eye.assign(T.mul(P.mul(Y.mul(invT.mul(new vec4(eye.x, eye.y, eye.z, 1))))).xyz);
-        this._curr.updateViewMatrix();
-    };
-    Trackball.prototype.cameraPan = function (d) {
-        var eye = this._prev.eye;
-        var center = this._prev.at;
-        var up = this._prev.up;
-        var dir = eye.sub(center);
-        var ocam = this._curr;
-        var ds = d.mul(ocam.width, ocam.height).mul(0.5 * ocam.zoomFactor);
-        var n = dir.normalize();
-        var u = up.cross(n).normalize();
-        var v = n.cross(u).normalize();
-        var o = u.mul(ds.x).add(v.mul(ds.y));
-        this._curr.eye.assign(eye.sub(o));
-        this._curr.at.assign(center.sub(o));
-        this._curr.updateViewMatrix();
-    };
-    Trackball.prototype.cameraZoom = function (d) {
-        var t = Math.pow(2, -d.x);
-        var eye = this._prev.eye;
-        var center = this._prev.at;
-        if (this._curr instanceof OrthographicCamera) {
-            this._curr.zoomFactor = this._prev.zoomFactor * t;
-        }
-        else if (this._curr instanceof PerspectiveCamera) {
-            var dist = eye.sub(center).length;
-            if (dist < this._curr.near && t < 1)
+var Geometry;
+(function (Geometry) {
+    var BoundingBox = (function () {
+        function BoundingBox(vertices, comp, count, offset) {
+            if (offset === void 0) { offset = 0; }
+            this.lowerBound = new vec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+            this.upperBound = new vec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
+            this.massCenter = new vec3();
+            if (typeof vertices === "undefined")
                 return;
-            if (dist > this._curr.far && t > 1)
+            if (typeof comp === "undefined")
+                throw new Error("comp must be given.");
+            if (typeof count === "undefined")
+                throw new Error("count must be given.");
+            this.expand(vertices, comp, count, offset);
+        }
+        Object.defineProperty(BoundingBox.prototype, "centerX", {
+            get: function () { return (this.lowerBound.x + this.upperBound.x) * 0.5; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BoundingBox.prototype, "centerY", {
+            get: function () { return (this.lowerBound.y + this.upperBound.y) * 0.5; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BoundingBox.prototype, "centerZ", {
+            get: function () { return (this.lowerBound.z + this.upperBound.z) * 0.5; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BoundingBox.prototype, "center", {
+            get: function () { return new vec3(this.centerX, this.centerY, this.centerZ); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BoundingBox.prototype, "extentX", {
+            get: function () { return this.upperBound.x - this.lowerBound.x; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BoundingBox.prototype, "extentY", {
+            get: function () { return this.upperBound.y - this.lowerBound.y; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BoundingBox.prototype, "extentZ", {
+            get: function () { return this.upperBound.z - this.lowerBound.z; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BoundingBox.prototype, "extent", {
+            get: function () { return new vec3(this.extentX, this.extentY, this.extentZ); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BoundingBox.prototype, "radius2", {
+            get: function () {
+                var ex = this.extentX * 0.5;
+                var ey = this.extentY * 0.5;
+                var ez = this.extentZ * 0.5;
+                return ex * ex + ey * ey + ez * ez;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BoundingBox.prototype, "radius", {
+            get: function () { return Math.sqrt(this.radius2); },
+            enumerable: true,
+            configurable: true
+        });
+        BoundingBox.prototype.expand = function (vertices, comp, count, offset) {
+            if (offset === void 0) { offset = 0; }
+            if (vertices.length < comp * count)
+                throw new Error("vertices.length must be greater than comp * count.");
+            for (var k = 0; k < count; k++) {
+                var baseOffset = 3 * k;
+                var x = vertices[baseOffset];
+                var y = vertices[baseOffset + 1];
+                var z = vertices[baseOffset + 2];
+                this.lowerBound.x = min(this.lowerBound.x, x);
+                this.lowerBound.y = min(this.lowerBound.y, y);
+                this.lowerBound.z = min(this.lowerBound.z, z);
+                this.upperBound.x = max(this.upperBound.x, x);
+                this.upperBound.y = max(this.upperBound.y, y);
+                this.upperBound.z = max(this.upperBound.z, z);
+                this.massCenter.x += x;
+                this.massCenter.y += y;
+                this.massCenter.z += z;
+            }
+            this.massCenter.x /= count;
+            this.massCenter.y /= count;
+            this.massCenter.z /= count;
+        };
+        return BoundingBox;
+    }());
+    Geometry.BoundingBox = BoundingBox;
+})(Geometry || (Geometry = {}));
+var Camera;
+(function (Camera) {
+    var OrthographicCamera = (function () {
+        function OrthographicCamera(eye, at, up, width, height, near, far, zoomFactor) {
+            if (zoomFactor === void 0) { zoomFactor = 1; }
+            this.eye = eye;
+            this.at = at;
+            this.up = up;
+            this.near = near;
+            this.far = far;
+            this.width = width;
+            this.height = height;
+            this.zoomFactor = zoomFactor;
+            this.updateViewMatrix();
+            this.updateProjectionMatrix();
+        }
+        Object.defineProperty(OrthographicCamera.prototype, "dir", {
+            get: function () { return this.at.sub(this.eye).normalize(); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(OrthographicCamera.prototype, "right", {
+            get: function () { return this.dir.cross(this.up).normalize(); },
+            enumerable: true,
+            configurable: true
+        });
+        OrthographicCamera.prototype.updateViewMatrix = function () {
+            this.view = mat4.lookAt(this.eye, this.at, this.up);
+        };
+        OrthographicCamera.prototype.updateProjectionMatrix = function () {
+            this.proj = mat4.orthographic(this.width * this.zoomFactor, this.height * this.zoomFactor, this.near, this.far);
+        };
+        OrthographicCamera.prototype.assign = function (c) {
+            this.eye.assign(c.eye);
+            this.at.assign(c.at);
+            this.up.assign(c.up);
+            this.near = c.near;
+            this.far = c.far;
+            this.width = c.width;
+            this.height = c.height;
+            this.zoomFactor = c.zoomFactor;
+            this.updateViewMatrix();
+            this.updateProjectionMatrix();
+            return this;
+        };
+        OrthographicCamera.prototype.clone = function () {
+            return new OrthographicCamera(new vec3().assign(this.eye), new vec3().assign(this.at), new vec3().assign(this.up), this.width, this.height, this.near, this.far, this.zoomFactor);
+        };
+        return OrthographicCamera;
+    }());
+    var TrackballMode;
+    (function (TrackballMode) {
+        TrackballMode[TrackballMode["NOTHING"] = 0] = "NOTHING";
+        TrackballMode[TrackballMode["CAMERA_ORBITING"] = 1] = "CAMERA_ORBITING";
+        TrackballMode[TrackballMode["CAMERA_PANNING"] = 2] = "CAMERA_PANNING";
+        TrackballMode[TrackballMode["CAMERA_ZOOMING"] = 3] = "CAMERA_ZOOMING";
+        TrackballMode[TrackballMode["CAMERA_ROLLING"] = 4] = "CAMERA_ROLLING";
+        TrackballMode[TrackballMode["OBJECT_ROTATING"] = 5] = "OBJECT_ROTATING";
+        TrackballMode[TrackballMode["OBJECT_ROLLING"] = 6] = "OBJECT_ROLLING";
+    })(TrackballMode = Camera.TrackballMode || (Camera.TrackballMode = {}));
+    var Trackball = (function () {
+        function Trackball(bbox, width, height) {
+            this.mode = TrackballMode.NOTHING;
+            this.cursor = new vec2();
+            var radius = bbox.radius;
+            var at = bbox.center;
+            var eye = at.add(0, 0, radius + 1);
+            var up = new vec3(0, 1, 0);
+            var zoomFactor = 2 * radius / max(width, height);
+            var near = 0.001;
+            var far = max(2 * radius + 1, 20.0);
+            var cam = new OrthographicCamera(eye, at, up, width, height, near, far, zoomFactor);
+            this.curr = cam;
+            this.prev = cam.clone();
+            this.home = cam.clone();
+            this.frontCam = cam.clone();
+            this.sideCam = new OrthographicCamera(at.add(radius + 1, 0, 0), at, up, width, height, near, far, zoomFactor);
+            this.topCam = new OrthographicCamera(at.add(0, radius + 1, 0), at, new vec3(0, 0, -1), width, height, near, far, zoomFactor);
+        }
+        Object.defineProperty(Trackball.prototype, "zoomFactor", {
+            get: function () { return this.curr.zoomFactor; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Trackball.prototype, "position", {
+            get: function () { return this.curr.eye; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Trackball.prototype, "viewMatrix", {
+            get: function () { return this.curr.view; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Trackball.prototype, "invViewMatrix", {
+            get: function () { return mat4.lookAtInv(this.curr.eye, this.curr.at, this.curr.up); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Trackball.prototype, "rotationMatrix", {
+            get: function () { return mat4.lookAt(this.curr.eye.sub(this.curr.at), new vec3(), this.curr.up); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Trackball.prototype, "projectionMatrix", {
+            get: function () { return this.curr.proj; },
+            enumerable: true,
+            configurable: true
+        });
+        Trackball.prototype.setHome = function () {
+            this.curr.assign(this.home);
+            this.prev.assign(this.home);
+        };
+        Trackball.prototype.setFront = function () {
+            this.curr.assign(this.frontCam);
+            this.prev.assign(this.frontCam);
+            this.home.assign(this.frontCam);
+        };
+        Trackball.prototype.setSide = function () {
+            this.curr.assign(this.sideCam);
+            this.prev.assign(this.sideCam);
+            this.home.assign(this.sideCam);
+        };
+        Trackball.prototype.setTop = function () {
+            this.curr.assign(this.topCam);
+            this.prev.assign(this.topCam);
+            this.home.assign(this.topCam);
+        };
+        Trackball.prototype.mouse = function (x, y, mode) {
+            x = clamp(2 * x - 1, -1, 1);
+            y = -clamp(2 * y - 1, -1, 1);
+            this.prev.assign(this.curr);
+            this.cursor.assign(x, y);
+            this.mode = mode;
+        };
+        Trackball.prototype.motion = function (x, y) {
+            x = clamp(2 * x - 1, -1, 1);
+            y = -clamp(2 * y - 1, -1, 1);
+            var d = new vec2(x, y).sub(this.cursor);
+            if (d.x == 0 && d.y == 0)
                 return;
-            this._curr.eye.assign(lerp(center, eye, t));
-        }
-        this._curr.updateViewMatrix();
-    };
-    Trackball.prototype.cameraRoll = function (d) {
-        var eye = this._prev.eye;
-        var center = this._prev.at;
-        var up = this._prev.up;
-        var n = center.sub(eye).normalize();
-        var u = up.cross(n).normalize();
-        var v = n.cross(u).normalize();
-        var p0 = new vec3().assign(this._mouse, 0).normalize();
-        var p1 = new vec3().assign(this._mouse.add(d), 0).normalize();
-        var angle = vec3.angleBetween(p0, p1, new vec3(0, 0, 1));
-        this._curr.up.assign(mat4.rotate(n, angle).mul(up, 0).xyz);
-        this._curr.updateViewMatrix();
-    };
-    Trackball.prototype.objectRotate = function (d) {
-        var angle = d.length * Math.PI * 0.5;
-        var n = new vec3(-d.y, d.x, 0).normalize().mul(this._prev.view.mat3());
-        this._objRotate = mat4.rotate(n, angle);
-        this._bUpdateTransform = true;
-    };
-    Trackball.prototype.objectScale = function (d) {
-        var t = 9 * Math.pow(10, -d.y);
-        this._objScale = mat4.scale(t, t, t);
-        this._bUpdateTransform = true;
-    };
-    Trackball.prototype.objectRoll = function (d) {
-        var eye = this._prev.eye;
-        var center = this._prev.at;
-        var p0 = new vec3(this._mouse.x, this._mouse.y, 0).normalize();
-        var p1 = new vec3().assign(this._mouse.add(d), 0).normalize();
-        var angle = vec3.angleBetween(p0, p1, new vec3(0, 0, 1));
-        var n = center.sub(eye).normalize().mul(this._prev.view.mat3());
-        this._objRoll = mat4.rotate(n, angle);
-        this._bUpdateTransform = true;
-    };
-    Trackball.prototype.reset = function (cam) {
-        this._mode = CameraBehavior.NOTHING;
-        this._move.reset();
-        this._curr.assign(cam == undefined ? this._home : cam);
-        this._prev.assign(cam == undefined ? this._home : cam);
-        this._transform.identity();
-        this._objRoll.identity();
-        this._objScale.identity();
-        this._objRotate.identity();
-        this._bUpdateTransform = false;
-        this._mouse.assign(0, 0);
-        this._curr.updateViewMatrix();
-        this._curr.updateProjMatrix();
-    };
-    Trackball.prototype.mouse = function (x, y, behavior) {
-        this._prev.assign(this._curr);
-        this._mouse.assign(clamp(2 * x - 1, -1, 1), clamp(1 - 2 * y, -1, 1));
-        this._mode = behavior;
-        if (this._bUpdateTransform) {
-            this._transform = this._objScale.mul(this._objRoll.mul(this._objRotate.mul(this._transform)));
-            this._objScale.identity();
-            this._objRoll.identity();
-            this._objRotate.identity();
-            this._bUpdateTransform = false;
-        }
-    };
-    Trackball.prototype.motion = function (x, y) {
-        x = clamp(2 * x - 1, -1, 1);
-        y = clamp(1 - 2 * y, -1, 1);
-        var d = new vec2(x, y).sub(this._mouse);
-        if (d.x == 0 && d.y == 0)
-            return;
-        switch (this._mode) {
-            case CameraBehavior.CAMERA_ORBITING:
-                this.cameraOrbit(d);
-                break;
-            case CameraBehavior.CAMERA_PANNING:
-                this.cameraPan(d);
-                break;
-            case CameraBehavior.CAMERA_ROLLING:
-                this.cameraRoll(d);
-                break;
-            case CameraBehavior.CAMERA_ZOOMING:
-                this.cameraZoom(d);
-                break;
-            case CameraBehavior.OBJECT_ROTATING:
-                this.objectRotate(d);
-                break;
-            case CameraBehavior.OBJECT_SCALING:
-                this.objectScale(d);
-                break;
-            case CameraBehavior.OBJECT_ROLLING:
-                this.objectRoll(d);
-                break;
-            default: break;
-        }
-    };
-    Trackball.prototype.updateViewport = function (width, height, fovy_deg) {
-        if (fovy_deg == null) {
-            var ocam = this._curr;
-            ocam.width = width;
-            ocam.height = height;
-            ocam = this._prev;
-            ocam.width = width;
-            ocam.height = height;
-            ocam = this._home;
-            ocam.width = width;
-            ocam.height = height;
-        }
-        else {
-            this._curr.fovy = fovy_deg * (Math.PI / 180);
-            this._curr.aspectRatio = width / height;
-            this._home.fovy = fovy_deg * (Math.PI / 180);
-            this._home.aspectRatio = width / height;
-        }
-    };
-    Trackball.prototype.update = function (elapsedTime) {
-        if (this._move.any()) {
-            var distance = this._home.eye.sub(this._home.at).length * elapsedTime * this._speed.translation;
-            var n = this._curr.at.sub(this._curr.eye).normalize();
-            var u = this._curr.up.cross(n).normalize();
-            var v = n.cross(u).normalize();
-            var dt = new vec3();
-            var forward = n.mul(distance);
-            var left = u.mul(distance);
-            var up = v.mul(distance);
-            if (this._move.forward) {
-                dt = dt.add(n.mul(distance));
+            switch (this.mode) {
+                case TrackballMode.CAMERA_ORBITING:
+                    this.cameraOrbit(d);
+                    break;
+                case TrackballMode.CAMERA_PANNING:
+                    this.cameraPan(d);
+                    break;
+                case TrackballMode.CAMERA_ROLLING:
+                    this.cameraRoll(d);
+                    break;
+                case TrackballMode.CAMERA_ZOOMING:
+                    this.cameraZoom(d);
+                    break;
+                case TrackballMode.OBJECT_ROTATING:
+                    this.objectRotate(d);
+                    break;
+                case TrackballMode.OBJECT_ROLLING:
+                    this.objectRoll(d);
+                    break;
+                default: break;
             }
-            if (this._move.backward) {
-                dt = dt.sub(n.mul(distance));
-            }
-            if (this._move.left) {
-                dt = dt.add(u.mul(distance));
-            }
-            if (this._move.right) {
-                dt = dt.sub(u.mul(distance));
-            }
-            if (this._move.up) {
-                dt = dt.add(v.mul(distance));
-            }
-            if (this._move.down) {
-                dt = dt.sub(v.mul(distance));
-            }
-            this._curr.eye = this._curr.eye.add(dt);
-            this._curr.at = this._curr.at.add(dt);
-        }
-        this._curr.updateViewMatrix();
-        this._curr.updateProjMatrix();
-    };
-    return Trackball;
-}());
+        };
+        Trackball.prototype.updateViewport = function (width, height) {
+            this.curr.width = width;
+            this.curr.height = height;
+            this.prev.width = width;
+            this.prev.height = height;
+            this.home.width = width;
+            this.home.height = height;
+            this.frontCam.width = width;
+            this.frontCam.height = height;
+            this.sideCam.width = width;
+            this.sideCam.height = height;
+            this.topCam.width = width;
+            this.topCam.height = height;
+        };
+        Trackball.prototype.update = function () {
+            this.curr.updateViewMatrix();
+            this.curr.updateProjectionMatrix();
+        };
+        Trackball.prototype.cameraOrbit = function (d) {
+            var HALF_PI = Math.PI * 0.5;
+            var angle = d.length * HALF_PI;
+            var axis = new vec3(-d.y, d.x, 0).normalize().mul(this.prev.view.mat3());
+            var R = mat4.rotate(axis, angle);
+            var eye = this.prev.eye.sub(this.prev.at);
+            eye = R.mul(eye, 1).xyz;
+            eye = eye.add(this.prev.at);
+            this.curr.eye.assign(eye);
+            this.curr.up.assign(R.mul(this.prev.up, 0).xyz);
+            this.curr.updateViewMatrix();
+        };
+        Trackball.prototype.cameraPan = function (d) {
+            var NORM_FACTOR = this.prev.zoomFactor * 0.5;
+            var dx = d.x * this.prev.width * NORM_FACTOR;
+            var dy = d.y * this.prev.height * NORM_FACTOR;
+            var n = this.prev.dir;
+            var u = this.prev.right;
+            var v = u.cross(n).normalize();
+            var p = u.mul(dx).add(v.mul(dy));
+            this.curr.eye.assign(this.prev.eye.sub(p));
+            this.curr.at.assign(this.prev.at.sub(p));
+            this.curr.updateViewMatrix();
+        };
+        Trackball.prototype.cameraZoom = function (d) {
+            var t = Math.pow(2, -d.x);
+            this.curr.zoomFactor = this.prev.zoomFactor * t;
+            this.curr.updateProjectionMatrix();
+        };
+        Trackball.prototype.cameraRoll = function (d) {
+            var p0 = new vec3().assign(this.cursor, 0).normalize();
+            var p1 = new vec3().assign(this.cursor.add(d), 0).normalize();
+            var angle = vec3.angleBetween(p0, p1, new vec3(0, 0, 1));
+            this.curr.up.assign(mat4.rotate(this.prev.dir, angle).mul(this.prev.up, 0).xyz);
+            this.curr.updateViewMatrix();
+        };
+        Trackball.prototype.objectRotate = function (d) {
+            var HALF_PI = Math.PI * 0.5;
+            var angle = -d.length * HALF_PI;
+            var axis = new vec3(-d.y, d.x, 0).normalize().mul(this.prev.view.mat3());
+            var R = mat4.rotate(axis, angle);
+            var eye = this.prev.eye.sub(this.home.at);
+            eye = R.mul(eye, 1).xyz;
+            eye = eye.add(this.home.at);
+            this.curr.eye.assign(eye);
+            var at = this.prev.at.sub(this.home.at);
+            at = R.mul(at, 1).xyz;
+            at = at.add(this.home.at);
+            this.curr.at.assign(at);
+            this.curr.up.assign(R.mul(this.prev.up, 0).xyz);
+            this.curr.updateViewMatrix();
+        };
+        Trackball.prototype.objectRoll = function (d) {
+            var p0 = new vec3().assign(this.cursor, 0).normalize();
+            var p1 = new vec3().assign(this.cursor.add(d), 0).normalize();
+            var angle = vec3.angleBetween(p0, p1, new vec3(0, 0, 1));
+            var R = mat4.rotate(this.prev.dir, angle);
+            var eye = this.prev.eye.sub(this.home.at);
+            eye = R.mul(eye, 1).xyz;
+            eye = eye.add(this.home.at);
+            this.curr.eye.assign(eye);
+            var at = this.prev.at.sub(this.home.at);
+            at = R.mul(at, 1).xyz;
+            at = at.add(this.home.at);
+            this.curr.at.assign(at);
+            this.curr.up.assign(R.mul(this.prev.up, 0).xyz);
+            this.curr.updateViewMatrix();
+        };
+        Trackball.CAMERA_ORBITING_RATIO = 0.75;
+        Trackball.CAMERA_PANNING_RATIO = 0.1;
+        Trackball.CAMERA_ZOOMING_RATIO = 0.5;
+        Trackball.CAMERA_ROLLING_RATIO = 0.75;
+        Trackball.OBJECT_ROTATING_RATIO = 0.75;
+        Trackball.OBJECT_ROLLING_RATIO = 0.75;
+        return Trackball;
+    }());
+    Camera.Trackball = Trackball;
+})(Camera || (Camera = {}));
 var PrimitiveType;
 (function (PrimitiveType) {
     PrimitiveType[PrimitiveType["Point"] = 0] = "Point";
@@ -4072,7 +4074,9 @@ var WebGLAppBase = (function (_super) {
     function WebGLAppBase(canvas) {
         var _this = _super.call(this, canvas) || this;
         _this._glContext = null;
+        _this.canvas = null;
         _this._glContext = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        _this.canvas = canvas;
         if (_this._glContext !== null) {
             canvas.addEventListener("mousedown", _this.onMouseDown.bind(_this));
             canvas.addEventListener("mouseup", _this.onMouseUp.bind(_this));
@@ -4091,6 +4095,9 @@ var WebGLAppBase = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    WebGLAppBase.prototype.GetNormalizedMousePosition = function (event) {
+        return new vec2(event.offsetX / this.canvas.clientWidth, event.offsetY / this.canvas.clientHeight);
+    };
     WebGLAppBase.prototype.Init = function () {
         return this.init(this.WebGLContext);
     };
@@ -4201,7 +4208,7 @@ var PrimitiveData = (function () {
         this.geometryVisible = true;
         this.pointColor = GenerateRainbowColor();
         this.geometryColor = new vec3();
-        this.pointSelected = false;
+        this.inlierSelected = false;
         this.geometrySelected = false;
     }
     return PrimitiveData;
@@ -4491,6 +4498,7 @@ var WebGLApp = (function (_super) {
         _this.programDebug = null;
         _this.programPointCloud = null;
         _this.programWireGeometry = null;
+        _this.programCircle = null;
         _this.plane = null;
         _this.sphere = null;
         _this.cylinder = null;
@@ -4503,46 +4511,47 @@ var WebGLApp = (function (_super) {
         _this.arrowCylinder = null;
         _this.originSphere = null;
         _this.rulerQuad = null;
-        _this.bboxMin = null;
-        _this.bboxMax = null;
-        _this.boxRadius = 20;
         _this._vertexDataBackup = null;
         _this._vertexData = null;
         _this.picked_point = null;
         _this.ray_org = null;
         _this.ray_dir = null;
+        _this.proveRadius = 4;
         _this.touchID = 0;
         _this.touchStartTime = 0;
         _this.touchStartPos = new vec2();
-        _this._trackballBehavior = CameraBehavior.NOTHING;
-        _this._trackballHomeFront = null;
-        _this._trackballHomeSide = null;
-        _this._trackballHomeTop = null;
-        _this._trackballBase = "front";
+        _this.trackballMode = Camera.TrackballMode.NOTHING;
         _this.text = null;
         _this.touchRadius = 0.1;
         _this.bTouchAreaVisible = false;
+        _this.showTouchRadiusCircle = true;
+        _this.touchRadiusCircleExp = 32;
+        _this.touchRadiusCircleMin = 0.1;
+        _this.touchRadiusCircleMax = 1.0;
+        _this.touchRadiusCircleColor = new vec3(1, 1, 0);
+        _this.showProveRadiusCircle = true;
+        _this.proveRadiusCircleExp = 16;
+        _this.proveRadiusCircleMin = 0.1;
+        _this.proveRadiusCircleMax = 1.0;
+        _this.proveRadiusCircleColor = new vec3(0, 1, 1);
+        _this.pickedPointIndex = -1;
+        _this.pickedPointColor = new vec3(1, 0, 0);
         _this.count = 0;
+        _this.isMouseOut = true;
         _this.text = textCanvas instanceof HTMLCanvasElement ? textCanvas.getContext("2d") : document.createElement("canvas").getContext("2d");
         _this.text.font = "20px Arial";
         _this._vertexData = vertices;
-        var mv = Number.MAX_VALUE;
-        _this.bboxMin = new vec3(mv, mv, mv);
-        _this.bboxMax = new vec3(-mv, -mv, -mv);
-        var massCenter = new vec3();
-        for (var k = 0; k < _this._vertexData.length; k += 3) {
-            var x = _this._vertexData[k];
-            var y = _this._vertexData[k + 1];
-            var z = _this._vertexData[k + 2];
-            _this.bboxMin = _this.bboxMin.minElements(x, y, z);
-            _this.bboxMax = _this.bboxMax.maxElements(x, y, z);
-            massCenter.assign(massCenter.x + x, massCenter.y + y, massCenter.z + z);
-        }
-        massCenter.assign(massCenter.div(_this._vertexData.length / 3));
-        for (var k = 0; k < _this._vertexData.length; k += 3) {
-            _this._vertexData[k] -= massCenter.x;
-            _this._vertexData[k + 1] -= massCenter.y;
-            _this._vertexData[k + 2] -= massCenter.z;
+        _this.bbox = new Geometry.BoundingBox(vertices, 3, vertices.length / 3, 0);
+        var shouldCenterPoints = true;
+        if (shouldCenterPoints) {
+            var mcx = _this.bbox.massCenter.x;
+            var mcy = _this.bbox.massCenter.y;
+            var mcz = _this.bbox.massCenter.z;
+            for (var k = 0; k < vertices.length; k += 3) {
+                vertices[k] -= mcx;
+                vertices[k + 1] -= mcy;
+                vertices[k + 2] -= mcz;
+            }
         }
         _this._vertexDataBackup = vertices.slice();
         _this.outlierPointSize = 1.0;
@@ -4608,41 +4617,60 @@ var WebGLApp = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    WebGLApp.prototype.SetTrackballRotate = function () { this._trackballBehavior = CameraBehavior.OBJECT_ROTATING; };
-    WebGLApp.prototype.SetTrackballZoom = function () { this._trackballBehavior = CameraBehavior.CAMERA_ZOOMING; };
-    WebGLApp.prototype.SetTrackballPan = function () { this._trackballBehavior = CameraBehavior.CAMERA_PANNING; };
-    WebGLApp.prototype.SetTrackballStop = function () { this._trackballBehavior = CameraBehavior.NOTHING; };
+    WebGLApp.prototype.GetProveRadius = function () { return this.proveRadius; };
+    WebGLApp.prototype.SetProveRadius = function (radiusInPixels) { this.proveRadius = radiusInPixels; };
+    WebGLApp.prototype.SetTrackballRotate = function () { this.trackballMode = Camera.TrackballMode.OBJECT_ROTATING; };
+    WebGLApp.prototype.SetTrackballZoom = function () { this.trackballMode = Camera.TrackballMode.CAMERA_ZOOMING; };
+    WebGLApp.prototype.SetTrackballPan = function () { this.trackballMode = Camera.TrackballMode.CAMERA_PANNING; };
+    WebGLApp.prototype.SetTrackballStop = function () { this.trackballMode = Camera.TrackballMode.NOTHING; };
+    WebGLApp.prototype.SetTouchRadius = function (radius) {
+        this.touchRadius = radius;
+    };
     WebGLApp.prototype.ShowTouchArea = function (show, radius) {
         if (typeof radius !== "undefined") {
             this.touchRadius = radius;
         }
         this.bTouchAreaVisible = show;
     };
+    WebGLApp.prototype.ShowTouchRadiusCircle = function (visible) { this.showTouchRadiusCircle = visible; };
+    WebGLApp.prototype.ShouldShowTouchRadiusCircle = function () { return this.showTouchRadiusCircle; };
+    WebGLApp.prototype.SetTouchRadiusCircleExp = function (exp) { this.touchRadiusCircleExp = exp; };
+    WebGLApp.prototype.GetTouchRadiusCircleExp = function () { return this.touchRadiusCircleExp; };
+    WebGLApp.prototype.SetTouchRadiusCircleMin = function (min) { this.touchRadiusCircleMin = min; };
+    WebGLApp.prototype.GetTouchRadiusCircleMin = function () { return this.touchRadiusCircleMin; };
+    WebGLApp.prototype.SetTouchRadiusCircleMax = function (max) { this.touchRadiusCircleMax = max; };
+    WebGLApp.prototype.GetTouchRadiusCircleMax = function () { return this.touchRadiusCircleMax; };
+    WebGLApp.prototype.SetTouchRadiusCircleColor = function (r, g, b) { this.touchRadiusCircleColor.assign(r, g, b); };
+    WebGLApp.prototype.GetTouchRadiusCircleColor = function () { return this.touchRadiusCircleColor.toArray(); };
+    WebGLApp.prototype.ShowProveRadiusCircle = function (visible) { this.showProveRadiusCircle = visible; };
+    WebGLApp.prototype.ShouldShowProveRadiusCircle = function () { return this.showProveRadiusCircle; };
+    WebGLApp.prototype.SetProveRadiusCircleExp = function (exp) { this.proveRadiusCircleExp = exp; };
+    WebGLApp.prototype.GetProveRadiusCircleExp = function () { return this.proveRadiusCircleExp; };
+    WebGLApp.prototype.SetProveRadiusCircleMin = function (min) { this.proveRadiusCircleMin = min; };
+    WebGLApp.prototype.GetProveRadiusCircleMin = function () { return this.proveRadiusCircleMin; };
+    WebGLApp.prototype.SetProveRadiusCircleMax = function (max) { this.proveRadiusCircleMax = max; };
+    WebGLApp.prototype.GetProveRadiusCircleMax = function () { return this.proveRadiusCircleMax; };
+    WebGLApp.prototype.SetProveRadiusCircleColor = function (r, g, b) { this.proveRadiusCircleColor.assign(r, g, b); };
+    WebGLApp.prototype.GetProveRadiusCircleColor = function () { return this.proveRadiusCircleColor.toArray(); };
     WebGLApp.prototype.Resize = function (width, height) {
         this.width = width;
         this.height = height;
-        var ocam = this._trackballHomeFront;
-        ocam.width = width;
-        ocam.height = height;
-        ocam = this._trackballHomeSide;
-        ocam.width = width;
-        ocam.height = height;
-        ocam = this._trackballHomeTop;
-        ocam.width = width;
-        ocam.height = height;
         this.trackball.updateViewport(width, height);
         this.WebGLContext.viewport(0, 0, width, height);
         this.text.font = "20px Arial";
     };
     WebGLApp.prototype.init = function (gl) {
-        this.CreateTrackball();
+        this.trackball = new Camera.Trackball(this.bbox, this.width, this.height);
         if (gl === null)
             return false;
         this.programDebug = CreateShaderProgram(gl, WebGLApp.vsDebugES2, WebGLApp.fsDebugES2);
+        this.programCircle = CreateShaderProgram(gl, WebGLApp.vsCircleES2, WebGLApp.fsCircleES2);
         this.programPointCloud = CreateShaderProgram(gl, WebGLApp.vsPointCloudES2, WebGLApp.fsPointCloudES2);
         this.programWireGeometry = CreateShaderProgram(gl, WebGLApp.vsWireGeometryES2, WebGLApp.fsWireGeometryES2);
         this.programGeometry = CreateShaderProgram(gl, WebGLApp.vsGeometryES2, WebGLApp.fsGeometryES2);
         this.pointcloud = CreateVertexBuffer(gl, this.vertexData);
+        this.attributeLessIndices = CreateVertexBuffer(gl, Array.apply(0, { length: 38 }).map(function (_, i) { return i + 1; }));
+        this.attributeLessIndices.count = 38;
         this.plane = CreateVertexBufferIndexed(gl, [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3], [0, 1, 1, 2, 2, 3, 3, 0]);
         this.sphere = CreateVertexBufferIndexed(gl, GenerateWireSphereVertexData(2));
         this.cylinder = CreateVertexBufferIndexed(gl, GenerateWireCylinderVertexData(3, 18));
@@ -4657,26 +4685,9 @@ var WebGLApp = (function (_super) {
         gl.enable(gl.DEPTH_TEST);
         return true;
     };
-    WebGLApp.prototype.CreateTrackball = function () {
-        var m = this.bboxMin;
-        var M = this.bboxMax;
-        var center = new vec3();
-        var radius = m.sub(M).length * 0.5;
-        this.boxRadius = radius;
-        var eye = center.sub(new vec3(0, 0, -(radius + 1)));
-        var up = new vec3(0, 1, 0);
-        var extent = M.sub(m).mul(0.5).xy;
-        var zoomFactor = this.width > this.height ? 2 * radius / this.width : 2 * radius / this.height;
-        var near = 0.001;
-        var far = max(2 * radius + 1, 20.0);
-        this._trackballHomeFront = new OrthographicCamera(eye, center, up, this.width, this.height, near, far, zoomFactor);
-        this._trackballHomeSide = new OrthographicCamera(center.add(new vec3((radius + 1), 0, 0)), center, up, this.width, this.height, near, far, zoomFactor);
-        this._trackballHomeTop = new OrthographicCamera(center.add(new vec3(0, radius + 1, 0)), center, new vec3(0, 0, -1), this.width, this.height, near, far, zoomFactor);
-        this.trackball = new Trackball(this._trackballHomeFront);
-    };
-    WebGLApp.prototype.SetCameraFront = function () { this.trackball.reset(this._trackballHomeFront); this._trackballBase = "front"; };
-    WebGLApp.prototype.SetCameraSide = function () { this.trackball.reset(this._trackballHomeSide); this._trackballBase = "side"; };
-    WebGLApp.prototype.SetCameraTop = function () { this.trackball.reset(this._trackballHomeTop); this._trackballBase = "top"; };
+    WebGLApp.prototype.SetCameraFront = function () { this.trackball.setFront(); };
+    WebGLApp.prototype.SetCameraSide = function () { this.trackball.setSide(); };
+    WebGLApp.prototype.SetCameraTop = function () { this.trackball.setTop(); };
     WebGLApp.prototype.extractInlier = function (flags) {
         var inlier = [];
         var outlier = [];
@@ -4779,19 +4790,19 @@ var WebGLApp = (function (_super) {
         this.inlierObjects[key].geometryColor.z = color[2];
     };
     WebGLApp.prototype.SelectObject = function (key) {
-        this.inlierObjects[key].pointSelected = true;
+        this.inlierObjects[key].inlierSelected = true;
         this.inlierObjects[key].geometrySelected = true;
     };
     WebGLApp.prototype.SelectObjectMesh = function (key) {
         this.inlierObjects[key].geometrySelected = true;
     };
     WebGLApp.prototype.SelectObjectInlier = function (key) {
-        this.inlierObjects[key].pointSelected = true;
+        this.inlierObjects[key].inlierSelected = true;
     };
     WebGLApp.prototype.DeselectAll = function () {
         var _this = this;
         this.objectNames.forEach(function (name) {
-            _this.inlierObjects[name].pointSelected = false;
+            _this.inlierObjects[name].inlierSelected = false;
             _this.inlierObjects[name].geometrySelected = false;
         });
     };
@@ -4837,17 +4848,17 @@ var WebGLApp = (function (_super) {
         return true;
     };
     WebGLApp.prototype.update = function (gl, timeElapsed) {
-        this.trackball.update(timeElapsed);
+        this.trackball.update();
     };
     WebGLApp.prototype.render = function (gl, timeElapsed) {
         this.text.clearRect(0, 0, this.text.canvas.width, this.text.canvas.height);
         this.text.fillStyle = "white";
         gl.viewport(0, 0, this.width, this.height);
-        this.renderPointCloud(gl);
+        this.renderPointCloud(gl, this.pickedPointIndex, this.selectedPointSize, this.pickedPointColor);
         this.renderInliers(gl);
         if (this.bTouchAreaVisible && this.picked_point instanceof vec3) {
             gl.useProgram(this.programWireGeometry);
-            gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(mat4.translate(this.picked_point).mul(mat4.scale(this.touchRadius, this.touchRadius, this.touchRadius))).transpose().toArray());
+            gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "model_matrix"), false, mat4.translate(this.picked_point).mul(mat4.scale(this.touchRadius, this.touchRadius, this.touchRadius)).transpose().toArray());
             gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
             gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
             gl.uniform3f(gl.getUniformLocation(this.programWireGeometry, "color"), 1, 0, 0);
@@ -4860,19 +4871,37 @@ var WebGLApp = (function (_super) {
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
             gl.useProgram(null);
         }
+        if (this.isMouseOut == false) {
+            if (this.showTouchRadiusCircle == true) {
+                this.renderCircles(gl, this.touchRadius, this.touchRadiusCircleColor, this.touchRadiusCircleExp, this.touchRadiusCircleMin, this.touchRadiusCircleMax);
+            }
+            if (this.showProveRadiusCircle == true) {
+                this.renderCircles(gl, this.proveRadius * this.trackball.zoomFactor, this.proveRadiusCircleColor, this.proveRadiusCircleExp, this.proveRadiusCircleMin, this.proveRadiusCircleMax);
+            }
+        }
         this.renderUnitFrame(gl);
         this.renderRuler(gl);
     };
-    WebGLApp.prototype.renderPointCloud = function (gl) {
+    WebGLApp.prototype.SetPickedPointColor = function (r, g, b) { this.pickedPointColor.assign(r, g, b); };
+    WebGLApp.prototype.GetPickedPointColor = function () { return this.pickedPointColor.toArray(); };
+    WebGLApp.prototype.renderPointCloud = function (gl, pickedIndex, pickedSize, pickedColor) {
         gl.useProgram(this.programPointCloud);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloud, "model_matrix"), false, this.trackball.transformMatrix.transpose().toArray());
         gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloud, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
         gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloud, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
         gl.uniform1f(gl.getUniformLocation(this.programPointCloud, "pointSize"), this.outlierPointSize);
         gl.uniform3f(gl.getUniformLocation(this.programPointCloud, "color"), 1, 1, 1);
         gl.drawArrays(gl.POINTS, 0, this.pointcloud.count);
+        if (pickedIndex != -1) {
+            var depthTest = gl.getParameter(gl.DEPTH_TEST);
+            gl.disable(gl.DEPTH_TEST);
+            gl.uniform1f(gl.getUniformLocation(this.programPointCloud, "pointSize"), this.selectedPointSize);
+            gl.uniform3f(gl.getUniformLocation(this.programPointCloud, "color"), pickedColor.x, pickedColor.y, pickedColor.z);
+            gl.drawArrays(gl.POINTS, pickedIndex, 1);
+            if (depthTest == true)
+                gl.enable(gl.DEPTH_TEST);
+        }
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.useProgram(null);
     };
@@ -4885,10 +4914,9 @@ var WebGLApp = (function (_super) {
                 gl.useProgram(_this.programPointCloud);
                 gl.bindBuffer(gl.ARRAY_BUFFER, objectVBO.vbo);
                 gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-                gl.uniformMatrix4fv(gl.getUniformLocation(_this.programPointCloud, "model_matrix"), false, _this.trackball.transformMatrix.transpose().toArray());
                 gl.uniformMatrix4fv(gl.getUniformLocation(_this.programPointCloud, "view_matrix"), false, _this.trackball.viewMatrix.transpose().toArray());
                 gl.uniformMatrix4fv(gl.getUniformLocation(_this.programPointCloud, "proj_matrix"), false, _this.trackball.projectionMatrix.transpose().toArray());
-                gl.uniform1f(gl.getUniformLocation(_this.programPointCloud, "pointSize"), objectData.pointSelected ? _this.selectedPointSize : _this.inlierPointSize);
+                gl.uniform1f(gl.getUniformLocation(_this.programPointCloud, "pointSize"), objectData.inlierSelected ? _this.selectedPointSize : _this.inlierPointSize);
                 gl.uniform3fv(gl.getUniformLocation(_this.programPointCloud, "color"), objectData.pointColor.toArray());
                 gl.drawArrays(gl.POINTS, 0, objectVBO.count);
                 gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -4899,7 +4927,7 @@ var WebGLApp = (function (_super) {
                 gl.disable(gl.DEPTH_TEST);
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
                 gl.useProgram(_this.programWireGeometry);
-                gl.uniformMatrix4fv(gl.getUniformLocation(_this.programWireGeometry, "model_matrix"), false, _this.trackball.transformMatrix.mul(objectData.modelMatrix).transpose().toArray());
+                gl.uniformMatrix4fv(gl.getUniformLocation(_this.programWireGeometry, "model_matrix"), false, objectData.modelMatrix.transpose().toArray());
                 gl.uniformMatrix4fv(gl.getUniformLocation(_this.programWireGeometry, "view_matrix"), false, _this.trackball.viewMatrix.transpose().toArray());
                 gl.uniformMatrix4fv(gl.getUniformLocation(_this.programWireGeometry, "proj_matrix"), false, _this.trackball.projectionMatrix.transpose().toArray());
                 gl.uniform3fv(gl.getUniformLocation(_this.programWireGeometry, "color"), objectData.geometryColor.toArray());
@@ -4970,24 +4998,14 @@ var WebGLApp = (function (_super) {
     WebGLApp.prototype.renderUnitFrame = function (gl) {
         gl.viewport(this.frame.pos.x, this.height - this.frame.pos.y - this.frame.size.height, this.frame.size.width, this.frame.size.height);
         gl.useProgram(this.programGeometry);
-        switch (this._trackballBase) {
-            case "front":
-                gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "view_matrix"), false, this._trackballHomeFront.view.transpose().toArray());
-                break;
-            case "side":
-                gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "view_matrix"), false, this._trackballHomeSide.view.transpose().toArray());
-                break;
-            case "top":
-                gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "view_matrix"), false, this._trackballHomeTop.view.transpose().toArray());
-                break;
-        }
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "proj_matrix"), false, mat4.orthographic(2, 2, 0.001, this.boxRadius * 10).transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "view_matrix"), false, this.trackball.rotationMatrix.transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "proj_matrix"), false, mat4.orthographic(2, 2, 0.001, 200).transpose().toArray());
         gl.bindBuffer(gl.ARRAY_BUFFER, this.originSphere.vbo);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.originSphere.ibo);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
         gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 1);
         gl.uniform3fv(gl.getUniformLocation(this.programGeometry, "color"), this.frame.color.origin);
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(mat4.scale(this.frame.scale.origin_radius, this.frame.scale.origin_radius, this.frame.scale.origin_radius)).transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, mat4.scale(this.frame.scale.origin_radius, this.frame.scale.origin_radius, this.frame.scale.origin_radius).transpose().toArray());
         gl.drawElements(gl.TRIANGLES, this.originSphere.count, gl.UNSIGNED_SHORT, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -5001,25 +5019,25 @@ var WebGLApp = (function (_super) {
         gl.uniform3fv(gl.getUniformLocation(this.programGeometry, "color"), this.frame.color.xaxis);
         var RX = mat4.rotateZ(-Math.PI / 2);
         gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 2);
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(RX.mul(cylTS)).transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, RX.mul(cylTS).transpose().toArray());
         gl.drawElements(gl.TRIANGLES, this.arrowCylinder.count, gl.UNSIGNED_SHORT, 0);
         gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 3);
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(RX.mul(conTS)).transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, RX.mul(conTS).transpose().toArray());
         gl.drawElements(gl.TRIANGLES, this.arrowCylinder.count, gl.UNSIGNED_SHORT, 0);
         gl.uniform3fv(gl.getUniformLocation(this.programGeometry, "color"), this.frame.color.yaxis);
         gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 2);
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(cylTS).transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, cylTS.transpose().toArray());
         gl.drawElements(gl.TRIANGLES, this.arrowCylinder.count, gl.UNSIGNED_SHORT, 0);
         gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 3);
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(conTS).transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, conTS.transpose().toArray());
         gl.drawElements(gl.TRIANGLES, this.arrowCylinder.count, gl.UNSIGNED_SHORT, 0);
         gl.uniform3fv(gl.getUniformLocation(this.programGeometry, "color"), this.frame.color.zaxis);
         var RZ = mat4.rotateX(Math.PI / 2);
         gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 2);
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(RZ.mul(cylTS)).transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, RZ.mul(cylTS).transpose().toArray());
         gl.drawElements(gl.TRIANGLES, this.arrowCylinder.count, gl.UNSIGNED_SHORT, 0);
         gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 3);
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(RZ.mul(conTS)).transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, RZ.mul(conTS).transpose().toArray());
         gl.drawElements(gl.TRIANGLES, this.arrowCylinder.count, gl.UNSIGNED_SHORT, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -5099,6 +5117,34 @@ var WebGLApp = (function (_super) {
         var rh = h;
         this.text.fillRect(rx, ry, rw, rh);
     };
+    WebGLApp.prototype.renderCircles = function (gl, radius, color, aExp, aMin, aMax) {
+        var vertexCount = 38;
+        var depthTest = gl.getParameter(gl.DEPTH_TEST);
+        gl.disable(gl.DEPTH_TEST);
+        var blend = gl.getParameter(gl.BLEND);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.useProgram(this.programCircle);
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programCircle, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.attributeLessIndices.vbo);
+        gl.vertexAttribPointer(0, 1, gl.FLOAT, false, 0, 0);
+        gl.uniform2f(gl.getUniformLocation(this.programCircle, "pos"), this.mouseX * 0.5 * this.width * this.trackball.zoomFactor, this.mouseY * 0.5 * this.height * this.trackball.zoomFactor);
+        gl.uniform1f(gl.getUniformLocation(this.programCircle, "radius"), radius);
+        gl.uniform1i(gl.getUniformLocation(this.programCircle, "vertexCount"), this.attributeLessIndices.count);
+        gl.uniform3f(gl.getUniformLocation(this.programCircle, "color"), color.x, color.y, color.z);
+        gl.uniform1f(gl.getUniformLocation(this.programCircle, "alphaExp"), aExp);
+        gl.uniform1f(gl.getUniformLocation(this.programCircle, "alphaMin"), aMin);
+        gl.uniform1f(gl.getUniformLocation(this.programCircle, "alphaMax"), aMax);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, this.attributeLessIndices.count);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.useProgram(null);
+        if (blend == false) {
+            gl.disable(gl.BLEND);
+        }
+        if (depthTest == true) {
+            gl.enable(gl.DEPTH_TEST);
+        }
+    };
     WebGLApp.prototype.finalUpdate = function (gl) {
         return true;
     };
@@ -5122,89 +5168,123 @@ var WebGLApp = (function (_super) {
         var pixel_length = this.trackball.zoomFactor;
         x *= this.width * 0.5 * this.trackball.zoomFactor;
         y *= this.height * 0.5 * this.trackball.zoomFactor;
-        var invView = this.trackball.transformMatrix.transpose().mul(mat4.lookAtInv(this.trackball.eye, this.trackball.at, this.trackball.up));
+        var invView = this.trackball.invViewMatrix;
         var ray_org = invView.mul(new vec4(x, y, 0, 1)).xyz;
-        var ray_dir = invView.mul(new vec4(x, y, -1, 1)).xyz.sub(ray_org).normalize();
-        var ray_radius = pixel_length * 4;
+        var ray_dir = invView.mul(new vec4(0, 0, -1, 0)).xyz.normalize();
+        var ray_radius = pixel_length * this.proveRadius;
+        var ray_radius2 = ray_radius * ray_radius;
         var min_index = -1;
-        var min_dist = Number.MAX_VALUE;
-        var min_pt = null;
+        var min_dist2 = Number.MAX_VALUE;
+        var min_px;
+        var min_py;
+        var min_pz;
         var candidate_point_indices = [];
         for (var k = 0; k < this.vertexData.length; k += 3) {
-            var pt = new vec3(this.vertexData[k], this.vertexData[k + 1], this.vertexData[k + 2]);
-            var pto = pt.sub(ray_org);
-            var is_behind_cam = pto.dot(ray_dir) < 0;
+            var px = this.vertexData[k];
+            var py = this.vertexData[k + 1];
+            var pz = this.vertexData[k + 2];
+            var ptox = px - ray_org.x;
+            var ptoy = py - ray_org.y;
+            var ptoz = pz - ray_org.z;
+            var dirDotPto = ptox * ray_dir.x + ptoy * ray_dir.y + ptoz * ray_dir.z;
+            var is_behind_cam = dirDotPto < 0;
             if (is_behind_cam)
                 continue;
-            var dist = pto.sub(ray_dir.mul(ray_dir.dot(pto))).length;
-            if (dist < ray_radius) {
-                candidate_point_indices.push({ index: k / 3, point: pt });
+            var dx = ptox - ray_dir.x * dirDotPto;
+            var dy = ptoy - ray_dir.y * dirDotPto;
+            var dz = ptoz - ray_dir.z * dirDotPto;
+            var dist2 = dx * dx + dy * dy + dz * dz;
+            if (dist2 < ray_radius2) {
+                candidate_point_indices.push({ index: k / 3, px: px, py: py, pz: pz });
             }
-            if (dist < min_dist) {
+            if (dist2 < min_dist2) {
                 min_index = k / 3;
-                min_dist = dist;
-                min_pt = pt;
+                min_dist2 = dist2;
+                min_px = px;
+                min_py = py;
+                min_pz = pz;
             }
         }
         if (candidate_point_indices.length == 0) {
             this.ray_org = ray_org;
             this.ray_dir = ray_dir;
-            this.picked_point = min_pt;
+            this.picked_point = new vec3(min_px, min_py, min_pz);
             return min_index;
         }
         var closest_index = -1;
-        var closest_dist = Number.MAX_VALUE;
+        var closest_px;
+        var closest_py;
+        var closest_pz;
+        var closest_dist2 = Number.MAX_VALUE;
         for (var k = 0; k < candidate_point_indices.length; k++) {
             var candidate = candidate_point_indices[k];
-            var dist = this.trackball.eye.sub(candidate.point).length;
-            if (dist < closest_dist) {
-                closest_index = k;
-                closest_dist = dist;
+            var dx = this.trackball.position.x - candidate.px;
+            var dy = this.trackball.position.y - candidate.py;
+            var dz = this.trackball.position.z - candidate.pz;
+            var dist2 = dx * dx + dy * dy + dz * dz;
+            if (dist2 < closest_dist2) {
+                closest_index = candidate.index;
+                closest_px = candidate.px;
+                closest_py = candidate.py;
+                closest_pz = candidate.pz;
+                closest_dist2 = dist2;
             }
         }
         this.ray_org = ray_org;
         this.ray_dir = ray_dir;
-        this.picked_point = candidate_point_indices[closest_index].point;
-        return candidate_point_indices[closest_index].index;
+        this.picked_point = new vec3(closest_px, closest_py, closest_pz);
+        return closest_index;
     };
     WebGLApp.prototype.GetOutliers = function () {
         return this._vertexData;
     };
     WebGLApp.prototype.onMouseDown = function (event) {
-        var x = event.x / this.width;
-        var y = event.y / this.height;
+        var pos = this.GetNormalizedMousePosition(event);
+        var x = pos.x;
+        var y = pos.y;
         if (event.button == 0) {
-            this.trackball.mouse(x, y, this._trackballBehavior);
+            this.trackball.mouse(x, y, this.trackballMode);
         }
     };
     WebGLApp.prototype.onMouseUp = function (event) {
-        var x = event.x / this.width;
-        var y = event.y / this.height;
+        var pos = this.GetNormalizedMousePosition(event);
+        var x = pos.x;
+        var y = pos.y;
         if (event.button == 0) {
-            this.trackball.mouse(x, y, CameraBehavior.NOTHING);
+            this.trackball.mouse(x, y, Camera.TrackballMode.NOTHING);
         }
     };
     WebGLApp.prototype.onMouseMove = function (event) {
-        var x = event.x / this.width;
-        var y = event.y / this.height;
+        var pos = this.GetNormalizedMousePosition(event);
+        var x = pos.x;
+        var y = pos.y;
+        this.mouseX = clamp(2 * x - 1, -1, 1);
+        this.mouseY = clamp(1 - 2 * y, -1, 1);
         this.trackball.motion(x, y);
+        this.isMouseOut = false;
+        this.pickedPointIndex = this.PickPoint(this.mouseX, this.mouseY);
     };
     WebGLApp.prototype.onMouseOut = function (event) {
-        var x = event.x / this.width;
-        var y = event.y / this.height;
+        var pos = this.GetNormalizedMousePosition(event);
+        var x = pos.x;
+        var y = pos.y;
         if (event.button == 0) {
-            this.trackball.mouse(x, y, CameraBehavior.NOTHING);
+            this.trackball.mouse(x, y, Camera.TrackballMode.NOTHING);
         }
+        this.isMouseOut = true;
+    };
+    WebGLApp.prototype._TouchScreen2Client = function (t) {
+        var canvasBB = this.canvas.getBoundingClientRect();
+        return new vec2(t.clientX - canvasBB.left, t.clientY - canvasBB.top);
     };
     WebGLApp.prototype.onTouchStart = function (event) {
         event.preventDefault();
         if (event.touches.length == 1) {
             this.touchID = event.touches[0].identifier;
             this.touchStartTime = (new Date()).getTime();
-            var x = event.touches[0].clientX;
-            var y = event.touches[0].clientY;
-            this.touchStartPos.assign(x, y);
-            this.trackball.mouse(x / this.width, y / this.height, this._trackballBehavior);
+            var pos = this._TouchScreen2Client(event.touches[0]);
+            this.touchStartPos.assign(pos.x, pos.y);
+            this.trackball.mouse(pos.x / this.width, pos.y / this.height, this.trackballMode);
         }
     };
     WebGLApp.prototype.onTouchMove = function (event) {
@@ -5212,9 +5292,9 @@ var WebGLApp = (function (_super) {
         for (var k = 0; k < event.changedTouches.length; k++) {
             var touch = event.changedTouches[k];
             if (touch.identifier === this.touchID) {
-                var x = touch.clientX;
-                var y = touch.clientY;
-                this.trackball.motion(x / this.width, y / this.height);
+                var pos = this._TouchScreen2Client(touch);
+                this.trackball.motion(pos.x / this.width, pos.y / this.height);
+                return;
             }
         }
     };
@@ -5223,11 +5303,10 @@ var WebGLApp = (function (_super) {
         for (var k = 0; k < event.changedTouches.length; k++) {
             var touch = event.changedTouches[k];
             if (touch.identifier === this.touchID) {
-                var x = touch.clientX;
-                var y = touch.clientY;
-                this.trackball.mouse(x / this.width, y / this.height, CameraBehavior.NOTHING);
+                var pos = this._TouchScreen2Client(touch);
+                this.trackball.mouse(pos.x / this.width, pos.y / this.height, Camera.TrackballMode.NOTHING);
                 var diffTime = (new Date()).getTime() - this.touchStartTime;
-                var diffDist = this.touchStartPos.sub(x, y).length;
+                var diffDist = this.touchStartPos.sub(pos.x, pos.y).length;
                 if (diffTime < 500 && diffDist < 4) {
                     var eventInit = {
                         bubbles: true, cancelable: true, view: window, detail: 1,
@@ -5244,6 +5323,7 @@ var WebGLApp = (function (_super) {
                     }
                     event.target.dispatchEvent(mouseEvent);
                 }
+                return;
             }
         }
     };
@@ -5252,19 +5332,20 @@ var WebGLApp = (function (_super) {
         for (var k = 0; k < event.changedTouches.length; k++) {
             var touch = event.changedTouches[k];
             if (touch.identifier === this.touchID) {
-                var x = touch.clientX;
-                var y = touch.clientY;
-                this.trackball.mouse(x / this.width, y / this.height, CameraBehavior.NOTHING);
+                var pos = this._TouchScreen2Client(touch);
+                this.trackball.mouse(pos.x / this.width, pos.y / this.height, Camera.TrackballMode.NOTHING);
             }
         }
     };
     WebGLApp.vsDebugES2 = "#version 100\n\tattribute vec3 pos;\n\n\tuniform vec3 line[2];\n\tuniform mat4 model_matrix;\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\n\tvoid main() {\n\t\tgl_Position = proj_matrix*view_matrix*model_matrix*vec4(line[int(pos.x)], 1);\n\t}\n\t";
     WebGLApp.fsDebugES2 = "#version 100\n\tprecision mediump float;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(1, 0, 0, 1);\n\t}\n\t";
-    WebGLApp.vsPointCloudES2 = "#version 100\n    attribute vec3 pos;\n\t\n\tuniform mat4 model_matrix;\n    uniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\tuniform float pointSize;\n\n    void main() {\n        gl_PointSize = pointSize;\n        gl_Position = proj_matrix*view_matrix*model_matrix*vec4(pos, 1);\n    }\n    ";
+    WebGLApp.vsPointCloudES2 = "#version 100\n    attribute vec3 pos;\n\t\n    uniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\tuniform float pointSize;\n\n    void main() {\n        gl_PointSize = pointSize;\n        gl_Position = proj_matrix*view_matrix*vec4(pos, 1);\n    }\n    ";
     WebGLApp.fsPointCloudES2 = "#version 100\n    precision mediump float;\n\n    uniform vec3 color;\n\n    void main() {\n        gl_FragColor = vec4(color, 1.0);\n    }\n    ";
     WebGLApp.vsWireGeometryES2 = "#version 100\n\tattribute vec3 pos;\n\n\tuniform int subroutine_index;\t// 0: plane, 1: sphere, 2: cylinder, 3: cone, 4: torus\n\tuniform vec3 quad[4];\t// ll, lr, ur, ul\n\tuniform float radius0;\t// bottom or tube\n\tuniform float radius1;\t// top or mean\n\tuniform mat4 model_matrix;\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\n\tvec4 Plane() { return vec4(quad[int(pos.x)], 1); }\n\tvec4 Sphere() { return vec4(pos, 1); }\n\tvec4 Cylinder() { return vec4(pos, 1); }\n\tvec4 Cone() {\n\t\tfloat height = (pos.y + 1.0)*0.5;\n\t\tfloat interpolated_radius = mix(radius0, radius1, height);\n\t\treturn vec4(vec3(interpolated_radius, 1, interpolated_radius)*pos, 1);\n\t}\n\tvec4 Torus() {\n\t\tvec3 tdir = normalize(vec3(pos.x, 0, pos.z));\n\t\tvec3 pdir = normalize(pos-tdir);\n\t\treturn vec4(radius1*tdir+radius0*pdir, 1);\n\t}\n\tvoid main() {\n\t\tvec4 pos;\n\t\tif(subroutine_index==0) pos = Plane();\n\t\telse if(subroutine_index==1) pos = Sphere();\n\t\telse if(subroutine_index==2) pos = Cylinder();\n\t\telse if(subroutine_index==3) pos = Cone();\n\t\telse if(subroutine_index==4) pos = Torus();\n\t\tgl_Position = proj_matrix*view_matrix*model_matrix*pos;\n\t}\n\t";
     WebGLApp.vsGeometryES2 = "#version 100\n\tattribute vec3 pos;\n\t\n\tuniform int subroutine_index;\t// 0: plane, 1: sphere, 2: cylinder, 3: cone, 4: torus\n\tuniform vec3 quad[4];\t// ll, lr, ur, ul\n\tuniform float radius0;\t// bottom or tube\n\tuniform float radius1;\t// top or mean\n\tuniform mat4 model_matrix;\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\n\tvec4 Plane() { return vec4(quad[int(pos.x)], 1); }\n\tvec4 Sphere() { return vec4(pos, 1); }\n\tvec4 Cylinder() { return vec4(pos, 1); }\n\tvec4 Cone() {\n\t\tfloat height = (pos.y + 1.0)*0.5;\n\t\tfloat interpolated_radius = mix(radius0, radius1, height);\n\t\treturn vec4(vec3(interpolated_radius, 1, interpolated_radius)*pos, 1);\n\t}\n\tvec4 Torus() {\n\t\tvec3 tdir = normalize(vec3(pos.x, 0, pos.z));\n\t\tvec3 pdir = normalize(pos-tdir);\n\t\treturn vec4(radius1*tdir+radius0*pdir, 1);\n\t}\n\tvoid main() {\n\t\tvec4 pos;\n\t\tif(subroutine_index==0) pos = Plane();\n\t\telse if(subroutine_index==1) pos = Sphere();\n\t\telse if(subroutine_index==2) pos = Cylinder();\n\t\telse if(subroutine_index==3) pos = Cone();\n\t\telse if(subroutine_index==4) pos = Torus();\n\t\tgl_Position = proj_matrix*view_matrix*model_matrix*pos;\n\t}\n\t";
     WebGLApp.fsWireGeometryES2 = "#version 100\n\tprecision mediump float;\n\t\n\tuniform vec3 color;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color, 0.5);\n\t}\n\t";
     WebGLApp.fsGeometryES2 = "#version 100\n\tprecision mediump float;\n\n\tuniform vec3 color;\n\n\t/*http://codeflow.org/entries/2012/aug/02/easy-wireframe-display-with-barycentric-coordinates/*/\n\t/*float edgeFactor() { \n\t\tvec3 d=fwidth(bary); \n\t\tvec3 a3=smoothstep(vec3(0.0), d*1.5, bary); \n\t\treturn min(min(a3.x, a3.y), a3.z); \n\t}*/\n\tvoid main() {\n\t\t/*float edge = edgeFactor();\n\t\tif(edge==0.0) discard;\n\t\tgl_FragColor = vec4(mix(color, vec3(0.5), edge), 1.0);*/\n\t\tgl_FragColor = vec4(color, 1.0);\n\t}\n\t";
+    WebGLApp.vsCircleES2 = "#version 100\n\t#define PI 3.141592653589793\n\tattribute float vertexID;\n\n\tuniform vec2 pos;\n\tuniform float radius;\n\tuniform int vertexCount; // ex) 38 = 36(points on circle) + 1(center) + 1(point enclosing circle)\n\tuniform mat4 proj_matrix;\n\n\tvarying float alphaFactor;\n  \n\tvoid main() {\n\t\t\n\t\tint ID = int(vertexID) - 1;\n\t\tif (ID == 0) {\n\t\t\tvec4 npos = proj_matrix * vec4(pos, -1, 1);\n\t\t\tgl_Position = vec4(npos.xy, 0, 1);\n\t\t\talphaFactor = 0.0;\n\t\t} else {\n\t\t\tint count = vertexCount - 2;\n\t\t\tint index = int(mod(float(ID - 1), float(count)));\n\t\t\tfloat angle = 2.0 * float(PI) * float(index) / float(count);\n\t\t\tfloat x = radius * cos(angle);\n\t\t\tfloat y = radius * sin(angle);\n\t\t\tvec4 npos = proj_matrix * vec4(pos.x + x, pos.y + y, -1, 1);\n\t\t\tgl_Position = vec4(npos.xy, 0, 1);\n\t\t\talphaFactor = 1.0;\n\t\t}\n\t}\n\t";
+    WebGLApp.fsCircleES2 = "#version 100\n\tprecision mediump float;\n\t\n\tuniform vec3 color;\n\tuniform float alphaExp;\n\tuniform float alphaMin;\n\tuniform float alphaMax;\n\tvarying float alphaFactor;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color, clamp(pow(alphaFactor, alphaExp), alphaMin, alphaMax));\n\t}\n\t";
     return WebGLApp;
 }(WebGLAppBase));

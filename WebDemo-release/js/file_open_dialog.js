@@ -42,8 +42,8 @@ function _initApplication(points, which) {
 	ClearInfoList();
 	_resetVisibleButtonGroup();
 	
-	try { gApp = new WebGLApp( document.getElementById('GL_CANVAS'), points, document.getElementById('TEXT_CANVAS') ); }
-	catch(e) { myAlert(ERR_MSG_WEBGL_FAILED); gApp = null; return; }
+  try { gApp = new WebGLApp( document.getElementById("GL_CANVAS"), points, document.getElementById("TEXT_CANVAS") ); gApp.SetTouchRadius(gFSParam.touchR); } 
+  catch (e) { myAlert(ERR_MSG_WEBGL_FAILED); gApp = null; return; }
 	
 	_LoadParamPreset(which);
 	

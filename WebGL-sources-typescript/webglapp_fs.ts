@@ -86,29 +86,37 @@ abstract class vec {
 }
 
 class vec2 extends vec {
-	public x: number;
-	public y: number;
+	private _x: number;
+	private _y: number;
+
 	constructor(x: number=0, y: number=0) {
 		super();
-		this.x=x;
-		this.y=y;
+		this._x=x;
+		this._y=y;
 	}
 
+	public get x(): number { return this._x; }
+	public set x(value: number) { this._x = value; }
+
+	public get y(): number { return this._y; }
+	public set y(value: number) { this._y = value; }
+
+	public get length2(): number { return this.dot(this); }
 	public get length(): number { return this.dot(this)**0.5; }
 
 	public assign(v: vec2): vec2;
 	public assign(x: number, y: number): vec2;
 	public assign(arg0: number|vec2, arg1?: number): vec2 {
 		if(arg0 instanceof vec2) {
-			this.x=arg0.x; this.y=arg0.y;
+			this._x=arg0._x; this._y=arg0._y;
 		} else {
-			this.x=arg0; this.y=arg1;
+			this._x=arg0; this._y=arg1;
 		}
 		return this;
 	}
 
 	public negate(): vec2 {
-		return new vec2(-this.x, -this.y);
+		return new vec2(-this._x, -this._y);
 	}
 
 	public normalize(): vec2 {
@@ -119,18 +127,18 @@ class vec2 extends vec {
 	public add(x: number, y: number): vec2;
 	public add(n: number): vec2;
 	public add(arg0: vec2|number, arg1?: number): vec2 {
-		return 	arg0 instanceof vec2 ? 	new vec2(this.x+arg0.x, this.y+arg0.y) :
-				isNumber(arg1) ? 	new vec2(this.x+arg0, this.y+arg1) :
-									new vec2(this.x+arg0, this.y+arg0);
+		return 	arg0 instanceof vec2 ? 	new vec2(this._x+arg0._x, this._y+arg0._y) :
+				isNumber(arg1) ? 	new vec2(this._x+arg0, this._y+arg1) :
+									new vec2(this._x+arg0, this._y+arg0);
 	}
 
 	public sub(v: vec2): vec2;
 	public sub(x: number, y: number): vec2;
 	public sub(n: number): vec2;
 	public sub(arg0: vec2|number, arg1?: number): vec2 {
-		return 	arg0 instanceof vec2 ?	new vec2(this.x-arg0.x, this.y-arg0.y) :
-				isNumber(arg1) ?	new vec2(this.x-arg0, this.y-arg1) :
-									new vec2(this.x-arg0, this.y-arg0);
+		return 	arg0 instanceof vec2 ?	new vec2(this._x-arg0._x, this._y-arg0._y) :
+				isNumber(arg1) ?	new vec2(this._x-arg0, this._y-arg1) :
+									new vec2(this._x-arg0, this._y-arg0);
 	}
 
 	public mul(m: mat2): vec2;
@@ -139,18 +147,18 @@ class vec2 extends vec {
 	public mul(n: number): vec2;
 	public mul(arg0: mat2|vec2|number, arg1?: number): vec2 {
 		return 	arg0 instanceof mat2 ? 	new vec2(this.dot(arg0.column(0)), this.dot(arg0.column(1))) :
-			   	arg0 instanceof vec2 ? 	new vec2(this.x*arg0.x, this.y*arg0.y) :
-				isNumber(arg1) ?	new vec2(this.x*arg0, this.y*arg1) :
-									new vec2(this.x*arg0, this.y*arg0);
+			   	arg0 instanceof vec2 ? 	new vec2(this._x*arg0._x, this._y*arg0._y) :
+				isNumber(arg1) ?	new vec2(this._x*arg0, this._y*arg1) :
+									new vec2(this._x*arg0, this._y*arg0);
 	}
 
 	public div(v: vec2): vec2;
 	public div(x: number, y: number): vec2;
 	public div(n: number): vec2;
 	public div(arg0: vec2|number, arg1?: number): vec2 {
-		return 	arg0 instanceof vec2 ?	new vec2(this.x/arg0.x, this.y/arg0.y) :
-				isNumber(arg1) ?	new vec2(this.x/arg0, this.y/arg1) :
-									new vec2(this.x/arg0, this.y/arg0);
+		return 	arg0 instanceof vec2 ?	new vec2(this._x/arg0._x, this._y/arg0._y) :
+				isNumber(arg1) ?	new vec2(this._x/arg0, this._y/arg1) :
+									new vec2(this._x/arg0, this._y/arg0);
 	}
 
 	public dot(v: vec2): number;
@@ -164,25 +172,25 @@ class vec2 extends vec {
 	public clamp(vmin: number, vmax: number): vec2;
 	public clamp(vmin: vec2|number, vmax: vec2|number): vec2 {
 		return 	vmin instanceof vec2 && vmax instanceof vec2 ?
-					new vec2(clamp(this.x, vmin.x, vmax.x),
-							 clamp(this.y, vmin.y, vmax.y)) :
-					new vec2(clamp(this.x, <number>vmin, <number>vmax),
-							 clamp(this.y, <number>vmin, <number>vmax));
+					new vec2(clamp(this._x, vmin._x, vmax._x),
+							 clamp(this._y, vmin._y, vmax._y)) :
+					new vec2(clamp(this._x, <number>vmin, <number>vmax),
+							 clamp(this._y, <number>vmin, <number>vmax));
 	}
 
-	public sum(): number { return this.x+this.y; }
+	public sum(): number { return this._x+this._y; }
 
 	public toArray(): [number, number] {
-		return [this.x, this.y];
+		return [this._x, this._y];
 	}
 
 	public greaterThan(v: vec2): boolean;
 	public greaterThan(x: number, y: number): boolean;
 	public greaterThan(arg0: vec2|number, arg1?: number): boolean {
 		if(arg0 instanceof vec2) {
-			return this.x>arg0.x&&this.y>arg0.y;
+			return this._x>arg0._x&&this._y>arg0._y;
 		} else {
-			return this.x>arg0&&this.y>arg1;
+			return this._x>arg0&&this._y>arg1;
 		}
 	}
 
@@ -190,9 +198,9 @@ class vec2 extends vec {
 	public lessThan(x: number, y: number): boolean;
 	public lessThan(arg0: vec2|number, arg1?: number): boolean {
 		if(arg0 instanceof vec2) {
-			return this.x<arg0.x&&this.y<arg0.y;
+			return this._x<arg0._x&&this._y<arg0._y;
 		} else {
-			return this.x<arg0&&this.y<arg1;
+			return this._x<arg0&&this._y<arg1;
 		}
 	}
 
@@ -200,11 +208,11 @@ class vec2 extends vec {
 	public equalTo(x: number, y: number): boolean;
 	public equalTo(arg0: vec2|number, arg1?: number): boolean {
 		if(arg0 instanceof vec2) {
-			return Math.abs(this.x-arg0.x)<Number.EPSILON&&
-				   Math.abs(this.y-arg0.y)<Number.EPSILON;
+			return Math.abs(this._x-arg0._x)<Number.EPSILON&&
+				   Math.abs(this._y-arg0._y)<Number.EPSILON;
 		} else {
-			return Math.abs(this.x-arg0)<Number.EPSILON&&
-				   Math.abs(this.y-arg1)<Number.EPSILON;
+			return Math.abs(this._x-arg0)<Number.EPSILON&&
+				   Math.abs(this._y-arg1)<Number.EPSILON;
 		}
 	}
 
@@ -229,22 +237,22 @@ class vec2 extends vec {
 	}
 
 	public maxElement(): number {
-		return Math.max(this.x, this.y);
+		return Math.max(this._x, this._y);
 	}
 
 	public minElement(): number {
-		return Math.min(this.x, this.y);
+		return Math.min(this._x, this._y);
 	}
 
 	public maxElements(v: vec2): vec2;
 	public maxElements(x: number, y: number): vec2;
 	public maxElements(arg0: vec2|number, arg1?: number): vec2 {
 		if(arg0 instanceof vec2) {
-			return new vec2(Math.max(this.x, arg0.x),
-							Math.max(this.y, arg0.y));
+			return new vec2(Math.max(this._x, arg0._x),
+							Math.max(this._y, arg0._y));
 		} else {
-			return new vec2(Math.max(this.x, arg0),
-							Math.max(this.y, arg1));
+			return new vec2(Math.max(this._x, arg0),
+							Math.max(this._y, arg1));
 		}
 	}
 
@@ -252,20 +260,20 @@ class vec2 extends vec {
 	public minElements(x: number, y: number): vec2;
 	public minElements(arg0: vec2|number, arg1?: number): vec2 {
 		if(arg0 instanceof vec2) {
-			return new vec2(Math.min(this.x, arg0.x),
-							Math.min(this.y, arg0.y));
+			return new vec2(Math.min(this._x, arg0._x),
+							Math.min(this._y, arg0._y));
 		} else {
-			return new vec2(Math.min(this.x, arg0),
-							Math.min(this.y, arg1));
+			return new vec2(Math.min(this._x, arg0),
+							Math.min(this._y, arg1));
 		}
 	}
 
 	public clone(): vec2 { return new vec2().assign(this); }
 
-	public get xx(): vec2 { return new vec2(this.x, this.x); }
-	public get xy(): vec2 { return new vec2(this.x, this.y); }
-	public get yx(): vec2 { return new vec2(this.y, this.x); }
-	public get yy(): vec2 { return new vec2(this.y, this.y); }
+	public get xx(): vec2 { return new vec2(this._x, this._x); }
+	public get xy(): vec2 { return new vec2(this._x, this._y); }
+	public get yx(): vec2 { return new vec2(this._y, this._x); }
+	public get yy(): vec2 { return new vec2(this._y, this._y); }
 }
 
 class vec3 extends vec {
@@ -280,22 +288,23 @@ class vec3 extends vec {
 		this._z=z;
 	}
 
-	get x(): number { return this._x; }
-	set x(value: number) { this._x=value; }
+	public get x(): number { return this._x; }
+	public set x(value: number) { this._x=value; }
 
-	get y(): number { return this._y; }
-	set y(value: number) { this._y=value; }
+	public get y(): number { return this._y; }
+	public set y(value: number) { this._y=value; }
 
-	get z(): number { return this._z; }
-	set z(value: number) { this._z=value; }
+	public get z(): number { return this._z; }
+	public set z(value: number) { this._z=value; }
 
-	get length(): number { return this.dot(this)**0.5; }
+	public get length2(): number { return this.dot(this); }
+	public get length(): number { return this.dot(this)**0.5; }
 
-	assign(xyz: vec3): vec3;
-	assign(xy: vec2, z: number): vec3;
-	assign(x: number, yz: vec2): vec3;
-	assign(x: number, y: number, z: number): vec3;
-	assign(arg0: number|vec2|vec3, arg1?: number|vec2, arg2?: number): vec3 {
+	public assign(xyz: vec3): vec3;
+	public assign(xy: vec2, z: number): vec3;
+	public assign(x: number, yz: vec2): vec3;
+	public assign(x: number, y: number, z: number): vec3;
+	public assign(arg0: number|vec2|vec3, arg1?: number|vec2, arg2?: number): vec3 {
 		if(arg0 instanceof vec3) {
 			this._x=arg0.x; this._y=arg0.y; this._z=arg0.z;
 		} else if(arg0 instanceof vec2) {
@@ -310,20 +319,20 @@ class vec3 extends vec {
 		return this;
 	}
 
-	negate(): vec3 {
+	public negate(): vec3 {
 		return new vec3(-this._x, -this._y, -this._z);
 	}
 
-	normalize(): vec3 {
+	public normalize(): vec3 {
 		return this.div(this.length);
 	}
 
-	add(v: vec3): vec3;
-	add(xy: vec2, z: number): vec3;
-	add(x: number, yz: vec2): vec3;
-	add(x: number, y: number, z: number): vec3;
-	add(n: number): vec3;
-	add(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
+	public add(v: vec3): vec3;
+	public add(xy: vec2, z: number): vec3;
+	public add(x: number, yz: vec2): vec3;
+	public add(x: number, y: number, z: number): vec3;
+	public add(n: number): vec3;
+	public add(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
 		if(arg0 instanceof vec3) {
 			return new vec3(this._x+arg0.x, this._y+arg0.y, this._z+arg0.z);
 		} else if(arg0 instanceof vec2) {
@@ -339,12 +348,12 @@ class vec3 extends vec {
 		}
 	}
 
-	sub(v: vec3): vec3;
-	sub(xy: vec2, z: number): vec3;
-	sub(x: number, yz: vec2): vec3;
-	sub(x: number, y: number, z: number): vec3;
-	sub(n: number): vec3;
-	sub(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
+	public sub(v: vec3): vec3;
+	public sub(xy: vec2, z: number): vec3;
+	public sub(x: number, yz: vec2): vec3;
+	public sub(x: number, y: number, z: number): vec3;
+	public sub(n: number): vec3;
+	public sub(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
 		if(arg0 instanceof vec3) {
 			return new vec3(this._x-arg0.x, this._y-arg0.y, this._z-arg0.z);
 		} else if(arg0 instanceof vec2) {
@@ -360,13 +369,13 @@ class vec3 extends vec {
 		}
 	}
 
-	mul(m: mat3): vec3;
-	mul(v: vec3): vec3;
-	mul(xy: vec2, z: number): vec3;
-	mul(x: number, yz: vec2): vec3;
-	mul(x: number, y: number, z: number): vec3;
-	mul(n: number): vec3;
-	mul(arg0: mat3|vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
+	public mul(m: mat3): vec3;
+	public mul(v: vec3): vec3;
+	public mul(xy: vec2, z: number): vec3;
+	public mul(x: number, yz: vec2): vec3;
+	public mul(x: number, y: number, z: number): vec3;
+	public mul(n: number): vec3;
+	public mul(arg0: mat3|vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
 		if(arg0 instanceof mat3) {
 			return new vec3(this.dot(arg0.column(0)), this.dot(arg0.column(1)), this.dot(arg0.column(2)));
 		} else if(arg0 instanceof vec3) {
@@ -384,12 +393,12 @@ class vec3 extends vec {
 		}
 	}
 
-	div(v: vec3): vec3;
-	div(xy: vec2, z: number): vec3;
-	div(x: number, yz: vec2): vec3;
-	div(x: number, y: number, z: number): vec3;
-	div(n: number): vec3;
-	div(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
+	public div(v: vec3): vec3;
+	public div(xy: vec2, z: number): vec3;
+	public div(x: number, yz: vec2): vec3;
+	public div(x: number, y: number, z: number): vec3;
+	public div(n: number): vec3;
+	public div(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
 		if(arg0 instanceof vec3) {
 			return new vec3(this._x/arg0.x, this._y/arg0.y, this._z/arg0.z);
 		} else if(arg0 instanceof vec2) {
@@ -405,11 +414,11 @@ class vec3 extends vec {
 		}
 	}
 
-	dot(v: vec3): number;
-	dot(xy: vec2, z: number): number;
-	dot(x: number, yx: vec2): number;
-	dot(x: number, y: number, z: number): number;
-	dot(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): number {
+	public dot(v: vec3): number;
+	public dot(xy: vec2, z: number): number;
+	public dot(x: number, yx: vec2): number;
+	public dot(x: number, y: number, z: number): number;
+	public dot(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): number {
 		if(arg0 instanceof vec3) {
 			return this.mul(arg0).sum();
 		} else if(arg0 instanceof vec2) {
@@ -423,11 +432,11 @@ class vec3 extends vec {
 		}
 	}
 
-	cross(v: vec3): vec3;
-	cross(xy: vec2, z: number): vec3;
-	cross(x: number, yx: vec2): vec3;
-	cross(x: number, y: number, z: number): vec3;
-	cross(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
+	public cross(v: vec3): vec3;
+	public cross(xy: vec2, z: number): vec3;
+	public cross(x: number, yx: vec2): vec3;
+	public cross(x: number, y: number, z: number): vec3;
+	public cross(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
 		if(arg0 instanceof vec3) {
 			return new vec3(this._y*arg0.z-this._z*arg0.y,
 							this._z*arg0.x-this._x*arg0.z,
@@ -449,9 +458,9 @@ class vec3 extends vec {
 		}
 	}
 
-	clamp(vmin: vec3, vmax: vec3): vec3;
-	clamp(vmin: number, vmax: number): vec3;
-	clamp(vmin: vec3|number, vmax: vec3|number): vec3 {
+	public clamp(vmin: vec3, vmax: vec3): vec3;
+	public clamp(vmin: number, vmax: number): vec3;
+	public clamp(vmin: vec3|number, vmax: vec3|number): vec3 {
 		return 	vmin instanceof vec3 && vmax instanceof vec3 ?
 					new vec3(clamp(this._x, vmin.x, vmax.x),
 							 clamp(this._y, vmin.y, vmax.y),
@@ -461,17 +470,17 @@ class vec3 extends vec {
 							 clamp(this._z, <number>vmin, <number>vmax));
 	}
 
-	sum(): number { return this._x+this._y+this._z; }
+	public sum(): number { return this._x+this._y+this._z; }
 	
-	toArray(): [number, number, number] {
+	public toArray(): [number, number, number] {
 		return [this._x, this._y, this._z];
 	}
 
-	greaterThan(v: vec3): boolean;
-	greaterThan(xy: vec2, z: number): boolean;
-	greaterThan(x: number, yz: vec2): boolean;
-	greaterThan(x: number, y: number, z: number): boolean;
-	greaterThan(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): boolean {
+	public greaterThan(v: vec3): boolean;
+	public greaterThan(xy: vec2, z: number): boolean;
+	public greaterThan(x: number, yz: vec2): boolean;
+	public greaterThan(x: number, y: number, z: number): boolean;
+	public greaterThan(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): boolean {
 		if(arg0 instanceof vec3) {
 			return this._x>arg0.x&&this._y>arg0.y&&this._z>arg0.z;
 		} else if(arg0 instanceof vec2) {
@@ -485,11 +494,11 @@ class vec3 extends vec {
 		}
 	}
 
-	lessThan(v: vec3): boolean;
-	lessThan(xy: vec2, z: number): boolean;
-	lessThan(x: number, yz: vec2): boolean;	
-	lessThan(x: number, y: number, z: number): boolean;
-	lessThan(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): boolean {
+	public lessThan(v: vec3): boolean;
+	public lessThan(xy: vec2, z: number): boolean;
+	public lessThan(x: number, yz: vec2): boolean;	
+	public lessThan(x: number, y: number, z: number): boolean;
+	public lessThan(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): boolean {
 		if(arg0 instanceof vec3) {
 			return this._x<arg0.x&&this._y<arg0.y&&this._z<arg0.z;
 		} else if(arg0 instanceof vec2) {
@@ -503,11 +512,11 @@ class vec3 extends vec {
 		}
 	}
 
-	equalTo(v: vec3): boolean;
-	equalTo(xy: vec2, z: number): boolean;
-	equalTo(x: number, yz: vec2): boolean;
-	equalTo(x: number, y: number, z: number): boolean;
-	equalTo(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): boolean {
+	public equalTo(v: vec3): boolean;
+	public equalTo(xy: vec2, z: number): boolean;
+	public equalTo(x: number, yz: vec2): boolean;
+	public equalTo(x: number, y: number, z: number): boolean;
+	public equalTo(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): boolean {
 		if(arg0 instanceof vec3) {
 			return Math.abs(this._x-arg0.x)<Number.EPSILON&&
 				   Math.abs(this._y-arg0.y)<Number.EPSILON&&
@@ -529,11 +538,11 @@ class vec3 extends vec {
 		}
 	}
 
-	greaterThanOrEqualTo(v: vec3): boolean;
-	greaterThanOrEqualTo(xy: vec2, z: number): boolean;
-	greaterThanOrEqualTo(x: number, yz: vec2): boolean;
-	greaterThanOrEqualTo(x: number, y: number, z: number): boolean;
-	greaterThanOrEqualTo(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): boolean {
+	public greaterThanOrEqualTo(v: vec3): boolean;
+	public greaterThanOrEqualTo(xy: vec2, z: number): boolean;
+	public greaterThanOrEqualTo(x: number, yz: vec2): boolean;
+	public greaterThanOrEqualTo(x: number, y: number, z: number): boolean;
+	public greaterThanOrEqualTo(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): boolean {
 		if(arg0 instanceof vec3) {
 			return this.greaterThan(arg0)||this.equalTo(arg0);
 		} else if(arg0 instanceof vec2) {
@@ -547,11 +556,11 @@ class vec3 extends vec {
 		}
 	}
 
-	lessThanOrEqualTo(v: vec3): boolean;
-	lessThanOrEqualTo(xy: vec2, z: number): boolean;
-	lessThanOrEqualTo(x: number, yz: vec2): boolean;
-	lessThanOrEqualTo(x: number, y: number, z: number): boolean;
-	lessThanOrEqualTo(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): boolean {
+	public lessThanOrEqualTo(v: vec3): boolean;
+	public lessThanOrEqualTo(xy: vec2, z: number): boolean;
+	public lessThanOrEqualTo(x: number, yz: vec2): boolean;
+	public lessThanOrEqualTo(x: number, y: number, z: number): boolean;
+	public lessThanOrEqualTo(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): boolean {
 		if(arg0 instanceof vec3) {
 			return this.lessThan(arg0)||this.equalTo(arg0);
 		} else if(arg0 instanceof vec2) {
@@ -564,19 +573,19 @@ class vec3 extends vec {
 		}
 	}
 
-	maxElement(): number {
+	public maxElement(): number {
 		return Math.max(this._x, this._y, this._z);
 	}
 
-	minElement(): number {
+	public minElement(): number {
 		return Math.min(this._x, this._y, this._z);
 	}
 
-	maxElements(v: vec3): vec3;
-	maxElements(xy: vec2, z: number): vec3;
-	maxElements(x: number, yz: vec2): vec3;
-	maxElements(x: number, y: number, z: number): vec3;
-	maxElements(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
+	public maxElements(v: vec3): vec3;
+	public maxElements(xy: vec2, z: number): vec3;
+	public maxElements(x: number, yz: vec2): vec3;
+	public maxElements(x: number, y: number, z: number): vec3;
+	public maxElements(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
 		if(arg0 instanceof vec3) {
 			return new vec3(Math.max(this._x, arg0.x),
 							Math.max(this._y, arg0.y),
@@ -598,11 +607,11 @@ class vec3 extends vec {
 		}
 	}
 
-	minElements(v: vec3): vec3;
-	minElements(xy: vec2, z: number): vec3;
-	minElements(x: number, yz: vec2): vec3;
-	minElements(x: number, y: number, z: number): vec3;
-	minElements(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
+	public minElements(v: vec3): vec3;
+	public minElements(xy: vec2, z: number): vec3;
+	public minElements(x: number, yz: vec2): vec3;
+	public minElements(x: number, y: number, z: number): vec3;
+	public minElements(arg0: vec3|vec2|number, arg1?: vec2|number, arg2?: number): vec3 {
 		if(arg0 instanceof vec3) {
 			return new vec3(Math.min(this._x, arg0.x),
 							Math.min(this._y, arg0.y),
@@ -626,9 +635,9 @@ class vec3 extends vec {
 
 	public clone(): vec3 { return new vec3().assign(this); }
 
-	static angleBetween(v0: vec3, v1: vec3): number;
-	static angleBetween(v0: vec3, v1: vec3, ref: vec3): number;
-	static angleBetween(arg0: vec3, arg1: vec3, arg2?: vec3) {
+	public static angleBetween(v0: vec3, v1: vec3): number;
+	public static angleBetween(v0: vec3, v1: vec3, ref: vec3): number;
+	public static angleBetween(arg0: vec3, arg1: vec3, arg2?: vec3) {
 		let v0: vec3 = arg0.normalize();
 		let v1: vec3 = arg1.normalize();
 		if(typeof arg2 == "undefined") {
@@ -641,49 +650,49 @@ class vec3 extends vec {
 		}
 	}
 	
-	static absoluteAngleBetween(v0: vec3, v1: vec3, ref: vec3): number {
+	public static absoluteAngleBetween(v0: vec3, v1: vec3, ref: vec3): number {
 		let signedAngle: number = this.angleBetween(v0, v1, ref);
 		if (signedAngle < 0.0) return 2*Constants.PI + signedAngle;
 		else return signedAngle;
 	}
 
-	get xx(): vec2 { return new vec2(this._x, this._x); }
-	get xy(): vec2 { return new vec2(this._x, this._y); }
-	get xz(): vec2 { return new vec2(this._x, this._z); }
-	get yx(): vec2 { return new vec2(this._y, this._x); }
-	get yy(): vec2 { return new vec2(this._y, this._y); }
-	get yz(): vec2 { return new vec2(this._y, this._z); }
-	get zx(): vec2 { return new vec2(this._z, this._x); }
-	get zy(): vec2 { return new vec2(this._z, this._y); }
-	get zz(): vec2 { return new vec2(this._z, this._z); }
+	public get xx(): vec2 { return new vec2(this._x, this._x); }
+	public get xy(): vec2 { return new vec2(this._x, this._y); }
+	public get xz(): vec2 { return new vec2(this._x, this._z); }
+	public get yx(): vec2 { return new vec2(this._y, this._x); }
+	public get yy(): vec2 { return new vec2(this._y, this._y); }
+	public get yz(): vec2 { return new vec2(this._y, this._z); }
+	public get zx(): vec2 { return new vec2(this._z, this._x); }
+	public get zy(): vec2 { return new vec2(this._z, this._y); }
+	public get zz(): vec2 { return new vec2(this._z, this._z); }
 	
-	get xxx(): vec3 { return new vec3(this._x, this._x, this._x); }
-	get xxy(): vec3 { return new vec3(this._x, this._x, this._y); }
-	get xxz(): vec3 { return new vec3(this._x, this._x, this._z); }
-	get xyx(): vec3 { return new vec3(this._x, this._y, this._x); }
-	get xyy(): vec3 { return new vec3(this._x, this._y, this._y); }
-	get xyz(): vec3 { return new vec3(this._x, this._y, this._z); }
-	get xzx(): vec3 { return new vec3(this._x, this._z, this._x); }
-	get xzy(): vec3 { return new vec3(this._x, this._z, this._y); }
-	get xzz(): vec3 { return new vec3(this._x, this._z, this._z); }
-	get yxx(): vec3 { return new vec3(this._y, this._x, this._x); }
-	get yxy(): vec3 { return new vec3(this._y, this._x, this._y); }
-	get yxz(): vec3 { return new vec3(this._y, this._x, this._z); }
-	get yyx(): vec3 { return new vec3(this._y, this._y, this._x); }
-	get yyy(): vec3 { return new vec3(this._y, this._y, this._y); }
-	get yyz(): vec3 { return new vec3(this._y, this._y, this._z); }
-	get yzx(): vec3 { return new vec3(this._y, this._z, this._x); }
-	get yzy(): vec3 { return new vec3(this._y, this._z, this._y); }
-	get yzz(): vec3 { return new vec3(this._y, this._z, this._z); }
-	get zxx(): vec3 { return new vec3(this._z, this._x, this._x); }
-	get zxy(): vec3 { return new vec3(this._z, this._x, this._y); }
-	get zxz(): vec3 { return new vec3(this._z, this._x, this._z); }
-	get zyx(): vec3 { return new vec3(this._z, this._y, this._x); }
-	get zyy(): vec3 { return new vec3(this._z, this._y, this._y); }
-	get zyz(): vec3 { return new vec3(this._z, this._y, this._z); }
-	get zzx(): vec3 { return new vec3(this._z, this._z, this._x); }
-	get zzy(): vec3 { return new vec3(this._z, this._z, this._y); }
-	get zzz(): vec3 { return new vec3(this._z, this._z, this._z); }
+	public get xxx(): vec3 { return new vec3(this._x, this._x, this._x); }
+	public get xxy(): vec3 { return new vec3(this._x, this._x, this._y); }
+	public get xxz(): vec3 { return new vec3(this._x, this._x, this._z); }
+	public get xyx(): vec3 { return new vec3(this._x, this._y, this._x); }
+	public get xyy(): vec3 { return new vec3(this._x, this._y, this._y); }
+	public get xyz(): vec3 { return new vec3(this._x, this._y, this._z); }
+	public get xzx(): vec3 { return new vec3(this._x, this._z, this._x); }
+	public get xzy(): vec3 { return new vec3(this._x, this._z, this._y); }
+	public get xzz(): vec3 { return new vec3(this._x, this._z, this._z); }
+	public get yxx(): vec3 { return new vec3(this._y, this._x, this._x); }
+	public get yxy(): vec3 { return new vec3(this._y, this._x, this._y); }
+	public get yxz(): vec3 { return new vec3(this._y, this._x, this._z); }
+	public get yyx(): vec3 { return new vec3(this._y, this._y, this._x); }
+	public get yyy(): vec3 { return new vec3(this._y, this._y, this._y); }
+	public get yyz(): vec3 { return new vec3(this._y, this._y, this._z); }
+	public get yzx(): vec3 { return new vec3(this._y, this._z, this._x); }
+	public get yzy(): vec3 { return new vec3(this._y, this._z, this._y); }
+	public get yzz(): vec3 { return new vec3(this._y, this._z, this._z); }
+	public get zxx(): vec3 { return new vec3(this._z, this._x, this._x); }
+	public get zxy(): vec3 { return new vec3(this._z, this._x, this._y); }
+	public get zxz(): vec3 { return new vec3(this._z, this._x, this._z); }
+	public get zyx(): vec3 { return new vec3(this._z, this._y, this._x); }
+	public get zyy(): vec3 { return new vec3(this._z, this._y, this._y); }
+	public get zyz(): vec3 { return new vec3(this._z, this._y, this._z); }
+	public get zzx(): vec3 { return new vec3(this._z, this._z, this._x); }
+	public get zzy(): vec3 { return new vec3(this._z, this._z, this._y); }
+	public get zzz(): vec3 { return new vec3(this._z, this._z, this._z); }
 }
 
 class vec4 extends vec {
@@ -699,29 +708,30 @@ class vec4 extends vec {
 		this._w=w;
 	}
 
-	get x(): number { return this._x; }
-	set x(value: number) { this._x=value; }
+	public get x(): number { return this._x; }
+	public set x(value: number) { this._x=value; }
 
-	get y(): number { return this._y; }
-	set y(value: number) { this._y=value; }
+	public get y(): number { return this._y; }
+	public set y(value: number) { this._y=value; }
 
-	get z(): number { return this._z; }
-	set z(value: number) { this._z=value; }
+	public get z(): number { return this._z; }
+	public set z(value: number) { this._z=value; }
 
-	get w(): number { return this._w; }
-	set w(value: number) { this._w=value; }
+	public get w(): number { return this._w; }
+	public set w(value: number) { this._w=value; }
 
-	get length(): number { return this.dot(this)**0.5; }
+	public get length2(): number { return this.dot(this); }
+	public get length(): number { return this.dot(this)**0.5; }
 
-	assign(xyzw: vec4): vec4;
-	assign(xyz: vec3, w: number): vec4;
-	assign(xy: vec2, zw: vec2): vec4;
-	assign(xy: vec2, z: number, w: number): vec4;
-	assign(x: number, yzw: vec3): vec4;
-	assign(x: number, yz: vec2, w: number): vec4;
-	assign(x: number, y: number, zw: vec2): vec4;
-	assign(x: number, y: number, z: number, w: number): vec4;
-	assign(arg0: number|vec2|vec3|vec4, arg1?: number|vec2|vec3, arg2?: number|vec2, arg3?: number): vec4 {
+	public assign(xyzw: vec4): vec4;
+	public assign(xyz: vec3, w: number): vec4;
+	public assign(xy: vec2, zw: vec2): vec4;
+	public assign(xy: vec2, z: number, w: number): vec4;
+	public assign(x: number, yzw: vec3): vec4;
+	public assign(x: number, yz: vec2, w: number): vec4;
+	public assign(x: number, y: number, zw: vec2): vec4;
+	public assign(x: number, y: number, z: number, w: number): vec4;
+	public assign(arg0: number|vec2|vec3|vec4, arg1?: number|vec2|vec3, arg2?: number|vec2, arg3?: number): vec4 {
 		if(arg0 instanceof vec4) {
 			this._x=arg0.x; this._y=arg0.y; this._z=arg0.z; this._w=arg0.w;
 		} else if(arg0 instanceof vec3) {
@@ -748,24 +758,24 @@ class vec4 extends vec {
 		return this;
 	}
 
-	negate(): vec4 {
+	public negate(): vec4 {
 		return new vec4(-this._x, -this._y, -this._z, -this._w);
 	}
 
-	normalize(): vec4 {
+	public normalize(): vec4 {
 		return this.div(this.length);
 	}
 
-	add(v: vec4): vec4;
-	add(xyz: vec3, w: number): vec4;
-	add(xy: vec2, zw: vec2): vec4;
-	add(xy: vec2, z: number, w: number): vec4;
-	add(x: number, yzw: vec3): vec4;
-	add(x: number, yz: vec2, w: number): vec4;
-	add(x: number, y: number, zw: vec2): vec4;
-	add(x: number, y: number, z: number, w: number): vec4;
-	add(n: number): vec4;
-	add(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): vec4 {
+	public add(v: vec4): vec4;
+	public add(xyz: vec3, w: number): vec4;
+	public add(xy: vec2, zw: vec2): vec4;
+	public add(xy: vec2, z: number, w: number): vec4;
+	public add(x: number, yzw: vec3): vec4;
+	public add(x: number, yz: vec2, w: number): vec4;
+	public add(x: number, y: number, zw: vec2): vec4;
+	public add(x: number, y: number, z: number, w: number): vec4;
+	public add(n: number): vec4;
+	public add(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): vec4 {
 		if(arg0 instanceof vec4) {
 			return new vec4(this._x+arg0.x, this._y+arg0.y, this._z+arg0.z, this._w+arg0.w);
 		} else if(arg0 instanceof vec3) {
@@ -793,16 +803,16 @@ class vec4 extends vec {
 		}
 	}
 
-	sub(v: vec4): vec4;
-	sub(xyz: vec3, w: number): vec4;
-	sub(xy: vec2, zw: vec2): vec4;
-	sub(xy: vec2, z: number, w: number): vec4;
-	sub(x: number, yzw: vec3): vec4;
-	sub(x: number, yz: vec2, w: number): vec4;
-	sub(x: number, y: number, zw: vec2): vec4;
-	sub(x: number, y: number, z: number, w: number): vec4;
-	sub(n: number): vec4;
-	sub(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): vec4 {
+	public sub(v: vec4): vec4;
+	public sub(xyz: vec3, w: number): vec4;
+	public sub(xy: vec2, zw: vec2): vec4;
+	public sub(xy: vec2, z: number, w: number): vec4;
+	public sub(x: number, yzw: vec3): vec4;
+	public sub(x: number, yz: vec2, w: number): vec4;
+	public sub(x: number, y: number, zw: vec2): vec4;
+	public sub(x: number, y: number, z: number, w: number): vec4;
+	public sub(n: number): vec4;
+	public sub(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): vec4 {
 		if(arg0 instanceof vec4) {
 			return new vec4(this._x-arg0.x, this._y-arg0.y, this._z-arg0.z, this._w-arg0.w);
 		} else if(arg0 instanceof vec3) {
@@ -830,17 +840,17 @@ class vec4 extends vec {
 		}	
 	}
 
-	mul(m: mat4): vec4;
-	mul(v: vec4): vec4;
-	mul(xyz: vec3, w: number): vec4;
-	mul(xy: vec2, zw: vec2): vec4;
-	mul(xy: vec2, z: number, w: number): vec4;
-	mul(x: number, yzw: vec3): vec4;
-	mul(x: number, yz: vec2, w: number): vec4;
-	mul(x: number, y: number, zw: vec2): vec4;
-	mul(x: number, y: number, z: number, w: number): vec4;
-	mul(n: number): vec4;
-	mul(arg0: mat4|vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): vec4 {
+	public mul(m: mat4): vec4;
+	public mul(v: vec4): vec4;
+	public mul(xyz: vec3, w: number): vec4;
+	public mul(xy: vec2, zw: vec2): vec4;
+	public mul(xy: vec2, z: number, w: number): vec4;
+	public mul(x: number, yzw: vec3): vec4;
+	public mul(x: number, yz: vec2, w: number): vec4;
+	public mul(x: number, y: number, zw: vec2): vec4;
+	public mul(x: number, y: number, z: number, w: number): vec4;
+	public mul(n: number): vec4;
+	public mul(arg0: mat4|vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): vec4 {
 		if(arg0 instanceof mat4) {
 			return new vec4(this.dot(arg0.column(0)), this.dot(arg0.column(1)), this.dot(arg0.column(2)), this.dot(arg0.column(3)));
 		} else if(arg0 instanceof vec4) {
@@ -870,16 +880,16 @@ class vec4 extends vec {
 		}	
 	}
 
-	div(v: vec4): vec4;
-	div(xyz: vec3, w: number): vec4;
-	div(xy: vec2, zw: vec2): vec4;
-	div(xy: vec2, z: number, w: number): vec4;
-	div(x: number, yzw: vec3): vec4;
-	div(x: number, yz: vec2, w: number): vec4;
-	div(x: number, y: number, zw: vec2): vec4;
-	div(x: number, y: number, z: number, w: number): vec4;
-	div(n: number): vec4;
-	div(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): vec4 {
+	public div(v: vec4): vec4;
+	public div(xyz: vec3, w: number): vec4;
+	public div(xy: vec2, zw: vec2): vec4;
+	public div(xy: vec2, z: number, w: number): vec4;
+	public div(x: number, yzw: vec3): vec4;
+	public div(x: number, yz: vec2, w: number): vec4;
+	public div(x: number, y: number, zw: vec2): vec4;
+	public div(x: number, y: number, z: number, w: number): vec4;
+	public div(n: number): vec4;
+	public div(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): vec4 {
 		if(arg0 instanceof vec4) {
 			return new vec4(this._x/arg0.x, this._y/arg0.y, this._z/arg0.z, this._w/arg0.w);
 		} else if(arg0 instanceof vec3) {
@@ -907,15 +917,15 @@ class vec4 extends vec {
 		}	
 	}
 
-	dot(v: vec4): number;
-	dot(xyz: vec3, w: number): number;
-	dot(xy: vec2, zw: vec2): number;
-	dot(xy: vec2, z: number, w: number): number;
-	dot(x: number, yzw: vec3): number;
-	dot(x: number, yz: vec2, w: number): number;
-	dot(x: number, y: number, zw: vec2): number;
-	dot(x: number, y: number, z: number, w: number): number;
-	dot(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): number {
+	public dot(v: vec4): number;
+	public dot(xyz: vec3, w: number): number;
+	public dot(xy: vec2, zw: vec2): number;
+	public dot(xy: vec2, z: number, w: number): number;
+	public dot(x: number, yzw: vec3): number;
+	public dot(x: number, yz: vec2, w: number): number;
+	public dot(x: number, y: number, zw: vec2): number;
+	public dot(x: number, y: number, z: number, w: number): number;
+	public dot(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): number {
 		if(arg0 instanceof vec4) {
 			return this._x*arg0.x+this._y*arg0.y+this._z*arg0.z+this._w*arg0.w;
 		} else if(arg0 instanceof vec3) {
@@ -941,9 +951,9 @@ class vec4 extends vec {
 		}	
 	}
 
-	clamp(vmin: vec4, vmax: vec4): vec4;
-	clamp(vmin: number, vmax: number): vec4;
-	clamp(vmin: vec4|number, vmax: vec4|number): vec4 {
+	public clamp(vmin: vec4, vmax: vec4): vec4;
+	public clamp(vmin: number, vmax: number): vec4;
+	public clamp(vmin: vec4|number, vmax: vec4|number): vec4 {
 		return 	vmin instanceof vec4 && vmax instanceof vec4 ?
 					new vec4(clamp(this._x, vmin.x, vmax.x),
 							 clamp(this._y, vmin.y, vmax.y),
@@ -955,21 +965,21 @@ class vec4 extends vec {
 							 clamp(this._w, <number>vmin, <number>vmax));
 	}
 
-	sum(): number { return this._x+this._y+this._z+this._w; }
+	public sum(): number { return this._x+this._y+this._z+this._w; }
 		
-	toArray(): [number, number, number, number] {
+	public toArray(): [number, number, number, number] {
 		return [this._x, this._y, this._z, this._w];
 	}
 
-	greaterThan(v: vec4): boolean;
-	greaterThan(xyz: vec3, w: number): boolean;
-	greaterThan(xy: vec2, zw: vec2): boolean;
-	greaterThan(xy: vec2, z: number, w: number): boolean;
-	greaterThan(x: number, yzw: vec3): boolean;
-	greaterThan(x: number, yz: vec2, w: number): boolean;
-	greaterThan(x: number, y: number, zw: vec2): boolean;
-	greaterThan(x: number, y: number, z: number, w: number): boolean;
-	greaterThan(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): boolean {
+	public greaterThan(v: vec4): boolean;
+	public greaterThan(xyz: vec3, w: number): boolean;
+	public greaterThan(xy: vec2, zw: vec2): boolean;
+	public greaterThan(xy: vec2, z: number, w: number): boolean;
+	public greaterThan(x: number, yzw: vec3): boolean;
+	public greaterThan(x: number, yz: vec2, w: number): boolean;
+	public greaterThan(x: number, y: number, zw: vec2): boolean;
+	public greaterThan(x: number, y: number, z: number, w: number): boolean;
+	public greaterThan(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): boolean {
 		if(arg0 instanceof vec4) {
 			return this._x>arg0.x&&this._y>arg0.y&&this._z>arg0.z&&this._w>arg0.w;
 		} else if(arg0 instanceof vec3) {
@@ -995,15 +1005,15 @@ class vec4 extends vec {
 		}
 	}
 
-	lessThan(v: vec4): boolean;
-	lessThan(xyz: vec3, w: number): boolean;
-	lessThan(xy: vec2, zw: vec2): boolean;
-	lessThan(xy: vec2, z: number, w: number): boolean;
-	lessThan(x: number, yzw: vec3): boolean;
-	lessThan(x: number, yz: vec2, w: number): boolean;
-	lessThan(x: number, y: number, zw: vec2): boolean;
-	lessThan(x: number, y: number, z: number, w: number): boolean;
-	lessThan(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): boolean {
+	public lessThan(v: vec4): boolean;
+	public lessThan(xyz: vec3, w: number): boolean;
+	public lessThan(xy: vec2, zw: vec2): boolean;
+	public lessThan(xy: vec2, z: number, w: number): boolean;
+	public lessThan(x: number, yzw: vec3): boolean;
+	public lessThan(x: number, yz: vec2, w: number): boolean;
+	public lessThan(x: number, y: number, zw: vec2): boolean;
+	public lessThan(x: number, y: number, z: number, w: number): boolean;
+	public lessThan(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): boolean {
 		if(arg0 instanceof vec4) {
 			return this._x<arg0.x&&this._y<arg0.y&&this._z<arg0.z&&this._w<arg0.w;
 		} else if(arg0 instanceof vec3) {
@@ -1029,15 +1039,15 @@ class vec4 extends vec {
 		}
 	}
 
-	equalTo(v: vec4): boolean;
-	equalTo(xyz: vec3, w: number): boolean;
-	equalTo(xy: vec2, zw: vec2): boolean;
-	equalTo(xy: vec2, z: number, w: number): boolean;
-	equalTo(x: number, yzw: vec3): boolean;
-	equalTo(x: number, yz: vec2, w: number): boolean;
-	equalTo(x: number, y: number, zw: vec2): boolean;
-	equalTo(x: number, y: number, z: number, w: number): boolean;
-	equalTo(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): boolean {
+	public equalTo(v: vec4): boolean;
+	public equalTo(xyz: vec3, w: number): boolean;
+	public equalTo(xy: vec2, zw: vec2): boolean;
+	public equalTo(xy: vec2, z: number, w: number): boolean;
+	public equalTo(x: number, yzw: vec3): boolean;
+	public equalTo(x: number, yz: vec2, w: number): boolean;
+	public equalTo(x: number, y: number, zw: vec2): boolean;
+	public equalTo(x: number, y: number, z: number, w: number): boolean;
+	public equalTo(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): boolean {
 		if(arg0 instanceof vec4) {
 			return Math.abs(this._x-arg0.x)<Number.EPSILON&&
 				   Math.abs(this._y-arg0.y)<Number.EPSILON&&
@@ -1087,15 +1097,15 @@ class vec4 extends vec {
 		}
 	}
 
-	greaterThanOrEqualTo(v: vec4): boolean;
-	greaterThanOrEqualTo(xyz: vec3, w: number): boolean;
-	greaterThanOrEqualTo(xy: vec2, zw: vec2): boolean;
-	greaterThanOrEqualTo(xy: vec2, z: number, w: number): boolean;
-	greaterThanOrEqualTo(x: number, yzw: vec3): boolean;
-	greaterThanOrEqualTo(x: number, yz: vec2, w: number): boolean;
-	greaterThanOrEqualTo(x: number, y: number, zw: vec2): boolean;
-	greaterThanOrEqualTo(x: number, y: number, z: number, w: number): boolean;
-	greaterThanOrEqualTo(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): boolean {
+	public greaterThanOrEqualTo(v: vec4): boolean;
+	public greaterThanOrEqualTo(xyz: vec3, w: number): boolean;
+	public greaterThanOrEqualTo(xy: vec2, zw: vec2): boolean;
+	public greaterThanOrEqualTo(xy: vec2, z: number, w: number): boolean;
+	public greaterThanOrEqualTo(x: number, yzw: vec3): boolean;
+	public greaterThanOrEqualTo(x: number, yz: vec2, w: number): boolean;
+	public greaterThanOrEqualTo(x: number, y: number, zw: vec2): boolean;
+	public greaterThanOrEqualTo(x: number, y: number, z: number, w: number): boolean;
+	public greaterThanOrEqualTo(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): boolean {
 		if(arg0 instanceof vec4) {
 			return this.greaterThan(arg0)||this.equalTo(arg0);
 		} else if(arg0 instanceof vec3) {
@@ -1121,15 +1131,15 @@ class vec4 extends vec {
 		}
 	}
 
-	lessThanOrEqualTo(v: vec4): boolean;
-	lessThanOrEqualTo(xyz: vec3, w: number): boolean;
-	lessThanOrEqualTo(xy: vec2, zw: vec2): boolean;
-	lessThanOrEqualTo(xy: vec2, z: number, w: number): boolean;
-	lessThanOrEqualTo(x: number, yzw: vec3): boolean;
-	lessThanOrEqualTo(x: number, yz: vec2, w: number): boolean;
-	lessThanOrEqualTo(x: number, y: number, zw: vec2): boolean;
-	lessThanOrEqualTo(x: number, y: number, z: number, w: number): boolean;
-	lessThanOrEqualTo(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): boolean {
+	public lessThanOrEqualTo(v: vec4): boolean;
+	public lessThanOrEqualTo(xyz: vec3, w: number): boolean;
+	public lessThanOrEqualTo(xy: vec2, zw: vec2): boolean;
+	public lessThanOrEqualTo(xy: vec2, z: number, w: number): boolean;
+	public lessThanOrEqualTo(x: number, yzw: vec3): boolean;
+	public lessThanOrEqualTo(x: number, yz: vec2, w: number): boolean;
+	public lessThanOrEqualTo(x: number, y: number, zw: vec2): boolean;
+	public lessThanOrEqualTo(x: number, y: number, z: number, w: number): boolean;
+	public lessThanOrEqualTo(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): boolean {
 		if(arg0 instanceof vec4) {
 			return this.lessThan(arg0)||this.equalTo(arg0);
 		} else if(arg0 instanceof vec3) {
@@ -1155,23 +1165,23 @@ class vec4 extends vec {
 		}
 	}
 
-	maxElement(): number {
+	public maxElement(): number {
 		return Math.max(this._x, this._y, this._z, this._w);
 	}
 
-	minElement(): number {
+	public minElement(): number {
 		return Math.min(this._x, this._y, this._z, this._w);
 	}
 
-	maxElements(v: vec4): vec4;
-	maxElements(xyz: vec3, w: number): vec4;
-	maxElements(xy: vec2, zw: vec2): vec4;
-	maxElements(xy: vec2, z: number, w: number): vec4;
-	maxElements(x: number, yzw: vec3): vec4;
-	maxElements(x: number, yz: vec2, w: number): vec4;
-	maxElements(x: number, y: number, zw: vec2): vec4;
-	maxElements(x: number, y: number, z: number, w: number): vec4;
-	maxElements(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): vec4 {
+	public maxElements(v: vec4): vec4;
+	public maxElements(xyz: vec3, w: number): vec4;
+	public maxElements(xy: vec2, zw: vec2): vec4;
+	public maxElements(xy: vec2, z: number, w: number): vec4;
+	public maxElements(x: number, yzw: vec3): vec4;
+	public maxElements(x: number, yz: vec2, w: number): vec4;
+	public maxElements(x: number, y: number, zw: vec2): vec4;
+	public maxElements(x: number, y: number, z: number, w: number): vec4;
+	public maxElements(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): vec4 {
 		if(arg0 instanceof vec4) {
 			return new vec4(Math.max(this._x, arg0.x),
 							Math.max(this._y, arg0.y),
@@ -1221,15 +1231,15 @@ class vec4 extends vec {
 		}
 	}
 
-	minElements(v: vec4): vec4;
-	minElements(xyz: vec3, w: number): vec4;
-	minElements(xy: vec2, zw: vec2): vec4;
-	minElements(xy: vec2, z: number, w: number): vec4;
-	minElements(x: number, yzw: vec3): vec4;
-	minElements(x: number, yz: vec2, w: number): vec4;
-	minElements(x: number, y: number, zw: vec2): vec4;
-	minElements(x: number, y: number, z: number, w: number): vec4;
-	minElements(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): vec4 {
+	public minElements(v: vec4): vec4;
+	public minElements(xyz: vec3, w: number): vec4;
+	public minElements(xy: vec2, zw: vec2): vec4;
+	public minElements(xy: vec2, z: number, w: number): vec4;
+	public minElements(x: number, yzw: vec3): vec4;
+	public minElements(x: number, yz: vec2, w: number): vec4;
+	public minElements(x: number, y: number, zw: vec2): vec4;
+	public minElements(x: number, y: number, z: number, w: number): vec4;
+	public minElements(arg0: vec4|vec3|vec2|number, arg1?: vec3|vec2|number, arg2?: vec2|number, arg3?: number): vec4 {
 		if(arg0 instanceof vec4) {
 			return new vec4(Math.min(this._x, arg0.x),
 							Math.min(this._y, arg0.y),
@@ -1281,347 +1291,347 @@ class vec4 extends vec {
 
 	public clone(): vec4 { return new vec4().assign(this); }
 
-	get xx(): vec2 { return new vec2(this._x, this._x); }
-	get xy(): vec2 { return new vec2(this._x, this._y); }
-	get xz(): vec2 { return new vec2(this._x, this._z); }
-	get xw(): vec2 { return new vec2(this._x, this._w); }
-	get yx(): vec2 { return new vec2(this._y, this._x); }
-	get yy(): vec2 { return new vec2(this._y, this._y); }
-	get yz(): vec2 { return new vec2(this._y, this._z); }
-	get yw(): vec2 { return new vec2(this._y, this._w); }
-	get zx(): vec2 { return new vec2(this._z, this._x); }
-	get zy(): vec2 { return new vec2(this._z, this._y); }
-	get zz(): vec2 { return new vec2(this._z, this._z); }
-	get zw(): vec2 { return new vec2(this._z, this._w); }
-	get wx(): vec2 { return new vec2(this._w, this._x); }
-	get wy(): vec2 { return new vec2(this._w, this._y); }
-	get wz(): vec2 { return new vec2(this._w, this._z); }
-	get ww(): vec2 { return new vec2(this._w, this._w); }
+	public get xx(): vec2 { return new vec2(this._x, this._x); }
+	public get xy(): vec2 { return new vec2(this._x, this._y); }
+	public get xz(): vec2 { return new vec2(this._x, this._z); }
+	public get xw(): vec2 { return new vec2(this._x, this._w); }
+	public get yx(): vec2 { return new vec2(this._y, this._x); }
+	public get yy(): vec2 { return new vec2(this._y, this._y); }
+	public get yz(): vec2 { return new vec2(this._y, this._z); }
+	public get yw(): vec2 { return new vec2(this._y, this._w); }
+	public get zx(): vec2 { return new vec2(this._z, this._x); }
+	public get zy(): vec2 { return new vec2(this._z, this._y); }
+	public get zz(): vec2 { return new vec2(this._z, this._z); }
+	public get zw(): vec2 { return new vec2(this._z, this._w); }
+	public get wx(): vec2 { return new vec2(this._w, this._x); }
+	public get wy(): vec2 { return new vec2(this._w, this._y); }
+	public get wz(): vec2 { return new vec2(this._w, this._z); }
+	public get ww(): vec2 { return new vec2(this._w, this._w); }
 	
-	get xxx(): vec3 { return new vec3(this._x, this._x, this._x); }
-	get xxy(): vec3 { return new vec3(this._x, this._x, this._y); }
-	get xxz(): vec3 { return new vec3(this._x, this._x, this._z); }
-	get xxw(): vec3 { return new vec3(this._x, this._x, this._w); }
-	get xyx(): vec3 { return new vec3(this._x, this._y, this._x); }
-	get xyy(): vec3 { return new vec3(this._x, this._y, this._y); }
-	get xyz(): vec3 { return new vec3(this._x, this._y, this._z); }
-	get xyw(): vec3 { return new vec3(this._x, this._y, this._w); }
-	get xzx(): vec3 { return new vec3(this._x, this._z, this._x); }
-	get xzy(): vec3 { return new vec3(this._x, this._z, this._y); }
-	get xzz(): vec3 { return new vec3(this._x, this._z, this._z); }
-	get xzw(): vec3 { return new vec3(this._x, this._z, this._w); }
-	get xwx(): vec3 { return new vec3(this._x, this._w, this._x); }
-	get xwy(): vec3 { return new vec3(this._x, this._w, this._y); }
-	get xwz(): vec3 { return new vec3(this._x, this._w, this._z); }
-	get xww(): vec3 { return new vec3(this._x, this._w, this._w); }
-	get yxx(): vec3 { return new vec3(this._y, this._x, this._x); }
-	get yxy(): vec3 { return new vec3(this._y, this._x, this._y); }
-	get yxz(): vec3 { return new vec3(this._y, this._x, this._z); }
-	get yxw(): vec3 { return new vec3(this._y, this._x, this._w); }
-	get yyx(): vec3 { return new vec3(this._y, this._y, this._x); }
-	get yyy(): vec3 { return new vec3(this._y, this._y, this._y); }
-	get yyz(): vec3 { return new vec3(this._y, this._y, this._z); }
-	get yyw(): vec3 { return new vec3(this._y, this._y, this._w); }
-	get yzx(): vec3 { return new vec3(this._y, this._z, this._x); }
-	get yzy(): vec3 { return new vec3(this._y, this._z, this._y); }
-	get yzz(): vec3 { return new vec3(this._y, this._z, this._z); }
-	get yzw(): vec3 { return new vec3(this._y, this._z, this._w); }
-	get ywx(): vec3 { return new vec3(this._y, this._w, this._x); }
-	get ywy(): vec3 { return new vec3(this._y, this._w, this._y); }
-	get ywz(): vec3 { return new vec3(this._y, this._w, this._z); }
-	get yww(): vec3 { return new vec3(this._y, this._w, this._w); }
-	get zxx(): vec3 { return new vec3(this._z, this._x, this._x); }
-	get zxy(): vec3 { return new vec3(this._z, this._x, this._y); }
-	get zxz(): vec3 { return new vec3(this._z, this._x, this._z); }
-	get zxw(): vec3 { return new vec3(this._z, this._x, this._w); }
-	get zyx(): vec3 { return new vec3(this._z, this._y, this._x); }
-	get zyy(): vec3 { return new vec3(this._z, this._y, this._y); }
-	get zyz(): vec3 { return new vec3(this._z, this._y, this._z); }
-	get zyw(): vec3 { return new vec3(this._z, this._y, this._w); }
-	get zzx(): vec3 { return new vec3(this._z, this._z, this._x); }
-	get zzy(): vec3 { return new vec3(this._z, this._z, this._y); }
-	get zzz(): vec3 { return new vec3(this._z, this._z, this._z); }
-	get zzw(): vec3 { return new vec3(this._z, this._z, this._w); }
-	get zwx(): vec3 { return new vec3(this._z, this._w, this._x); }
-	get zwy(): vec3 { return new vec3(this._z, this._w, this._y); }
-	get zwz(): vec3 { return new vec3(this._z, this._w, this._z); }
-	get zww(): vec3 { return new vec3(this._z, this._w, this._w); }
-	get wxx(): vec3 { return new vec3(this._w, this._x, this._x); }
-	get wxy(): vec3 { return new vec3(this._w, this._x, this._y); }
-	get wxz(): vec3 { return new vec3(this._w, this._x, this._z); }
-	get wxw(): vec3 { return new vec3(this._w, this._x, this._w); }
-	get wyx(): vec3 { return new vec3(this._w, this._y, this._x); }
-	get wyy(): vec3 { return new vec3(this._w, this._y, this._y); }
-	get wyz(): vec3 { return new vec3(this._w, this._y, this._z); }
-	get wyw(): vec3 { return new vec3(this._w, this._y, this._w); }
-	get wzx(): vec3 { return new vec3(this._w, this._z, this._x); }
-	get wzy(): vec3 { return new vec3(this._w, this._z, this._y); }
-	get wzz(): vec3 { return new vec3(this._w, this._z, this._z); }
-	get wzw(): vec3 { return new vec3(this._w, this._z, this._w); }
-	get wwx(): vec3 { return new vec3(this._w, this._w, this._x); }
-	get wwy(): vec3 { return new vec3(this._w, this._w, this._y); }
-	get wwz(): vec3 { return new vec3(this._w, this._w, this._z); }
-	get www(): vec3 { return new vec3(this._w, this._w, this._w); }
+	public get xxx(): vec3 { return new vec3(this._x, this._x, this._x); }
+	public get xxy(): vec3 { return new vec3(this._x, this._x, this._y); }
+	public get xxz(): vec3 { return new vec3(this._x, this._x, this._z); }
+	public get xxw(): vec3 { return new vec3(this._x, this._x, this._w); }
+	public get xyx(): vec3 { return new vec3(this._x, this._y, this._x); }
+	public get xyy(): vec3 { return new vec3(this._x, this._y, this._y); }
+	public get xyz(): vec3 { return new vec3(this._x, this._y, this._z); }
+	public get xyw(): vec3 { return new vec3(this._x, this._y, this._w); }
+	public get xzx(): vec3 { return new vec3(this._x, this._z, this._x); }
+	public get xzy(): vec3 { return new vec3(this._x, this._z, this._y); }
+	public get xzz(): vec3 { return new vec3(this._x, this._z, this._z); }
+	public get xzw(): vec3 { return new vec3(this._x, this._z, this._w); }
+	public get xwx(): vec3 { return new vec3(this._x, this._w, this._x); }
+	public get xwy(): vec3 { return new vec3(this._x, this._w, this._y); }
+	public get xwz(): vec3 { return new vec3(this._x, this._w, this._z); }
+	public get xww(): vec3 { return new vec3(this._x, this._w, this._w); }
+	public get yxx(): vec3 { return new vec3(this._y, this._x, this._x); }
+	public get yxy(): vec3 { return new vec3(this._y, this._x, this._y); }
+	public get yxz(): vec3 { return new vec3(this._y, this._x, this._z); }
+	public get yxw(): vec3 { return new vec3(this._y, this._x, this._w); }
+	public get yyx(): vec3 { return new vec3(this._y, this._y, this._x); }
+	public get yyy(): vec3 { return new vec3(this._y, this._y, this._y); }
+	public get yyz(): vec3 { return new vec3(this._y, this._y, this._z); }
+	public get yyw(): vec3 { return new vec3(this._y, this._y, this._w); }
+	public get yzx(): vec3 { return new vec3(this._y, this._z, this._x); }
+	public get yzy(): vec3 { return new vec3(this._y, this._z, this._y); }
+	public get yzz(): vec3 { return new vec3(this._y, this._z, this._z); }
+	public get yzw(): vec3 { return new vec3(this._y, this._z, this._w); }
+	public get ywx(): vec3 { return new vec3(this._y, this._w, this._x); }
+	public get ywy(): vec3 { return new vec3(this._y, this._w, this._y); }
+	public get ywz(): vec3 { return new vec3(this._y, this._w, this._z); }
+	public get yww(): vec3 { return new vec3(this._y, this._w, this._w); }
+	public get zxx(): vec3 { return new vec3(this._z, this._x, this._x); }
+	public get zxy(): vec3 { return new vec3(this._z, this._x, this._y); }
+	public get zxz(): vec3 { return new vec3(this._z, this._x, this._z); }
+	public get zxw(): vec3 { return new vec3(this._z, this._x, this._w); }
+	public get zyx(): vec3 { return new vec3(this._z, this._y, this._x); }
+	public get zyy(): vec3 { return new vec3(this._z, this._y, this._y); }
+	public get zyz(): vec3 { return new vec3(this._z, this._y, this._z); }
+	public get zyw(): vec3 { return new vec3(this._z, this._y, this._w); }
+	public get zzx(): vec3 { return new vec3(this._z, this._z, this._x); }
+	public get zzy(): vec3 { return new vec3(this._z, this._z, this._y); }
+	public get zzz(): vec3 { return new vec3(this._z, this._z, this._z); }
+	public get zzw(): vec3 { return new vec3(this._z, this._z, this._w); }
+	public get zwx(): vec3 { return new vec3(this._z, this._w, this._x); }
+	public get zwy(): vec3 { return new vec3(this._z, this._w, this._y); }
+	public get zwz(): vec3 { return new vec3(this._z, this._w, this._z); }
+	public get zww(): vec3 { return new vec3(this._z, this._w, this._w); }
+	public get wxx(): vec3 { return new vec3(this._w, this._x, this._x); }
+	public get wxy(): vec3 { return new vec3(this._w, this._x, this._y); }
+	public get wxz(): vec3 { return new vec3(this._w, this._x, this._z); }
+	public get wxw(): vec3 { return new vec3(this._w, this._x, this._w); }
+	public get wyx(): vec3 { return new vec3(this._w, this._y, this._x); }
+	public get wyy(): vec3 { return new vec3(this._w, this._y, this._y); }
+	public get wyz(): vec3 { return new vec3(this._w, this._y, this._z); }
+	public get wyw(): vec3 { return new vec3(this._w, this._y, this._w); }
+	public get wzx(): vec3 { return new vec3(this._w, this._z, this._x); }
+	public get wzy(): vec3 { return new vec3(this._w, this._z, this._y); }
+	public get wzz(): vec3 { return new vec3(this._w, this._z, this._z); }
+	public get wzw(): vec3 { return new vec3(this._w, this._z, this._w); }
+	public get wwx(): vec3 { return new vec3(this._w, this._w, this._x); }
+	public get wwy(): vec3 { return new vec3(this._w, this._w, this._y); }
+	public get wwz(): vec3 { return new vec3(this._w, this._w, this._z); }
+	public get www(): vec3 { return new vec3(this._w, this._w, this._w); }
 
-	get xxxx(): vec4 { return new vec4(this._x, this._x, this._x, this._x); }
-	get xxxy(): vec4 { return new vec4(this._x, this._x, this._x, this._y); }
-	get xxxz(): vec4 { return new vec4(this._x, this._x, this._x, this._z); }
-	get xxxw(): vec4 { return new vec4(this._x, this._x, this._x, this._w); }
-	get xxyx(): vec4 { return new vec4(this._x, this._x, this._y, this._x); }
-	get xxyy(): vec4 { return new vec4(this._x, this._x, this._y, this._y); }
-	get xxyz(): vec4 { return new vec4(this._x, this._x, this._y, this._z); }
-	get xxyw(): vec4 { return new vec4(this._x, this._x, this._y, this._w); }
-	get xxzx(): vec4 { return new vec4(this._x, this._x, this._z, this._x); }
-	get xxzy(): vec4 { return new vec4(this._x, this._x, this._z, this._y); }
-	get xxzz(): vec4 { return new vec4(this._x, this._x, this._z, this._z); }
-	get xxzw(): vec4 { return new vec4(this._x, this._x, this._z, this._w); }
-	get xxwx(): vec4 { return new vec4(this._x, this._x, this._w, this._x); }
-	get xxwy(): vec4 { return new vec4(this._x, this._x, this._w, this._y); }
-	get xxwz(): vec4 { return new vec4(this._x, this._x, this._w, this._z); }
-	get xxww(): vec4 { return new vec4(this._x, this._x, this._w, this._w); }
-	get xyxx(): vec4 { return new vec4(this._x, this._y, this._x, this._x); }
-	get xyxy(): vec4 { return new vec4(this._x, this._y, this._x, this._y); }
-	get xyxz(): vec4 { return new vec4(this._x, this._y, this._x, this._z); }
-	get xyxw(): vec4 { return new vec4(this._x, this._y, this._x, this._w); }
-	get xyyx(): vec4 { return new vec4(this._x, this._y, this._y, this._x); }
-	get xyyy(): vec4 { return new vec4(this._x, this._y, this._y, this._y); }
-	get xyyz(): vec4 { return new vec4(this._x, this._y, this._y, this._z); }
-	get xyyw(): vec4 { return new vec4(this._x, this._y, this._y, this._w); }
-	get xyzx(): vec4 { return new vec4(this._x, this._y, this._z, this._x); }
-	get xyzy(): vec4 { return new vec4(this._x, this._y, this._z, this._y); }
-	get xyzz(): vec4 { return new vec4(this._x, this._y, this._z, this._z); }
-	get xyzw(): vec4 { return new vec4(this._x, this._y, this._z, this._w); }
-	get xywx(): vec4 { return new vec4(this._x, this._y, this._w, this._x); }
-	get xywy(): vec4 { return new vec4(this._x, this._y, this._w, this._y); }
-	get xywz(): vec4 { return new vec4(this._x, this._y, this._w, this._z); }
-	get xyww(): vec4 { return new vec4(this._x, this._y, this._w, this._w); }
-	get xzxx(): vec4 { return new vec4(this._x, this._z, this._x, this._x); }
-	get xzxy(): vec4 { return new vec4(this._x, this._z, this._x, this._y); }
-	get xzxz(): vec4 { return new vec4(this._x, this._z, this._x, this._z); }
-	get xzxw(): vec4 { return new vec4(this._x, this._z, this._x, this._w); }
-	get xzyx(): vec4 { return new vec4(this._x, this._z, this._y, this._x); }
-	get xzyy(): vec4 { return new vec4(this._x, this._z, this._y, this._y); }
-	get xzyz(): vec4 { return new vec4(this._x, this._z, this._y, this._z); }
-	get xzyw(): vec4 { return new vec4(this._x, this._z, this._y, this._w); }
-	get xzzx(): vec4 { return new vec4(this._x, this._z, this._z, this._x); }
-	get xzzy(): vec4 { return new vec4(this._x, this._z, this._z, this._y); }
-	get xzzz(): vec4 { return new vec4(this._x, this._z, this._z, this._z); }
-	get xzzw(): vec4 { return new vec4(this._x, this._z, this._z, this._w); }
-	get xzwx(): vec4 { return new vec4(this._x, this._z, this._w, this._x); }
-	get xzwy(): vec4 { return new vec4(this._x, this._z, this._w, this._y); }
-	get xzwz(): vec4 { return new vec4(this._x, this._z, this._w, this._z); }
-	get xzww(): vec4 { return new vec4(this._x, this._z, this._w, this._w); }
-	get xwxx(): vec4 { return new vec4(this._x, this._w, this._x, this._x); }
-	get xwxy(): vec4 { return new vec4(this._x, this._w, this._x, this._y); }
-	get xwxz(): vec4 { return new vec4(this._x, this._w, this._x, this._z); }
-	get xwxw(): vec4 { return new vec4(this._x, this._w, this._x, this._w); }
-	get xwyx(): vec4 { return new vec4(this._x, this._w, this._y, this._x); }
-	get xwyy(): vec4 { return new vec4(this._x, this._w, this._y, this._y); }
-	get xwyz(): vec4 { return new vec4(this._x, this._w, this._y, this._z); }
-	get xwyw(): vec4 { return new vec4(this._x, this._w, this._y, this._w); }
-	get xwzx(): vec4 { return new vec4(this._x, this._w, this._z, this._x); }
-	get xwzy(): vec4 { return new vec4(this._x, this._w, this._z, this._y); }
-	get xwzz(): vec4 { return new vec4(this._x, this._w, this._z, this._z); }
-	get xwzw(): vec4 { return new vec4(this._x, this._w, this._z, this._w); }
-	get xwwx(): vec4 { return new vec4(this._x, this._w, this._w, this._x); }
-	get xwwy(): vec4 { return new vec4(this._x, this._w, this._w, this._y); }
-	get xwwz(): vec4 { return new vec4(this._x, this._w, this._w, this._z); }
-	get xwww(): vec4 { return new vec4(this._x, this._w, this._w, this._w); }
+	public get xxxx(): vec4 { return new vec4(this._x, this._x, this._x, this._x); }
+	public get xxxy(): vec4 { return new vec4(this._x, this._x, this._x, this._y); }
+	public get xxxz(): vec4 { return new vec4(this._x, this._x, this._x, this._z); }
+	public get xxxw(): vec4 { return new vec4(this._x, this._x, this._x, this._w); }
+	public get xxyx(): vec4 { return new vec4(this._x, this._x, this._y, this._x); }
+	public get xxyy(): vec4 { return new vec4(this._x, this._x, this._y, this._y); }
+	public get xxyz(): vec4 { return new vec4(this._x, this._x, this._y, this._z); }
+	public get xxyw(): vec4 { return new vec4(this._x, this._x, this._y, this._w); }
+	public get xxzx(): vec4 { return new vec4(this._x, this._x, this._z, this._x); }
+	public get xxzy(): vec4 { return new vec4(this._x, this._x, this._z, this._y); }
+	public get xxzz(): vec4 { return new vec4(this._x, this._x, this._z, this._z); }
+	public get xxzw(): vec4 { return new vec4(this._x, this._x, this._z, this._w); }
+	public get xxwx(): vec4 { return new vec4(this._x, this._x, this._w, this._x); }
+	public get xxwy(): vec4 { return new vec4(this._x, this._x, this._w, this._y); }
+	public get xxwz(): vec4 { return new vec4(this._x, this._x, this._w, this._z); }
+	public get xxww(): vec4 { return new vec4(this._x, this._x, this._w, this._w); }
+	public get xyxx(): vec4 { return new vec4(this._x, this._y, this._x, this._x); }
+	public get xyxy(): vec4 { return new vec4(this._x, this._y, this._x, this._y); }
+	public get xyxz(): vec4 { return new vec4(this._x, this._y, this._x, this._z); }
+	public get xyxw(): vec4 { return new vec4(this._x, this._y, this._x, this._w); }
+	public get xyyx(): vec4 { return new vec4(this._x, this._y, this._y, this._x); }
+	public get xyyy(): vec4 { return new vec4(this._x, this._y, this._y, this._y); }
+	public get xyyz(): vec4 { return new vec4(this._x, this._y, this._y, this._z); }
+	public get xyyw(): vec4 { return new vec4(this._x, this._y, this._y, this._w); }
+	public get xyzx(): vec4 { return new vec4(this._x, this._y, this._z, this._x); }
+	public get xyzy(): vec4 { return new vec4(this._x, this._y, this._z, this._y); }
+	public get xyzz(): vec4 { return new vec4(this._x, this._y, this._z, this._z); }
+	public get xyzw(): vec4 { return new vec4(this._x, this._y, this._z, this._w); }
+	public get xywx(): vec4 { return new vec4(this._x, this._y, this._w, this._x); }
+	public get xywy(): vec4 { return new vec4(this._x, this._y, this._w, this._y); }
+	public get xywz(): vec4 { return new vec4(this._x, this._y, this._w, this._z); }
+	public get xyww(): vec4 { return new vec4(this._x, this._y, this._w, this._w); }
+	public get xzxx(): vec4 { return new vec4(this._x, this._z, this._x, this._x); }
+	public get xzxy(): vec4 { return new vec4(this._x, this._z, this._x, this._y); }
+	public get xzxz(): vec4 { return new vec4(this._x, this._z, this._x, this._z); }
+	public get xzxw(): vec4 { return new vec4(this._x, this._z, this._x, this._w); }
+	public get xzyx(): vec4 { return new vec4(this._x, this._z, this._y, this._x); }
+	public get xzyy(): vec4 { return new vec4(this._x, this._z, this._y, this._y); }
+	public get xzyz(): vec4 { return new vec4(this._x, this._z, this._y, this._z); }
+	public get xzyw(): vec4 { return new vec4(this._x, this._z, this._y, this._w); }
+	public get xzzx(): vec4 { return new vec4(this._x, this._z, this._z, this._x); }
+	public get xzzy(): vec4 { return new vec4(this._x, this._z, this._z, this._y); }
+	public get xzzz(): vec4 { return new vec4(this._x, this._z, this._z, this._z); }
+	public get xzzw(): vec4 { return new vec4(this._x, this._z, this._z, this._w); }
+	public get xzwx(): vec4 { return new vec4(this._x, this._z, this._w, this._x); }
+	public get xzwy(): vec4 { return new vec4(this._x, this._z, this._w, this._y); }
+	public get xzwz(): vec4 { return new vec4(this._x, this._z, this._w, this._z); }
+	public get xzww(): vec4 { return new vec4(this._x, this._z, this._w, this._w); }
+	public get xwxx(): vec4 { return new vec4(this._x, this._w, this._x, this._x); }
+	public get xwxy(): vec4 { return new vec4(this._x, this._w, this._x, this._y); }
+	public get xwxz(): vec4 { return new vec4(this._x, this._w, this._x, this._z); }
+	public get xwxw(): vec4 { return new vec4(this._x, this._w, this._x, this._w); }
+	public get xwyx(): vec4 { return new vec4(this._x, this._w, this._y, this._x); }
+	public get xwyy(): vec4 { return new vec4(this._x, this._w, this._y, this._y); }
+	public get xwyz(): vec4 { return new vec4(this._x, this._w, this._y, this._z); }
+	public get xwyw(): vec4 { return new vec4(this._x, this._w, this._y, this._w); }
+	public get xwzx(): vec4 { return new vec4(this._x, this._w, this._z, this._x); }
+	public get xwzy(): vec4 { return new vec4(this._x, this._w, this._z, this._y); }
+	public get xwzz(): vec4 { return new vec4(this._x, this._w, this._z, this._z); }
+	public get xwzw(): vec4 { return new vec4(this._x, this._w, this._z, this._w); }
+	public get xwwx(): vec4 { return new vec4(this._x, this._w, this._w, this._x); }
+	public get xwwy(): vec4 { return new vec4(this._x, this._w, this._w, this._y); }
+	public get xwwz(): vec4 { return new vec4(this._x, this._w, this._w, this._z); }
+	public get xwww(): vec4 { return new vec4(this._x, this._w, this._w, this._w); }
 
-	get yxxx(): vec4 { return new vec4(this._y, this._x, this._x, this._x); }
-	get yxxy(): vec4 { return new vec4(this._y, this._x, this._x, this._y); }
-	get yxxz(): vec4 { return new vec4(this._y, this._x, this._x, this._z); }
-	get yxxw(): vec4 { return new vec4(this._y, this._x, this._x, this._w); }
-	get yxyx(): vec4 { return new vec4(this._y, this._x, this._y, this._x); }
-	get yxyy(): vec4 { return new vec4(this._y, this._x, this._y, this._y); }
-	get yxyz(): vec4 { return new vec4(this._y, this._x, this._y, this._z); }
-	get yxyw(): vec4 { return new vec4(this._y, this._x, this._y, this._w); }
-	get yxzx(): vec4 { return new vec4(this._y, this._x, this._z, this._x); }
-	get yxzy(): vec4 { return new vec4(this._y, this._x, this._z, this._y); }
-	get yxzz(): vec4 { return new vec4(this._y, this._x, this._z, this._z); }
-	get yxzw(): vec4 { return new vec4(this._y, this._x, this._z, this._w); }
-	get yxwx(): vec4 { return new vec4(this._y, this._x, this._w, this._x); }
-	get yxwy(): vec4 { return new vec4(this._y, this._x, this._w, this._y); }
-	get yxwz(): vec4 { return new vec4(this._y, this._x, this._w, this._z); }
-	get yxww(): vec4 { return new vec4(this._y, this._x, this._w, this._w); }
-	get yyxx(): vec4 { return new vec4(this._y, this._y, this._x, this._x); }
-	get yyxy(): vec4 { return new vec4(this._y, this._y, this._x, this._y); }
-	get yyxz(): vec4 { return new vec4(this._y, this._y, this._x, this._z); }
-	get yyxw(): vec4 { return new vec4(this._y, this._y, this._x, this._w); }
-	get yyyx(): vec4 { return new vec4(this._y, this._y, this._y, this._x); }
-	get yyyy(): vec4 { return new vec4(this._y, this._y, this._y, this._y); }
-	get yyyz(): vec4 { return new vec4(this._y, this._y, this._y, this._z); }
-	get yyyw(): vec4 { return new vec4(this._y, this._y, this._y, this._w); }
-	get yyzx(): vec4 { return new vec4(this._y, this._y, this._z, this._x); }
-	get yyzy(): vec4 { return new vec4(this._y, this._y, this._z, this._y); }
-	get yyzz(): vec4 { return new vec4(this._y, this._y, this._z, this._z); }
-	get yyzw(): vec4 { return new vec4(this._y, this._y, this._z, this._w); }
-	get yywx(): vec4 { return new vec4(this._y, this._y, this._w, this._x); }
-	get yywy(): vec4 { return new vec4(this._y, this._y, this._w, this._y); }
-	get yywz(): vec4 { return new vec4(this._y, this._y, this._w, this._z); }
-	get yyww(): vec4 { return new vec4(this._y, this._y, this._w, this._w); }
-	get yzxx(): vec4 { return new vec4(this._y, this._z, this._x, this._x); }
-	get yzxy(): vec4 { return new vec4(this._y, this._z, this._x, this._y); }
-	get yzxz(): vec4 { return new vec4(this._y, this._z, this._x, this._z); }
-	get yzxw(): vec4 { return new vec4(this._y, this._z, this._x, this._w); }
-	get yzyx(): vec4 { return new vec4(this._y, this._z, this._y, this._x); }
-	get yzyy(): vec4 { return new vec4(this._y, this._z, this._y, this._y); }
-	get yzyz(): vec4 { return new vec4(this._y, this._z, this._y, this._z); }
-	get yzyw(): vec4 { return new vec4(this._y, this._z, this._y, this._w); }
-	get yzzx(): vec4 { return new vec4(this._y, this._z, this._z, this._x); }
-	get yzzy(): vec4 { return new vec4(this._y, this._z, this._z, this._y); }
-	get yzzz(): vec4 { return new vec4(this._y, this._z, this._z, this._z); }
-	get yzzw(): vec4 { return new vec4(this._y, this._z, this._z, this._w); }
-	get yzwx(): vec4 { return new vec4(this._y, this._z, this._w, this._x); }
-	get yzwy(): vec4 { return new vec4(this._y, this._z, this._w, this._y); }
-	get yzwz(): vec4 { return new vec4(this._y, this._z, this._w, this._z); }
-	get yzww(): vec4 { return new vec4(this._y, this._z, this._w, this._w); }
-	get ywxx(): vec4 { return new vec4(this._y, this._w, this._x, this._x); }
-	get ywxy(): vec4 { return new vec4(this._y, this._w, this._x, this._y); }
-	get ywxz(): vec4 { return new vec4(this._y, this._w, this._x, this._z); }
-	get ywxw(): vec4 { return new vec4(this._y, this._w, this._x, this._w); }
-	get ywyx(): vec4 { return new vec4(this._y, this._w, this._y, this._x); }
-	get ywyy(): vec4 { return new vec4(this._y, this._w, this._y, this._y); }
-	get ywyz(): vec4 { return new vec4(this._y, this._w, this._y, this._z); }
-	get ywyw(): vec4 { return new vec4(this._y, this._w, this._y, this._w); }
-	get ywzx(): vec4 { return new vec4(this._y, this._w, this._z, this._x); }
-	get ywzy(): vec4 { return new vec4(this._y, this._w, this._z, this._y); }
-	get ywzz(): vec4 { return new vec4(this._y, this._w, this._z, this._z); }
-	get ywzw(): vec4 { return new vec4(this._y, this._w, this._z, this._w); }
-	get ywwx(): vec4 { return new vec4(this._y, this._w, this._w, this._x); }
-	get ywwy(): vec4 { return new vec4(this._y, this._w, this._w, this._y); }
-	get ywwz(): vec4 { return new vec4(this._y, this._w, this._w, this._z); }
-	get ywww(): vec4 { return new vec4(this._y, this._w, this._w, this._w); }
+	public get yxxx(): vec4 { return new vec4(this._y, this._x, this._x, this._x); }
+	public get yxxy(): vec4 { return new vec4(this._y, this._x, this._x, this._y); }
+	public get yxxz(): vec4 { return new vec4(this._y, this._x, this._x, this._z); }
+	public get yxxw(): vec4 { return new vec4(this._y, this._x, this._x, this._w); }
+	public get yxyx(): vec4 { return new vec4(this._y, this._x, this._y, this._x); }
+	public get yxyy(): vec4 { return new vec4(this._y, this._x, this._y, this._y); }
+	public get yxyz(): vec4 { return new vec4(this._y, this._x, this._y, this._z); }
+	public get yxyw(): vec4 { return new vec4(this._y, this._x, this._y, this._w); }
+	public get yxzx(): vec4 { return new vec4(this._y, this._x, this._z, this._x); }
+	public get yxzy(): vec4 { return new vec4(this._y, this._x, this._z, this._y); }
+	public get yxzz(): vec4 { return new vec4(this._y, this._x, this._z, this._z); }
+	public get yxzw(): vec4 { return new vec4(this._y, this._x, this._z, this._w); }
+	public get yxwx(): vec4 { return new vec4(this._y, this._x, this._w, this._x); }
+	public get yxwy(): vec4 { return new vec4(this._y, this._x, this._w, this._y); }
+	public get yxwz(): vec4 { return new vec4(this._y, this._x, this._w, this._z); }
+	public get yxww(): vec4 { return new vec4(this._y, this._x, this._w, this._w); }
+	public get yyxx(): vec4 { return new vec4(this._y, this._y, this._x, this._x); }
+	public get yyxy(): vec4 { return new vec4(this._y, this._y, this._x, this._y); }
+	public get yyxz(): vec4 { return new vec4(this._y, this._y, this._x, this._z); }
+	public get yyxw(): vec4 { return new vec4(this._y, this._y, this._x, this._w); }
+	public get yyyx(): vec4 { return new vec4(this._y, this._y, this._y, this._x); }
+	public get yyyy(): vec4 { return new vec4(this._y, this._y, this._y, this._y); }
+	public get yyyz(): vec4 { return new vec4(this._y, this._y, this._y, this._z); }
+	public get yyyw(): vec4 { return new vec4(this._y, this._y, this._y, this._w); }
+	public get yyzx(): vec4 { return new vec4(this._y, this._y, this._z, this._x); }
+	public get yyzy(): vec4 { return new vec4(this._y, this._y, this._z, this._y); }
+	public get yyzz(): vec4 { return new vec4(this._y, this._y, this._z, this._z); }
+	public get yyzw(): vec4 { return new vec4(this._y, this._y, this._z, this._w); }
+	public get yywx(): vec4 { return new vec4(this._y, this._y, this._w, this._x); }
+	public get yywy(): vec4 { return new vec4(this._y, this._y, this._w, this._y); }
+	public get yywz(): vec4 { return new vec4(this._y, this._y, this._w, this._z); }
+	public get yyww(): vec4 { return new vec4(this._y, this._y, this._w, this._w); }
+	public get yzxx(): vec4 { return new vec4(this._y, this._z, this._x, this._x); }
+	public get yzxy(): vec4 { return new vec4(this._y, this._z, this._x, this._y); }
+	public get yzxz(): vec4 { return new vec4(this._y, this._z, this._x, this._z); }
+	public get yzxw(): vec4 { return new vec4(this._y, this._z, this._x, this._w); }
+	public get yzyx(): vec4 { return new vec4(this._y, this._z, this._y, this._x); }
+	public get yzyy(): vec4 { return new vec4(this._y, this._z, this._y, this._y); }
+	public get yzyz(): vec4 { return new vec4(this._y, this._z, this._y, this._z); }
+	public get yzyw(): vec4 { return new vec4(this._y, this._z, this._y, this._w); }
+	public get yzzx(): vec4 { return new vec4(this._y, this._z, this._z, this._x); }
+	public get yzzy(): vec4 { return new vec4(this._y, this._z, this._z, this._y); }
+	public get yzzz(): vec4 { return new vec4(this._y, this._z, this._z, this._z); }
+	public get yzzw(): vec4 { return new vec4(this._y, this._z, this._z, this._w); }
+	public get yzwx(): vec4 { return new vec4(this._y, this._z, this._w, this._x); }
+	public get yzwy(): vec4 { return new vec4(this._y, this._z, this._w, this._y); }
+	public get yzwz(): vec4 { return new vec4(this._y, this._z, this._w, this._z); }
+	public get yzww(): vec4 { return new vec4(this._y, this._z, this._w, this._w); }
+	public get ywxx(): vec4 { return new vec4(this._y, this._w, this._x, this._x); }
+	public get ywxy(): vec4 { return new vec4(this._y, this._w, this._x, this._y); }
+	public get ywxz(): vec4 { return new vec4(this._y, this._w, this._x, this._z); }
+	public get ywxw(): vec4 { return new vec4(this._y, this._w, this._x, this._w); }
+	public get ywyx(): vec4 { return new vec4(this._y, this._w, this._y, this._x); }
+	public get ywyy(): vec4 { return new vec4(this._y, this._w, this._y, this._y); }
+	public get ywyz(): vec4 { return new vec4(this._y, this._w, this._y, this._z); }
+	public get ywyw(): vec4 { return new vec4(this._y, this._w, this._y, this._w); }
+	public get ywzx(): vec4 { return new vec4(this._y, this._w, this._z, this._x); }
+	public get ywzy(): vec4 { return new vec4(this._y, this._w, this._z, this._y); }
+	public get ywzz(): vec4 { return new vec4(this._y, this._w, this._z, this._z); }
+	public get ywzw(): vec4 { return new vec4(this._y, this._w, this._z, this._w); }
+	public get ywwx(): vec4 { return new vec4(this._y, this._w, this._w, this._x); }
+	public get ywwy(): vec4 { return new vec4(this._y, this._w, this._w, this._y); }
+	public get ywwz(): vec4 { return new vec4(this._y, this._w, this._w, this._z); }
+	public get ywww(): vec4 { return new vec4(this._y, this._w, this._w, this._w); }
 
-	get zxxx(): vec4 { return new vec4(this._z, this._x, this._x, this._x); }
-	get zxxy(): vec4 { return new vec4(this._z, this._x, this._x, this._y); }
-	get zxxz(): vec4 { return new vec4(this._z, this._x, this._x, this._z); }
-	get zxxw(): vec4 { return new vec4(this._z, this._x, this._x, this._w); }
-	get zxyx(): vec4 { return new vec4(this._z, this._x, this._y, this._x); }
-	get zxyy(): vec4 { return new vec4(this._z, this._x, this._y, this._y); }
-	get zxyz(): vec4 { return new vec4(this._z, this._x, this._y, this._z); }
-	get zxyw(): vec4 { return new vec4(this._z, this._x, this._y, this._w); }
-	get zxzx(): vec4 { return new vec4(this._z, this._x, this._z, this._x); }
-	get zxzy(): vec4 { return new vec4(this._z, this._x, this._z, this._y); }
-	get zxzz(): vec4 { return new vec4(this._z, this._x, this._z, this._z); }
-	get zxzw(): vec4 { return new vec4(this._z, this._x, this._z, this._w); }
-	get zxwx(): vec4 { return new vec4(this._z, this._x, this._w, this._x); }
-	get zxwy(): vec4 { return new vec4(this._z, this._x, this._w, this._y); }
-	get zxwz(): vec4 { return new vec4(this._z, this._x, this._w, this._z); }
-	get zxww(): vec4 { return new vec4(this._z, this._x, this._w, this._w); }
-	get zyxx(): vec4 { return new vec4(this._z, this._y, this._x, this._x); }
-	get zyxy(): vec4 { return new vec4(this._z, this._y, this._x, this._y); }
-	get zyxz(): vec4 { return new vec4(this._z, this._y, this._x, this._z); }
-	get zyxw(): vec4 { return new vec4(this._z, this._y, this._x, this._w); }
-	get zyyx(): vec4 { return new vec4(this._z, this._y, this._y, this._x); }
-	get zyyy(): vec4 { return new vec4(this._z, this._y, this._y, this._y); }
-	get zyyz(): vec4 { return new vec4(this._z, this._y, this._y, this._z); }
-	get zyyw(): vec4 { return new vec4(this._z, this._y, this._y, this._w); }
-	get zyzx(): vec4 { return new vec4(this._z, this._y, this._z, this._x); }
-	get zyzy(): vec4 { return new vec4(this._z, this._y, this._z, this._y); }
-	get zyzz(): vec4 { return new vec4(this._z, this._y, this._z, this._z); }
-	get zyzw(): vec4 { return new vec4(this._z, this._y, this._z, this._w); }
-	get zywx(): vec4 { return new vec4(this._z, this._y, this._w, this._x); }
-	get zywy(): vec4 { return new vec4(this._z, this._y, this._w, this._y); }
-	get zywz(): vec4 { return new vec4(this._z, this._y, this._w, this._z); }
-	get zyww(): vec4 { return new vec4(this._z, this._y, this._w, this._w); }
-	get zzxx(): vec4 { return new vec4(this._z, this._z, this._x, this._x); }
-	get zzxy(): vec4 { return new vec4(this._z, this._z, this._x, this._y); }
-	get zzxz(): vec4 { return new vec4(this._z, this._z, this._x, this._z); }
-	get zzxw(): vec4 { return new vec4(this._z, this._z, this._x, this._w); }
-	get zzyx(): vec4 { return new vec4(this._z, this._z, this._y, this._x); }
-	get zzyy(): vec4 { return new vec4(this._z, this._z, this._y, this._y); }
-	get zzyz(): vec4 { return new vec4(this._z, this._z, this._y, this._z); }
-	get zzyw(): vec4 { return new vec4(this._z, this._z, this._y, this._w); }
-	get zzzx(): vec4 { return new vec4(this._z, this._z, this._z, this._x); }
-	get zzzy(): vec4 { return new vec4(this._z, this._z, this._z, this._y); }
-	get zzzz(): vec4 { return new vec4(this._z, this._z, this._z, this._z); }
-	get zzzw(): vec4 { return new vec4(this._z, this._z, this._z, this._w); }
-	get zzwx(): vec4 { return new vec4(this._z, this._z, this._w, this._x); }
-	get zzwy(): vec4 { return new vec4(this._z, this._z, this._w, this._y); }
-	get zzwz(): vec4 { return new vec4(this._z, this._z, this._w, this._z); }
-	get zzww(): vec4 { return new vec4(this._z, this._z, this._w, this._w); }
-	get zwxx(): vec4 { return new vec4(this._z, this._w, this._x, this._x); }
-	get zwxy(): vec4 { return new vec4(this._z, this._w, this._x, this._y); }
-	get zwxz(): vec4 { return new vec4(this._z, this._w, this._x, this._z); }
-	get zwxw(): vec4 { return new vec4(this._z, this._w, this._x, this._w); }
-	get zwyx(): vec4 { return new vec4(this._z, this._w, this._y, this._x); }
-	get zwyy(): vec4 { return new vec4(this._z, this._w, this._y, this._y); }
-	get zwyz(): vec4 { return new vec4(this._z, this._w, this._y, this._z); }
-	get zwyw(): vec4 { return new vec4(this._z, this._w, this._y, this._w); }
-	get zwzx(): vec4 { return new vec4(this._z, this._w, this._z, this._x); }
-	get zwzy(): vec4 { return new vec4(this._z, this._w, this._z, this._y); }
-	get zwzz(): vec4 { return new vec4(this._z, this._w, this._z, this._z); }
-	get zwzw(): vec4 { return new vec4(this._z, this._w, this._z, this._w); }
-	get zwwx(): vec4 { return new vec4(this._z, this._w, this._w, this._x); }
-	get zwwy(): vec4 { return new vec4(this._z, this._w, this._w, this._y); }
-	get zwwz(): vec4 { return new vec4(this._z, this._w, this._w, this._z); }
-	get zwww(): vec4 { return new vec4(this._z, this._w, this._w, this._w); }
+	public get zxxx(): vec4 { return new vec4(this._z, this._x, this._x, this._x); }
+	public get zxxy(): vec4 { return new vec4(this._z, this._x, this._x, this._y); }
+	public get zxxz(): vec4 { return new vec4(this._z, this._x, this._x, this._z); }
+	public get zxxw(): vec4 { return new vec4(this._z, this._x, this._x, this._w); }
+	public get zxyx(): vec4 { return new vec4(this._z, this._x, this._y, this._x); }
+	public get zxyy(): vec4 { return new vec4(this._z, this._x, this._y, this._y); }
+	public get zxyz(): vec4 { return new vec4(this._z, this._x, this._y, this._z); }
+	public get zxyw(): vec4 { return new vec4(this._z, this._x, this._y, this._w); }
+	public get zxzx(): vec4 { return new vec4(this._z, this._x, this._z, this._x); }
+	public get zxzy(): vec4 { return new vec4(this._z, this._x, this._z, this._y); }
+	public get zxzz(): vec4 { return new vec4(this._z, this._x, this._z, this._z); }
+	public get zxzw(): vec4 { return new vec4(this._z, this._x, this._z, this._w); }
+	public get zxwx(): vec4 { return new vec4(this._z, this._x, this._w, this._x); }
+	public get zxwy(): vec4 { return new vec4(this._z, this._x, this._w, this._y); }
+	public get zxwz(): vec4 { return new vec4(this._z, this._x, this._w, this._z); }
+	public get zxww(): vec4 { return new vec4(this._z, this._x, this._w, this._w); }
+	public get zyxx(): vec4 { return new vec4(this._z, this._y, this._x, this._x); }
+	public get zyxy(): vec4 { return new vec4(this._z, this._y, this._x, this._y); }
+	public get zyxz(): vec4 { return new vec4(this._z, this._y, this._x, this._z); }
+	public get zyxw(): vec4 { return new vec4(this._z, this._y, this._x, this._w); }
+	public get zyyx(): vec4 { return new vec4(this._z, this._y, this._y, this._x); }
+	public get zyyy(): vec4 { return new vec4(this._z, this._y, this._y, this._y); }
+	public get zyyz(): vec4 { return new vec4(this._z, this._y, this._y, this._z); }
+	public get zyyw(): vec4 { return new vec4(this._z, this._y, this._y, this._w); }
+	public get zyzx(): vec4 { return new vec4(this._z, this._y, this._z, this._x); }
+	public get zyzy(): vec4 { return new vec4(this._z, this._y, this._z, this._y); }
+	public get zyzz(): vec4 { return new vec4(this._z, this._y, this._z, this._z); }
+	public get zyzw(): vec4 { return new vec4(this._z, this._y, this._z, this._w); }
+	public get zywx(): vec4 { return new vec4(this._z, this._y, this._w, this._x); }
+	public get zywy(): vec4 { return new vec4(this._z, this._y, this._w, this._y); }
+	public get zywz(): vec4 { return new vec4(this._z, this._y, this._w, this._z); }
+	public get zyww(): vec4 { return new vec4(this._z, this._y, this._w, this._w); }
+	public get zzxx(): vec4 { return new vec4(this._z, this._z, this._x, this._x); }
+	public get zzxy(): vec4 { return new vec4(this._z, this._z, this._x, this._y); }
+	public get zzxz(): vec4 { return new vec4(this._z, this._z, this._x, this._z); }
+	public get zzxw(): vec4 { return new vec4(this._z, this._z, this._x, this._w); }
+	public get zzyx(): vec4 { return new vec4(this._z, this._z, this._y, this._x); }
+	public get zzyy(): vec4 { return new vec4(this._z, this._z, this._y, this._y); }
+	public get zzyz(): vec4 { return new vec4(this._z, this._z, this._y, this._z); }
+	public get zzyw(): vec4 { return new vec4(this._z, this._z, this._y, this._w); }
+	public get zzzx(): vec4 { return new vec4(this._z, this._z, this._z, this._x); }
+	public get zzzy(): vec4 { return new vec4(this._z, this._z, this._z, this._y); }
+	public get zzzz(): vec4 { return new vec4(this._z, this._z, this._z, this._z); }
+	public get zzzw(): vec4 { return new vec4(this._z, this._z, this._z, this._w); }
+	public get zzwx(): vec4 { return new vec4(this._z, this._z, this._w, this._x); }
+	public get zzwy(): vec4 { return new vec4(this._z, this._z, this._w, this._y); }
+	public get zzwz(): vec4 { return new vec4(this._z, this._z, this._w, this._z); }
+	public get zzww(): vec4 { return new vec4(this._z, this._z, this._w, this._w); }
+	public get zwxx(): vec4 { return new vec4(this._z, this._w, this._x, this._x); }
+	public get zwxy(): vec4 { return new vec4(this._z, this._w, this._x, this._y); }
+	public get zwxz(): vec4 { return new vec4(this._z, this._w, this._x, this._z); }
+	public get zwxw(): vec4 { return new vec4(this._z, this._w, this._x, this._w); }
+	public get zwyx(): vec4 { return new vec4(this._z, this._w, this._y, this._x); }
+	public get zwyy(): vec4 { return new vec4(this._z, this._w, this._y, this._y); }
+	public get zwyz(): vec4 { return new vec4(this._z, this._w, this._y, this._z); }
+	public get zwyw(): vec4 { return new vec4(this._z, this._w, this._y, this._w); }
+	public get zwzx(): vec4 { return new vec4(this._z, this._w, this._z, this._x); }
+	public get zwzy(): vec4 { return new vec4(this._z, this._w, this._z, this._y); }
+	public get zwzz(): vec4 { return new vec4(this._z, this._w, this._z, this._z); }
+	public get zwzw(): vec4 { return new vec4(this._z, this._w, this._z, this._w); }
+	public get zwwx(): vec4 { return new vec4(this._z, this._w, this._w, this._x); }
+	public get zwwy(): vec4 { return new vec4(this._z, this._w, this._w, this._y); }
+	public get zwwz(): vec4 { return new vec4(this._z, this._w, this._w, this._z); }
+	public get zwww(): vec4 { return new vec4(this._z, this._w, this._w, this._w); }
 
-	get wxxx(): vec4 { return new vec4(this._w, this._x, this._x, this._x); }
-	get wxxy(): vec4 { return new vec4(this._w, this._x, this._x, this._y); }
-	get wxxz(): vec4 { return new vec4(this._w, this._x, this._x, this._z); }
-	get wxxw(): vec4 { return new vec4(this._w, this._x, this._x, this._w); }
-	get wxyx(): vec4 { return new vec4(this._w, this._x, this._y, this._x); }
-	get wxyy(): vec4 { return new vec4(this._w, this._x, this._y, this._y); }
-	get wxyz(): vec4 { return new vec4(this._w, this._x, this._y, this._z); }
-	get wxyw(): vec4 { return new vec4(this._w, this._x, this._y, this._w); }
-	get wxzx(): vec4 { return new vec4(this._w, this._x, this._z, this._x); }
-	get wxzy(): vec4 { return new vec4(this._w, this._x, this._z, this._y); }
-	get wxzz(): vec4 { return new vec4(this._w, this._x, this._z, this._z); }
-	get wxzw(): vec4 { return new vec4(this._w, this._x, this._z, this._w); }
-	get wxwx(): vec4 { return new vec4(this._w, this._x, this._w, this._x); }
-	get wxwy(): vec4 { return new vec4(this._w, this._x, this._w, this._y); }
-	get wxwz(): vec4 { return new vec4(this._w, this._x, this._w, this._z); }
-	get wxww(): vec4 { return new vec4(this._w, this._x, this._w, this._w); }
-	get wyxx(): vec4 { return new vec4(this._w, this._y, this._x, this._x); }
-	get wyxy(): vec4 { return new vec4(this._w, this._y, this._x, this._y); }
-	get wyxz(): vec4 { return new vec4(this._w, this._y, this._x, this._z); }
-	get wyxw(): vec4 { return new vec4(this._w, this._y, this._x, this._w); }
-	get wyyx(): vec4 { return new vec4(this._w, this._y, this._y, this._x); }
-	get wyyy(): vec4 { return new vec4(this._w, this._y, this._y, this._y); }
-	get wyyz(): vec4 { return new vec4(this._w, this._y, this._y, this._z); }
-	get wyyw(): vec4 { return new vec4(this._w, this._y, this._y, this._w); }
-	get wyzx(): vec4 { return new vec4(this._w, this._y, this._z, this._x); }
-	get wyzy(): vec4 { return new vec4(this._w, this._y, this._z, this._y); }
-	get wyzz(): vec4 { return new vec4(this._w, this._y, this._z, this._z); }
-	get wyzw(): vec4 { return new vec4(this._w, this._y, this._z, this._w); }
-	get wywx(): vec4 { return new vec4(this._w, this._y, this._w, this._x); }
-	get wywy(): vec4 { return new vec4(this._w, this._y, this._w, this._y); }
-	get wywz(): vec4 { return new vec4(this._w, this._y, this._w, this._z); }
-	get wyww(): vec4 { return new vec4(this._w, this._y, this._w, this._w); }
-	get wzxx(): vec4 { return new vec4(this._w, this._z, this._x, this._x); }
-	get wzxy(): vec4 { return new vec4(this._w, this._z, this._x, this._y); }
-	get wzxz(): vec4 { return new vec4(this._w, this._z, this._x, this._z); }
-	get wzxw(): vec4 { return new vec4(this._w, this._z, this._x, this._w); }
-	get wzyx(): vec4 { return new vec4(this._w, this._z, this._y, this._x); }
-	get wzyy(): vec4 { return new vec4(this._w, this._z, this._y, this._y); }
-	get wzyz(): vec4 { return new vec4(this._w, this._z, this._y, this._z); }
-	get wzyw(): vec4 { return new vec4(this._w, this._z, this._y, this._w); }
-	get wzzx(): vec4 { return new vec4(this._w, this._z, this._z, this._x); }
-	get wzzy(): vec4 { return new vec4(this._w, this._z, this._z, this._y); }
-	get wzzz(): vec4 { return new vec4(this._w, this._z, this._z, this._z); }
-	get wzzw(): vec4 { return new vec4(this._w, this._z, this._z, this._w); }
-	get wzwx(): vec4 { return new vec4(this._w, this._z, this._w, this._x); }
-	get wzwy(): vec4 { return new vec4(this._w, this._z, this._w, this._y); }
-	get wzwz(): vec4 { return new vec4(this._w, this._z, this._w, this._z); }
-	get wzww(): vec4 { return new vec4(this._w, this._z, this._w, this._w); }
-	get wwxx(): vec4 { return new vec4(this._w, this._w, this._x, this._x); }
-	get wwxy(): vec4 { return new vec4(this._w, this._w, this._x, this._y); }
-	get wwxz(): vec4 { return new vec4(this._w, this._w, this._x, this._z); }
-	get wwxw(): vec4 { return new vec4(this._w, this._w, this._x, this._w); }
-	get wwyx(): vec4 { return new vec4(this._w, this._w, this._y, this._x); }
-	get wwyy(): vec4 { return new vec4(this._w, this._w, this._y, this._y); }
-	get wwyz(): vec4 { return new vec4(this._w, this._w, this._y, this._z); }
-	get wwyw(): vec4 { return new vec4(this._w, this._w, this._y, this._w); }
-	get wwzx(): vec4 { return new vec4(this._w, this._w, this._z, this._x); }
-	get wwzy(): vec4 { return new vec4(this._w, this._w, this._z, this._y); }
-	get wwzz(): vec4 { return new vec4(this._w, this._w, this._z, this._z); }
-	get wwzw(): vec4 { return new vec4(this._w, this._w, this._z, this._w); }
-	get wwwx(): vec4 { return new vec4(this._w, this._w, this._w, this._x); }
-	get wwwy(): vec4 { return new vec4(this._w, this._w, this._w, this._y); }
-	get wwwz(): vec4 { return new vec4(this._w, this._w, this._w, this._z); }
-	get wwww(): vec4 { return new vec4(this._w, this._w, this._w, this._w); }
+	public get wxxx(): vec4 { return new vec4(this._w, this._x, this._x, this._x); }
+	public get wxxy(): vec4 { return new vec4(this._w, this._x, this._x, this._y); }
+	public get wxxz(): vec4 { return new vec4(this._w, this._x, this._x, this._z); }
+	public get wxxw(): vec4 { return new vec4(this._w, this._x, this._x, this._w); }
+	public get wxyx(): vec4 { return new vec4(this._w, this._x, this._y, this._x); }
+	public get wxyy(): vec4 { return new vec4(this._w, this._x, this._y, this._y); }
+	public get wxyz(): vec4 { return new vec4(this._w, this._x, this._y, this._z); }
+	public get wxyw(): vec4 { return new vec4(this._w, this._x, this._y, this._w); }
+	public get wxzx(): vec4 { return new vec4(this._w, this._x, this._z, this._x); }
+	public get wxzy(): vec4 { return new vec4(this._w, this._x, this._z, this._y); }
+	public get wxzz(): vec4 { return new vec4(this._w, this._x, this._z, this._z); }
+	public get wxzw(): vec4 { return new vec4(this._w, this._x, this._z, this._w); }
+	public get wxwx(): vec4 { return new vec4(this._w, this._x, this._w, this._x); }
+	public get wxwy(): vec4 { return new vec4(this._w, this._x, this._w, this._y); }
+	public get wxwz(): vec4 { return new vec4(this._w, this._x, this._w, this._z); }
+	public get wxww(): vec4 { return new vec4(this._w, this._x, this._w, this._w); }
+	public get wyxx(): vec4 { return new vec4(this._w, this._y, this._x, this._x); }
+	public get wyxy(): vec4 { return new vec4(this._w, this._y, this._x, this._y); }
+	public get wyxz(): vec4 { return new vec4(this._w, this._y, this._x, this._z); }
+	public get wyxw(): vec4 { return new vec4(this._w, this._y, this._x, this._w); }
+	public get wyyx(): vec4 { return new vec4(this._w, this._y, this._y, this._x); }
+	public get wyyy(): vec4 { return new vec4(this._w, this._y, this._y, this._y); }
+	public get wyyz(): vec4 { return new vec4(this._w, this._y, this._y, this._z); }
+	public get wyyw(): vec4 { return new vec4(this._w, this._y, this._y, this._w); }
+	public get wyzx(): vec4 { return new vec4(this._w, this._y, this._z, this._x); }
+	public get wyzy(): vec4 { return new vec4(this._w, this._y, this._z, this._y); }
+	public get wyzz(): vec4 { return new vec4(this._w, this._y, this._z, this._z); }
+	public get wyzw(): vec4 { return new vec4(this._w, this._y, this._z, this._w); }
+	public get wywx(): vec4 { return new vec4(this._w, this._y, this._w, this._x); }
+	public get wywy(): vec4 { return new vec4(this._w, this._y, this._w, this._y); }
+	public get wywz(): vec4 { return new vec4(this._w, this._y, this._w, this._z); }
+	public get wyww(): vec4 { return new vec4(this._w, this._y, this._w, this._w); }
+	public get wzxx(): vec4 { return new vec4(this._w, this._z, this._x, this._x); }
+	public get wzxy(): vec4 { return new vec4(this._w, this._z, this._x, this._y); }
+	public get wzxz(): vec4 { return new vec4(this._w, this._z, this._x, this._z); }
+	public get wzxw(): vec4 { return new vec4(this._w, this._z, this._x, this._w); }
+	public get wzyx(): vec4 { return new vec4(this._w, this._z, this._y, this._x); }
+	public get wzyy(): vec4 { return new vec4(this._w, this._z, this._y, this._y); }
+	public get wzyz(): vec4 { return new vec4(this._w, this._z, this._y, this._z); }
+	public get wzyw(): vec4 { return new vec4(this._w, this._z, this._y, this._w); }
+	public get wzzx(): vec4 { return new vec4(this._w, this._z, this._z, this._x); }
+	public get wzzy(): vec4 { return new vec4(this._w, this._z, this._z, this._y); }
+	public get wzzz(): vec4 { return new vec4(this._w, this._z, this._z, this._z); }
+	public get wzzw(): vec4 { return new vec4(this._w, this._z, this._z, this._w); }
+	public get wzwx(): vec4 { return new vec4(this._w, this._z, this._w, this._x); }
+	public get wzwy(): vec4 { return new vec4(this._w, this._z, this._w, this._y); }
+	public get wzwz(): vec4 { return new vec4(this._w, this._z, this._w, this._z); }
+	public get wzww(): vec4 { return new vec4(this._w, this._z, this._w, this._w); }
+	public get wwxx(): vec4 { return new vec4(this._w, this._w, this._x, this._x); }
+	public get wwxy(): vec4 { return new vec4(this._w, this._w, this._x, this._y); }
+	public get wwxz(): vec4 { return new vec4(this._w, this._w, this._x, this._z); }
+	public get wwxw(): vec4 { return new vec4(this._w, this._w, this._x, this._w); }
+	public get wwyx(): vec4 { return new vec4(this._w, this._w, this._y, this._x); }
+	public get wwyy(): vec4 { return new vec4(this._w, this._w, this._y, this._y); }
+	public get wwyz(): vec4 { return new vec4(this._w, this._w, this._y, this._z); }
+	public get wwyw(): vec4 { return new vec4(this._w, this._w, this._y, this._w); }
+	public get wwzx(): vec4 { return new vec4(this._w, this._w, this._z, this._x); }
+	public get wwzy(): vec4 { return new vec4(this._w, this._w, this._z, this._y); }
+	public get wwzz(): vec4 { return new vec4(this._w, this._w, this._z, this._z); }
+	public get wwzw(): vec4 { return new vec4(this._w, this._w, this._z, this._w); }
+	public get wwwx(): vec4 { return new vec4(this._w, this._w, this._w, this._x); }
+	public get wwwy(): vec4 { return new vec4(this._w, this._w, this._w, this._y); }
+	public get wwwz(): vec4 { return new vec4(this._w, this._w, this._w, this._z); }
+	public get wwww(): vec4 { return new vec4(this._w, this._w, this._w, this._w); }
 }
 
 abstract class mat {
@@ -2142,12 +2152,13 @@ class mat4 extends mat implements iMatrixIndexSignature {
 	}
 
 	static lookAtInv(eye: vec3, at: vec3, up: vec3): mat4 {
-		let v3: mat3 = mat4.lookAt(eye, at, up).mat3().transpose();
-		let v4: mat4 = new mat4(v3[0][0], v3[0][1], v3[0][2], 0,
-								v3[1][0], v3[1][1], v3[1][2], 0,
-								v3[2][0], v3[2][1], v3[2][2], 0,
-								0, 0, 0, 1);
-		return mat4.translate(eye).mul(v4);
+		let n: vec3=eye.sub(at).normalize();
+		let u: vec3=up.cross(n).normalize();
+		let v: vec3=n.cross(u).normalize();
+		return new mat4(u.x, v.x, n.x, eye.x,
+						u.y, v.y, n.y, eye.y,
+						u.z, v.z, n.z, eye.z,
+						0, 0, 0, 1);
 	}
 
 	static orthographic(width: number, height: number, near: number, far: number): mat4 {
@@ -2166,407 +2177,348 @@ class mat4 extends mat implements iMatrixIndexSignature {
 	}
 }
 
+namespace Geometry {
+
+	export class BoundingBox {
+		public lowerBound: vec3 = new vec3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+		public upperBound: vec3 = new vec3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
+		public massCenter: vec3 = new vec3();
+
+		public get centerX(): number { return (this.lowerBound.x + this.upperBound.x) * 0.5; }
+		public get centerY(): number { return (this.lowerBound.y + this.upperBound.y) * 0.5; }
+		public get centerZ(): number { return (this.lowerBound.z + this.upperBound.z) * 0.5; }
+		public get center(): vec3 { return new vec3(this.centerX, this.centerY, this.centerZ); }
+
+		public get extentX(): number { return this.upperBound.x - this.lowerBound.x; }
+		public get extentY(): number { return this.upperBound.y - this.lowerBound.y; }
+		public get extentZ(): number { return this.upperBound.z - this.lowerBound.z; }
+		public get extent(): vec3 { return new vec3(this.extentX, this.extentY, this.extentZ); }
+
+		public get radius2(): number {
+			let ex: number = this.extentX * 0.5;
+			let ey: number = this.extentY * 0.5;
+			let ez: number = this.extentZ * 0.5;
+			return ex * ex + ey * ey + ez * ez;
+		}
+		public get radius(): number { return Math.sqrt(this.radius2); }
+
+		public constructor(vertices: number[], comp: number, count: number, offset: number = 0) {
+			if (typeof vertices === "undefined") return; 
+			if (typeof comp === "undefined") throw new Error("comp must be given.");
+			if (typeof count === "undefined") throw new Error("count must be given.");
+			this.expand(vertices, comp, count, offset);
+		}
+
+		public expand(vertices: number[], comp: number, count: number, offset: number = 0): void {
+			if (vertices.length < comp * count) throw new Error("vertices.length must be greater than comp * count.");
+			for (let k = 0; k < count; k++) {
+				let baseOffset: number = 3 * k;
+				let x: number = vertices[baseOffset];
+				let y: number = vertices[baseOffset + 1];
+				let z: number = vertices[baseOffset + 2];
+				this.lowerBound.x = min(this.lowerBound.x, x);
+				this.lowerBound.y = min(this.lowerBound.y, y);
+				this.lowerBound.z = min(this.lowerBound.z, z);
+				this.upperBound.x = max(this.upperBound.x, x);
+				this.upperBound.y = max(this.upperBound.y, y);
+				this.upperBound.z = max(this.upperBound.z, z);
+				this.massCenter.x += x;
+				this.massCenter.y += y;
+				this.massCenter.z += z;
+			}
+			this.massCenter.x /= count;
+			this.massCenter.y /= count;
+			this.massCenter.z /= count;
+		}
+	}
+}
+
 /* gcamera.ts */
-abstract class Camera {
-	public eye: vec3;
-	public at: vec3;
-	public up: vec3;
-	public near: number;
-	public far: number;
-	public view: mat4;
-	public proj: mat4;
+namespace Camera {
 
-	public constructor(eye: vec3, at: vec3, up: vec3, near: number, far: number) {
-		this.eye = eye;
-		this.at = at;
-		this.up = up;
-		this.near = near;
-		this.far = far;
-		this.updateViewMatrix();
-	}
+	class OrthographicCamera {
+		public eye: vec3;
+		public at: vec3;
+		public up: vec3;
+		public width: number;
+		public height: number;
+		public near: number;
+		public far: number;
+		public zoomFactor: number;
 
-	public updateViewMatrix(): void {
-		this.view = mat4.lookAt(this.eye, this.at, this.up);
-	}
+		public view: mat4;
+		public proj: mat4;
 
-	public abstract updateProjMatrix(): void;
-
-	public assign(c: Camera): Camera {
-		this.eye.assign(c.eye);
-		this.at.assign(c.at);
-		this.up.assign(c.up);
-		this.near = c.near;
-		this.far = c.far;
-		this.updateViewMatrix();
-		return this;
-	}
-
-	public abstract clone(): Camera;
-}
-
-class OrthographicCamera extends Camera {
-
-	public width: number;
-	public height: number;
-	public zoomFactor: number;
-
-	constructor(eye: vec3, at: vec3, up: vec3, width: number, height: number, near: number, far: number, zoomFactor: number=1) {
-		super(eye, at, up, near, far);
-
-		this.width=width;
-		this.height=height;
-		this.zoomFactor=zoomFactor;
-		this.updateProjMatrix();
-	}
-
-	public updateProjMatrix(): void {
-		this.proj=mat4.orthographic(this.width*this.zoomFactor, this.height*this.zoomFactor, this.near, this.far);
-	}
-
-	public assign(c: OrthographicCamera): OrthographicCamera {
-		super.assign(c);
-
-		this.width=c.width;
-		this.height=c.height;
-		this.zoomFactor=c.zoomFactor;
-		this.updateProjMatrix();
-		return this;
-	}
-
-	public clone(): OrthographicCamera {
-		return new OrthographicCamera(new vec3().assign(this.eye), new vec3().assign(this.at), new vec3().assign(this.up), this.width, this.height, this.near, this.far, this.zoomFactor);
-	}
-}
-
-class PerspectiveCamera extends Camera {
-
-	public fovy: number;
-	public aspectRatio: number;
-
-	constructor(eye: vec3, at: vec3, up: vec3, fovy: number, aspectRatio: number, near: number, far: number) {
-		super(eye, at, up, near, far);
+		public get dir(): vec3 { return this.at.sub(this.eye).normalize(); }
+		public get right(): vec3 { return this.dir.cross(this.up).normalize(); }
 		
-		this.fovy=fovy;
-		this.aspectRatio=aspectRatio;
-		this.updateProjMatrix();
-	}
+		public constructor(eye: vec3, at: vec3, up: vec3, width: number, height: number, near: number, far: number, zoomFactor: number=1) {
+			this.eye = eye;
+			this.at = at;
+			this.up = up;
+			this.near = near;
+			this.far = far;
 
-	public updateProjMatrix(): void {
-		this.proj=mat4.perspective(this.fovy, this.aspectRatio, this.near, this.far);
-	}
+			this.width=width;
+			this.height=height;
+			this.zoomFactor=zoomFactor;
 
-	public assign(c: PerspectiveCamera): PerspectiveCamera {
-		super.assign(c);
-
-		this.fovy=c.fovy;
-		this.aspectRatio=c.aspectRatio;
-		this.updateProjMatrix();
-		return this;
-	}
-
-	public clone(): PerspectiveCamera {
-		return new PerspectiveCamera(new vec3().assign(this.eye), new vec3().assign(this.at), new vec3().assign(this.up), this.fovy, this.aspectRatio, this.near, this.far);
-	}
-}
-
-enum CameraBehavior {
-	NOTHING,
-	CAMERA_ORBITING,
-	CAMERA_PANNING,
-	CAMERA_ZOOMING,
-	CAMERA_ROLLING,
-	OBJECT_ROTATING,
-	OBJECT_SCALING,
-	OBJECT_ROLLING
-}
-
-class CameraMovement {
-	up: boolean=false;
-	down: boolean=false;
-	left: boolean=false;
-	right: boolean=false;
-	forward: boolean=false;
-	backward: boolean=false;
-
-	reset(): void {
-		this.up=false;
-		this.down=false;
-		this.left=false;
-		this.right=false;
-		this.forward=false;
-		this.backward=false;
-	}
-
-	any(): boolean {
-		return this.up||this.down||this.left||this.right||this.forward||this.backward;
-	}
-}
-
-interface iTrackballSpeed {
-	zooming: number;
-	panning: number;
-	rotation: number;
-	translation: number;
-}
-
-class Trackball<CameraType extends Camera> {
-	private _mode: CameraBehavior;
-	private _move: CameraMovement;
-	private _curr: Camera;
-	private _prev: Camera;
-	private _home: Camera;
-
-	private _transform: mat4;
-	private _bUpdateTransform: Boolean;
-	private _objRotate: mat4;
-	private _objScale: mat4;
-	private _objRoll: mat4;
-
-	private _mouse: vec2;
-	private _speed: iTrackballSpeed;
-
-	public get eye(): vec3 { return this._curr.eye.add(0); }
-	public get at(): vec3 { return this._curr.at.add(0); }
-	public get up(): vec3 { return this._curr.up.add(0); }
-	public get zoomFactor(): number { return (<OrthographicCamera>this._curr).zoomFactor; }
-
-	public get zoomingSpeed(): number { return this._speed.zooming; }
-	public set zoomingSpeed(value: number) { this._speed.zooming=value; }
-	public get panningSpeed(): number { return this._speed.panning; }
-	public set panningSpeed(value: number) { this._speed.panning=value; }
-	public get rotationSpeed(): number { return this._speed.rotation; }
-	public set rotationSpeed(value: number) { this._speed.rotation=value; }
-	public get translationSpeed(): number { return this._speed.translation; }
-	public set translationSpeed(value: number) { this._speed.translation=value; }
-
-	public get movement(): CameraMovement { return this._move; }
-
-	//public get transformViewMatrix(): mat4 { return this._curr.view.mul(this.transformMatrix); }
-	public get viewMatrix(): mat4 { return this._curr.view; }
-	public get projectionMatrix(): mat4 { return this._curr.proj; }
-
-	public get transformMatrix(): mat4 { return this._bUpdateTransform ? this._objScale.mul(this._objRoll.mul(this._objRotate.mul(this._transform))) : this._transform; }
-	//public set transformMatrix(m: mat4) { this._transform.assign(m); }
-	public set updateTransform(b: Boolean) { this._bUpdateTransform = b; }
-
-	public constructor(currentCam: CameraType) {
-		this._mode=CameraBehavior.NOTHING;
-		this._move=new CameraMovement();
-		this._curr=currentCam.clone();
-		this._prev=currentCam.clone();
-		this._home=currentCam.clone();
-		this._mouse=new vec2();
-		this._speed={zooming:0.5, panning:0.1, rotation: 0.75, translation: 0.0005};
-
-		this._transform = new mat4();
-		this._objRoll = new mat4();
-		this._objRotate = new mat4();
-		this._objScale = new mat4();
-		this._bUpdateTransform = false;
-	}
-
-	private cameraOrbit(d: vec2): void {
-
-		let eye: vec3 = this._prev.eye;
-		let center: vec3 = this._prev.at;
-		let up: vec3 = this._prev.up;
-
-		let yawPitch: vec2 = d.mul(Math.PI*0.5);
-
-		let yawAxis: vec3 = up;
-		let pitchAxis: vec3 = center.sub(eye).cross(yawAxis).normalize();
-
-		let T: mat4 = mat4.translate(center);
-		let Y: mat4 = mat4.rotate(yawAxis, yawPitch.x);
-		let P: mat4 = mat4.rotate(pitchAxis, yawPitch.y);
-		let invT: mat4 = mat4.translate(center.negate());
-
-		this._curr.eye.assign(T.mul(P.mul(Y.mul(invT.mul(new vec4(eye.x, eye.y, eye.z, 1))))).xyz);
-
-		this._curr.updateViewMatrix();
-	}
-
-	private cameraPan(d: vec2): void {
-		
-		let eye: vec3 = this._prev.eye;
-		let center: vec3 = this._prev.at;
-		let up: vec3 = this._prev.up;
-
-		let dir: vec3 = eye.sub(center);
-		//d.assign(d.mul(dir.length)); perspective
-		let ocam: OrthographicCamera = <OrthographicCamera>this._curr;
-
-		let ds: vec2 = d.mul(ocam.width, ocam.height).mul(0.5*ocam.zoomFactor);
-
-		let n: vec3 = dir.normalize();
-		let u: vec3 = up.cross(n).normalize();
-		let v: vec3 = n.cross(u).normalize();
-
-		let o: vec3 = u.mul(ds.x).add(v.mul(ds.y));
-
-		this._curr.eye.assign(eye.sub(o));
-		this._curr.at.assign(center.sub(o));
-
-		this._curr.updateViewMatrix();
-	}	
-
-	private cameraZoom(d: vec2): void {
-
-		let t: number = Math.pow(2, -d.x);		
-		
-		let eye: vec3 = this._prev.eye;
-		let center: vec3 = this._prev.at;
-		
-		if(this._curr instanceof OrthographicCamera) {
-			this._curr.zoomFactor = (<OrthographicCamera>this._prev).zoomFactor*t;
-		} else if(this._curr instanceof PerspectiveCamera) {
-			let dist: number = eye.sub(center).length;
-
-			if(dist < this._curr.near && t < 1) return;
-			if(dist > this._curr.far && t > 1) return;
-
-			this._curr.eye.assign(lerp(center, eye, t));
+			this.updateViewMatrix();
+			this.updateProjectionMatrix();
 		}
-		
-		this._curr.updateViewMatrix();
-	}
 
-	private cameraRoll(d: vec2): void {
-
-		let eye: vec3 = this._prev.eye;
-		let center: vec3 = this._prev.at;
-		let up: vec3 = this._prev.up;
-
-		let n: vec3 = center.sub(eye).normalize();
-		let u: vec3 = up.cross(n).normalize();
-		let v: vec3 = n.cross(u).normalize();
-
-		let p0: vec3 = new vec3().assign(this._mouse, 0).normalize();
-		let p1: vec3 = new vec3().assign(this._mouse.add(d), 0).normalize();
-		let angle: number = vec3.angleBetween(p0, p1, new vec3(0, 0, 1));
-
-		this._curr.up.assign(mat4.rotate(n, angle).mul(up, 0).xyz);
-
-		this._curr.updateViewMatrix();
-	}
-
-	private objectRotate(d: vec2): void {
-
-		let angle: number = d.length*Math.PI*0.5;
-		let n: vec3 = new vec3(-d.y, d.x, 0).normalize().mul(this._prev.view.mat3());
-		
-		this._objRotate = mat4.rotate(n, angle);
-		this._bUpdateTransform = true;
-	}
-
-	private objectScale(d: vec2): void {
-
-		let t: number = 9*Math.pow(10, -d.y);
-		this._objScale = mat4.scale(t, t, t);
-		this._bUpdateTransform = true;
-	}
-
-	private objectRoll(d: vec2): void {
-
-		let eye: vec3 = this._prev.eye;
-		let center: vec3 = this._prev.at;
-		
-		let p0: vec3 = new vec3(this._mouse.x, this._mouse.y, 0).normalize();
-		let p1: vec3 = new vec3().assign(this._mouse.add(d), 0).normalize();
-		let angle: number = vec3.angleBetween(p0, p1, new vec3(0, 0, 1));
-		let n: vec3 = center.sub(eye).normalize().mul(this._prev.view.mat3());
-
-		this._objRoll = mat4.rotate(n, angle);
-		this._bUpdateTransform = true;
-	}
-
-	reset(cam?: CameraType): void {
-		this._mode=CameraBehavior.NOTHING;
-		this._move.reset();
-		this._curr.assign(cam==undefined ? this._home : cam);
-		this._prev.assign(cam==undefined ? this._home : cam);
-		this._transform.identity();
-		this._objRoll.identity();
-		this._objScale.identity();
-		this._objRotate.identity();
-		this._bUpdateTransform = false;
-		this._mouse.assign(0, 0);
-		this._curr.updateViewMatrix();
-		this._curr.updateProjMatrix();
-	}
-
-	mouse(x: number, y: number, behavior: CameraBehavior) {
-		this._prev.assign(this._curr);
-		this._mouse.assign(clamp(2*x-1, -1, 1), clamp(1-2*y, -1, 1));
-		this._mode=behavior;
-
-		if (this._bUpdateTransform) {
-			this._transform = this._objScale.mul(this._objRoll.mul(this._objRotate.mul(this._transform)));
-			this._objScale.identity();
-			this._objRoll.identity();
-			this._objRotate.identity();
-			this._bUpdateTransform=false;
+		public updateViewMatrix(): void {
+			this.view = mat4.lookAt(this.eye, this.at, this.up);
 		}
-	}
 
-	motion(x: number, y: number) {
-		x=clamp(2*x-1, -1, 1);
-		y=clamp(1-2*y, -1, 1);
-		let d: vec2 = new vec2(x, y).sub(this._mouse);
-		if(d.x==0 && d.y==0) return;
-
-		switch(this._mode) {
-			case CameraBehavior.CAMERA_ORBITING: this.cameraOrbit(d); break;
-			case CameraBehavior.CAMERA_PANNING:  this.cameraPan(d); break;
-			case CameraBehavior.CAMERA_ROLLING:  this.cameraRoll(d); break;
-			case CameraBehavior.CAMERA_ZOOMING:  this.cameraZoom(d); break;
-			case CameraBehavior.OBJECT_ROTATING: this.objectRotate(d); break;
-			case CameraBehavior.OBJECT_SCALING:  this.objectScale(d); break;
-			case CameraBehavior.OBJECT_ROLLING:  this.objectRoll(d); break;
-			default: break;
+		public updateProjectionMatrix(): void {
+			this.proj=mat4.orthographic(this.width*this.zoomFactor, this.height*this.zoomFactor, this.near, this.far);
 		}
-	}
 
-	updateViewport(width: number, height: number, fovy_deg?: number) {
-		if(fovy_deg==null) {
-			let ocam: OrthographicCamera = (<OrthographicCamera>this._curr);
-			ocam.width = width; ocam.height = height;
-			ocam = (<OrthographicCamera>this._prev);
-			ocam.width = width; ocam.height = height;
-			ocam = (<OrthographicCamera>this._home);
-			ocam.width = width; ocam.height = height;
-		} else {
-			(<PerspectiveCamera>this._curr).fovy = fovy_deg * (Math.PI/180);
-			(<PerspectiveCamera>this._curr).aspectRatio = width/height;
-			(<PerspectiveCamera>this._home).fovy = fovy_deg * (Math.PI/180);
-			(<PerspectiveCamera>this._home).aspectRatio = width/height;
-		}
-	}
-
-	update(elapsedTime: number) {
-		if(this._move.any()) {
-			let distance: number=this._home.eye.sub(this._home.at).length*elapsedTime*this._speed.translation;
-			let n: vec3=this._curr.at.sub(this._curr.eye).normalize();
-			let u: vec3=this._curr.up.cross(n).normalize();
-			let v: vec3=n.cross(u).normalize();
-	
-			let dt: vec3=new vec3();
-			let forward: vec3=n.mul(distance);
-			let left: vec3=u.mul(distance);
-			let up: vec3=v.mul(distance);
-			if(this._move.forward) { dt=dt.add(n.mul(distance)); }
-			if(this._move.backward) { dt=dt.sub(n.mul(distance)); }
-			if(this._move.left) { dt=dt.add(u.mul(distance)); }
-			if(this._move.right) { dt=dt.sub(u.mul(distance)); }
-			if(this._move.up) { dt=dt.add(v.mul(distance)); }
-			if(this._move.down) { dt=dt.sub(v.mul(distance)); }
+		public assign(c: OrthographicCamera): OrthographicCamera {
+			this.eye.assign(c.eye);
+			this.at.assign(c.at);
+			this.up.assign(c.up);
+			this.near = c.near;
+			this.far = c.far;
 			
-			this._curr.eye=this._curr.eye.add(dt);
-			this._curr.at=this._curr.at.add(dt);
+			this.width=c.width;
+			this.height=c.height;
+			this.zoomFactor=c.zoomFactor;
+
+			this.updateViewMatrix();
+			this.updateProjectionMatrix();
+			return this;
+		}
+
+		public clone(): OrthographicCamera {
+			return new OrthographicCamera(new vec3().assign(this.eye), new vec3().assign(this.at), new vec3().assign(this.up), this.width, this.height, this.near, this.far, this.zoomFactor);
+		}
+	}
+
+	export enum TrackballMode {
+		NOTHING,
+		CAMERA_ORBITING,
+		CAMERA_PANNING,
+		CAMERA_ZOOMING,
+		CAMERA_ROLLING,
+		OBJECT_ROTATING,
+		OBJECT_ROLLING
+	}
+	
+	export class Trackball {
+		private mode: TrackballMode = TrackballMode.NOTHING;
+		private curr: OrthographicCamera;
+		private prev: OrthographicCamera;
+		private home: OrthographicCamera;
+		private frontCam: OrthographicCamera;
+		private sideCam: OrthographicCamera;
+		private topCam: OrthographicCamera;
+
+		private cursor: vec2 = new vec2();
+
+		public static CAMERA_ORBITING_RATIO: number = 0.75;
+		public static CAMERA_PANNING_RATIO: number = 0.1;
+		public static CAMERA_ZOOMING_RATIO: number = 0.5;
+		public static CAMERA_ROLLING_RATIO: number = 0.75;
+		public static OBJECT_ROTATING_RATIO: number = 0.75;
+		public static OBJECT_ROLLING_RATIO: number = 0.75;
+		
+		public constructor(bbox: Geometry.BoundingBox, width: number, height: number) {
+			let radius: number = bbox.radius;
+			let at: vec3 = bbox.center;
+			let eye: vec3 = at.add(0, 0, radius+1);
+			let up: vec3 = new vec3(0, 1, 0);
+			let zoomFactor: number = 2 * radius / max(width, height);
+			let near: number = 0.001;
+			let far: number = max(2 * radius + 1, 20.0);
+			
+			let cam: OrthographicCamera = new OrthographicCamera(eye, at, up, width, height, near, far, zoomFactor);
+			
+			this.curr = cam;
+			this.prev = cam.clone();
+			this.home = cam.clone();
+
+			this.frontCam = cam.clone();
+			this.sideCam = new OrthographicCamera(at.add(radius+1, 0, 0), at, up, width, height, near, far, zoomFactor);
+			this.topCam = new OrthographicCamera(at.add(0, radius+1, 0), at, new vec3(0, 0, -1), width, height, near, far, zoomFactor);
+		}
+
+		public get zoomFactor(): number { return this.curr.zoomFactor; }
+
+		public get position(): vec3 { return this.curr.eye; }
+		public get viewMatrix(): mat4 { return this.curr.view; }
+		public get invViewMatrix(): mat4 { return mat4.lookAtInv(this.curr.eye, this.curr.at, this.curr.up); }
+		public get rotationMatrix(): mat4 { return mat4.lookAt(this.curr.eye.sub(this.curr.at), new vec3(), this.curr.up); }
+		public get projectionMatrix(): mat4 { return this.curr.proj; }
+
+		public setHome(): void {
+			this.curr.assign(this.home);
+			this.prev.assign(this.home);
+		}
+		public setFront(): void {
+			this.curr.assign(this.frontCam);
+			this.prev.assign(this.frontCam);
+			this.home.assign(this.frontCam);
+		}
+		public setSide(): void {
+			this.curr.assign(this.sideCam);
+			this.prev.assign(this.sideCam);
+			this.home.assign(this.sideCam);
+		}
+		public setTop(): void {
+			this.curr.assign(this.topCam);
+			this.prev.assign(this.topCam);
+			this.home.assign(this.topCam);
+		}
+
+		public mouse(x: number, y: number, mode: TrackballMode): void {
+			x = clamp(2*x-1, -1, 1);
+			y = -clamp(2*y-1, -1, 1);
+			this.prev.assign(this.curr);
+			this.cursor.assign(x, y);
+			this.mode = mode;
+		}
+
+		public motion(x: number, y: number): void {
+			x = clamp(2*x-1, -1, 1);
+			y = -clamp(2*y-1, -1, 1);
+			let d: vec2 = new vec2(x, y).sub(this.cursor);
+			if (d.x == 0 && d.y == 0) return;
+
+			switch (this.mode) {
+				case TrackballMode.CAMERA_ORBITING: this.cameraOrbit(d); break;
+				case TrackballMode.CAMERA_PANNING: this.cameraPan(d); break;
+				case TrackballMode.CAMERA_ROLLING: this.cameraRoll(d); break;
+				case TrackballMode.CAMERA_ZOOMING: this.cameraZoom(d); break;
+				case TrackballMode.OBJECT_ROTATING: this.objectRotate(d); break;
+				case TrackballMode.OBJECT_ROLLING: this.objectRoll(d); break;
+				default: break;
+			}
+		}
+
+		public updateViewport(width: number, height: number) {
+			this.curr.width = width;
+			this.curr.height = height;
+			this.prev.width = width;
+			this.prev.height = height;
+			this.home.width = width;
+			this.home.height = height;
+			this.frontCam.width = width;
+			this.frontCam.height = height;
+			this.sideCam.width = width;
+			this.sideCam.height = height;
+			this.topCam.width = width;
+			this.topCam.height = height;
+		}
+
+		public update(): void {
+			this.curr.updateViewMatrix();
+			this.curr.updateProjectionMatrix();
+		}
+
+		private cameraOrbit(d: vec2): void {
+			const HALF_PI: number = Math.PI * 0.5;
+			
+			const angle: number = d.length * HALF_PI;
+			const axis: vec3 = new vec3(-d.y, d.x, 0).normalize().mul(this.prev.view.mat3());
+		
+			let R: mat4 = mat4.rotate(axis, angle);
+			let eye: vec3 = this.prev.eye.sub(this.prev.at);
+			eye = R.mul(eye, 1).xyz;
+			eye = eye.add(this.prev.at);
+
+			this.curr.eye.assign(eye);
+
+			this.curr.up.assign(R.mul(this.prev.up, 0).xyz);
+
+			this.curr.updateViewMatrix();
+		}
+
+		private cameraPan(d: vec2): void {
+			const NORM_FACTOR: number = this.prev.zoomFactor * 0.5;
+			const dx: number = d.x * this.prev.width * NORM_FACTOR;
+			const dy: number = d.y * this.prev.height * NORM_FACTOR;
+
+			const n: vec3 = this.prev.dir;
+			const u: vec3 = this.prev.right;
+			const v: vec3 = u.cross(n).normalize();
+
+			const p: vec3 = u.mul(dx).add(v.mul(dy));
+
+			this.curr.eye.assign(this.prev.eye.sub(p));
+			this.curr.at.assign(this.prev.at.sub(p));
+
+			this.curr.updateViewMatrix();
+		}
+
+		private cameraZoom(d: vec2): void {
+
+			const t: number = Math.pow(2, -d.x);
+
+			this.curr.zoomFactor = this.prev.zoomFactor * t;
+
+			this.curr.updateProjectionMatrix();
+		}
+
+		private cameraRoll(d: vec2): void {
+
+			const p0: vec3 = new vec3().assign(this.cursor, 0).normalize();
+			const p1: vec3 = new vec3().assign(this.cursor.add(d), 0).normalize();
+			const angle: number = vec3.angleBetween(p0, p1, new vec3(0, 0, 1));
+
+			this.curr.up.assign(mat4.rotate(this.prev.dir, angle).mul(this.prev.up, 0).xyz);
+
+			this.curr.updateViewMatrix();
 		}
 		
-		this._curr.updateViewMatrix();
-		this._curr.updateProjMatrix();
+		private objectRotate(d: vec2): void {
+			const HALF_PI: number = Math.PI * 0.5;
+			
+			const angle: number = -d.length * HALF_PI;
+			const axis: vec3 = new vec3(-d.y, d.x, 0).normalize().mul(this.prev.view.mat3());
+		
+			const R: mat4 = mat4.rotate(axis, angle);
+
+			let eye: vec3 = this.prev.eye.sub(this.home.at);
+			eye = R.mul(eye, 1).xyz;
+			eye = eye.add(this.home.at);
+
+			this.curr.eye.assign(eye);
+
+			let at: vec3 = this.prev.at.sub(this.home.at);
+			at = R.mul(at, 1).xyz;
+			at = at.add(this.home.at);
+
+			this.curr.at.assign(at);
+
+			this.curr.up.assign(R.mul(this.prev.up, 0).xyz);
+			
+			this.curr.updateViewMatrix();
+		}
+
+		private objectRoll(d: vec2): void {
+			const p0: vec3 = new vec3().assign(this.cursor, 0).normalize();
+			const p1: vec3 = new vec3().assign(this.cursor.add(d), 0).normalize();
+			const angle: number = vec3.angleBetween(p0, p1, new vec3(0, 0, 1));
+
+			const R: mat4 = mat4.rotate(this.prev.dir, angle);
+
+			let eye: vec3 = this.prev.eye.sub(this.home.at);
+			eye = R.mul(eye, 1).xyz;
+			eye = eye.add(this.home.at);
+
+			this.curr.eye.assign(eye);
+
+			let at: vec3 = this.prev.at.sub(this.home.at);
+			at = R.mul(at, 1).xyz;
+			at = at.add(this.home.at);
+
+			this.curr.at.assign(at);
+			this.curr.up.assign(R.mul(this.prev.up, 0).xyz);
+
+			this.curr.updateViewMatrix();
+		}
 	}
 }
 
@@ -3166,14 +3118,14 @@ abstract class PrimitiveData {
 	public geometryVisible: Boolean;
 	public pointColor: vec3;
 	public geometryColor: vec3;
-	public pointSelected: Boolean;
+	public inlierSelected: Boolean;
 	public geometrySelected: Boolean;
 	public constructor() {
 		this.pointVisible = true;
 		this.geometryVisible = true;
 		this.pointColor = GenerateRainbowColor();
 		this.geometryColor = new vec3();
-		this.pointSelected = false;
+		this.inlierSelected = false;
 		this.geometrySelected = false;
 	}
 	public abstract get modelMatrix(): mat4;
@@ -3417,14 +3369,13 @@ class WebGLApp extends WebGLAppBase {
     private static vsPointCloudES2: string=`#version 100
     attribute vec3 pos;
 	
-	uniform mat4 model_matrix;
     uniform mat4 view_matrix;
 	uniform mat4 proj_matrix;
 	uniform float pointSize;
 
     void main() {
         gl_PointSize = pointSize;
-        gl_Position = proj_matrix*view_matrix*model_matrix*vec4(pos, 1);
+        gl_Position = proj_matrix*view_matrix*vec4(pos, 1);
     }
     `;
 
@@ -3582,8 +3533,8 @@ class WebGLApp extends WebGLAppBase {
 	}
 	`;
 
-	private trackball: Trackball<OrthographicCamera>;
-
+	private trackball: Camera.Trackball;
+	
 	private programDebug: WebGLProgram = null;
 	private programPointCloud: WebGLProgram = null;
 	private programWireGeometry: WebGLProgram = null;
@@ -3601,7 +3552,6 @@ class WebGLApp extends WebGLAppBase {
 	private inlierVAO: iVertexBufferMap = {};
 	private inlierObjects: iPrimitiveDataMap = {};
 
-	//private FBO: iFramebufferObject = null;
 	private programGeometry: WebGLProgram = null;
 	private arrowCylinder: iVertexBufferIndexed = null;
 	private originSphere: iVertexBufferIndexed = null;
@@ -3646,9 +3596,7 @@ class WebGLApp extends WebGLAppBase {
 	public GetSelectedPointSize(): number { return this.inlierPointSize; }
 	public SetSelectedPointSize(size: number): void { this.selectedPointSize = Math.max(size, 1.0); }
 
-	private bboxMin: vec3 = null;
-	private bboxMax: vec3 = null;
-	private boxRadius: number = 20;
+	private bbox: Geometry.BoundingBox;
 	private _vertexDataBackup: number[] = null;
 	private _vertexData: number[] = null;
 	public get vertexData(): number[] { return this._vertexData; }
@@ -3658,21 +3606,17 @@ class WebGLApp extends WebGLAppBase {
 	private ray_dir: vec3 = null;
 	private proveRadius: number = 4;
 	public GetProveRadius(): number { return this.proveRadius; }
-	public SetProveRadius(radiusInPixels: number) { return this.proveRadius; }
+	public SetProveRadius(radiusInPixels: number) { this.proveRadius = radiusInPixels; }
 
 	private touchID: number = 0;
 	private touchStartTime: number = 0;
 	private touchStartPos: vec2 = new vec2();
 
-	private _trackballBehavior: CameraBehavior = CameraBehavior.NOTHING;
-	public SetTrackballRotate(): void { this._trackballBehavior = CameraBehavior.OBJECT_ROTATING; }
-	public SetTrackballZoom(): void { this._trackballBehavior = CameraBehavior.CAMERA_ZOOMING; }
-	public SetTrackballPan(): void { this._trackballBehavior = CameraBehavior.CAMERA_PANNING; }
-	public SetTrackballStop(): void { this._trackballBehavior = CameraBehavior.NOTHING; }
-	private _trackballHomeFront: OrthographicCamera = null;
-	private _trackballHomeSide: OrthographicCamera = null;
-	private _trackballHomeTop: OrthographicCamera = null;
-	private _trackballBase: string="front";
+	private trackballMode: Camera.TrackballMode = Camera.TrackballMode.NOTHING;
+	public SetTrackballRotate(): void { this.trackballMode = Camera.TrackballMode.OBJECT_ROTATING; }
+	public SetTrackballZoom(): void { this.trackballMode = Camera.TrackballMode.CAMERA_ZOOMING; }
+	public SetTrackballPan(): void { this.trackballMode = Camera.TrackballMode.CAMERA_PANNING; }
+	public SetTrackballStop(): void { this.trackballMode = Camera.TrackballMode.NOTHING; }
 	
 	private text: CanvasRenderingContext2D = null;	
 
@@ -3692,7 +3636,7 @@ class WebGLApp extends WebGLAppBase {
 	private touchRadiusCircleExp: number = 32;
 	private touchRadiusCircleMin: number = 0.1;
 	private touchRadiusCircleMax: number = 1.0;
-	private touchRadiusCircleColor: vec3 = new vec3(1, 1, 1);
+	private touchRadiusCircleColor: vec3 = new vec3(1, 1, 0);
 	public ShowTouchRadiusCircle(visible: boolean): void { this.showTouchRadiusCircle = visible; }
 	public ShouldShowTouchRadiusCircle(): boolean { return this.showTouchRadiusCircle; }
 	public SetTouchRadiusCircleExp(exp: number): void { this.touchRadiusCircleExp = exp; }
@@ -3705,10 +3649,10 @@ class WebGLApp extends WebGLAppBase {
 	public GetTouchRadiusCircleColor(): number[] { return this.touchRadiusCircleColor.toArray(); }
 
 	private showProveRadiusCircle: boolean = true;
-	private proveRadiusCircleExp: number = 0;
+	private proveRadiusCircleExp: number = 16;
 	private proveRadiusCircleMin: number = 0.1;
-	private proveRadiusCircleMax: number = 0.1;
-	private proveRadiusCircleColor: vec3 = new vec3(1, 1, 1);
+	private proveRadiusCircleMax: number = 1.0;
+	private proveRadiusCircleColor: vec3 = new vec3(0, 1, 1);
 	public ShowProveRadiusCircle(visible: boolean): void { this.showProveRadiusCircle = visible; }
 	public ShouldShowProveRadiusCircle(): boolean { return this.showProveRadiusCircle; }
 	public SetProveRadiusCircleExp(exp: number): void { this.proveRadiusCircleExp = exp; }
@@ -3722,14 +3666,10 @@ class WebGLApp extends WebGLAppBase {
 
 	public Resize(width: number, height: number) { 
 		this.width = width; this.height = height;
-		let ocam: OrthographicCamera = this._trackballHomeFront; ocam.width = width; ocam.height = height;
-		ocam = this._trackballHomeSide; ocam.width = width; ocam.height = height;
-		ocam = this._trackballHomeTop; ocam.width = width; ocam.height = height;
 		this.trackball.updateViewport(width, height);
 		this.WebGLContext.viewport(0, 0, width, height);
 
 		this.text.font="20px Arial";
-		//ResizeFramebufferObject(this.WebGLContext, width, height, this.FBO);
 	}
 
     public constructor(canvas: HTMLCanvasElement, vertices: number[], textCanvas: HTMLCanvasElement) {
@@ -3741,26 +3681,19 @@ class WebGLApp extends WebGLAppBase {
 
 		this._vertexData = vertices;
 
-		let mv: number = Number.MAX_VALUE;
-		this.bboxMin = new vec3(mv, mv, mv);
-		this.bboxMax = new vec3(-mv, -mv, -mv);
-		let massCenter: vec3 = new vec3();
-		for(let k=0; k<this._vertexData.length; k+=3) {
-			let x: number = this._vertexData[k];
-			let y: number = this._vertexData[k+1];
-			let z: number = this._vertexData[k+2];
-			this.bboxMin = this.bboxMin.minElements(x, y, z);
-			this.bboxMax = this.bboxMax.maxElements(x, y, z);
-			massCenter.assign(massCenter.x+x, massCenter.y+y, massCenter.z+z);
+		this.bbox = new Geometry.BoundingBox(vertices, 3, vertices.length / 3, 0);
+		const shouldCenterPoints: boolean = true;
+		if (shouldCenterPoints) {
+			const mcx: number = this.bbox.massCenter.x;
+			const mcy: number = this.bbox.massCenter.y;
+			const mcz: number = this.bbox.massCenter.z;
+			for (let k = 0; k < vertices.length; k += 3) {
+				vertices[k] -= mcx
+				vertices[k + 1] -= mcy;
+				vertices[k + 2] -= mcz;
+			}
 		}
-		massCenter.assign(massCenter.div(this._vertexData.length/3));
-		
-		for(let k=0; k<this._vertexData.length; k+=3) {
-			this._vertexData[k] -= massCenter.x;
-			this._vertexData[k+1] -= massCenter.y;
-			this._vertexData[k+2] -= massCenter.z;
-		}
-		
+
 		this._vertexDataBackup = vertices.slice();
 
 		this.outlierPointSize = 1.0;
@@ -3793,7 +3726,7 @@ class WebGLApp extends WebGLAppBase {
     protected init(gl: WebGLRenderingContext): Boolean {
 
 		// trackball camera 
-		this.CreateTrackball();
+		this.trackball = new Camera.Trackball(this.bbox, this.width, this.height);
 
 		if(gl===null) return false;
 
@@ -3826,30 +3759,10 @@ class WebGLApp extends WebGLAppBase {
 		gl.enable(gl.DEPTH_TEST);
         return true;
 	}
-	
-	private CreateTrackball(): void {
-		let m: vec3 = this.bboxMin;
-		let M: vec3 = this.bboxMax;
-		let center: vec3 = new vec3();
-		let radius: number = m.sub(M).length*0.5; this.boxRadius=radius;
-		let eye: vec3 = center.sub(new vec3(0, 0, -(radius+1)));
-		let up: vec3 = new vec3(0, 1, 0);
-		let extent: vec2 = M.sub(m).mul(0.5).xy;
-		let zoomFactor: number = this.width>this.height ? 2*radius/this.width : 2*radius/this.height;
 
-		let near: number = 0.001;
-		let far: number = max(2*radius+1, 20.0);
-
-		this._trackballHomeFront = new OrthographicCamera(eye, center, up, this.width, this.height, near, far, zoomFactor);
-		this._trackballHomeSide = new OrthographicCamera(center.add(new vec3((radius+1), 0, 0)), center, up, this.width, this.height, near, far, zoomFactor);
-		this._trackballHomeTop = new OrthographicCamera(center.add(new vec3(0, radius+1, 0)), center, new vec3(0, 0, -1), this.width, this.height, near, far, zoomFactor);
-		
-		this.trackball = new Trackball<OrthographicCamera>(this._trackballHomeFront);
-	}
-
-	public SetCameraFront(): void { this.trackball.reset(this._trackballHomeFront); this._trackballBase="front"; }
-	public SetCameraSide(): void { this.trackball.reset(this._trackballHomeSide); this._trackballBase="side"; }
-	public SetCameraTop(): void { this.trackball.reset(this._trackballHomeTop); this._trackballBase="top"; }
+	public SetCameraFront(): void { this.trackball.setFront(); }
+	public SetCameraSide(): void { this.trackball.setSide(); }
+	public SetCameraTop(): void { this.trackball.setTop(); }
 
 	private extractInlier(flags: number[]): number[] {
 		let inlier: number[] = [];
@@ -3957,18 +3870,18 @@ class WebGLApp extends WebGLAppBase {
 	}
 
 	public SelectObject(key: string): void {
-		this.inlierObjects[key].pointSelected = true;
+		this.inlierObjects[key].inlierSelected = true;
 		this.inlierObjects[key].geometrySelected = true;
 	}
 	public SelectObjectMesh(key: string): void {
 		this.inlierObjects[key].geometrySelected = true;
 	}
 	public SelectObjectInlier(key: string): void {
-		this.inlierObjects[key].pointSelected = true;
+		this.inlierObjects[key].inlierSelected = true;
 	}
 	public DeselectAll(): void {
 		this.objectNames.forEach(name=>{
-			this.inlierObjects[name].pointSelected = false;
+			this.inlierObjects[name].inlierSelected = false;
 			this.inlierObjects[name].geometrySelected = false;
 		});
 	}
@@ -4025,7 +3938,7 @@ class WebGLApp extends WebGLAppBase {
 
     protected update(gl: WebGLRenderingContext, timeElapsed: number): void {
 		
-		this.trackball.update(timeElapsed);
+		this.trackball.update();
     }
 
     protected render(gl: WebGLRenderingContext, timeElapsed: number): void {
@@ -4034,13 +3947,22 @@ class WebGLApp extends WebGLAppBase {
 		this.text.fillStyle="white";
 
 		gl.viewport(0, 0, this.width, this.height);
-		this.renderPointCloud(gl);
+		this.renderPointCloud(gl, this.pickedPointIndex, this.selectedPointSize, this.pickedPointColor);
 		this.renderInliers(gl);
 
+		// TODO: is it okay to remove this?
+		//       since we draw a circle on mouse cursor instead of this.
+		//
 		if(this.bTouchAreaVisible&&this.picked_point instanceof vec3) {
 			gl.useProgram(this.programWireGeometry);
 
-			gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(mat4.translate(this.picked_point).mul(mat4.scale( this.touchRadius, this.touchRadius, this.touchRadius  ))).transpose().toArray());	
+			gl.uniformMatrix4fv(
+				gl.getUniformLocation(this.programWireGeometry, "model_matrix"), 
+				false, 
+				mat4.translate(this.picked_point).mul(
+					mat4.scale( this.touchRadius, this.touchRadius, this.touchRadius  )
+					).transpose().toArray()
+				);	
 			gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
 			gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
 			gl.uniform3f(gl.getUniformLocation(this.programWireGeometry, "color"), 1, 0, 0);
@@ -4068,18 +3990,34 @@ class WebGLApp extends WebGLAppBase {
 		this.renderRuler(gl);
 	}
 	
-	private renderPointCloud(gl: WebGLRenderingContext): void {
+	private pickedPointIndex: number = -1;
+	private pickedPointColor: vec3 = new vec3(1, 0, 0);
+	public SetPickedPointColor(r: number, g: number, b: number): void { this.pickedPointColor.assign(r, g, b); }
+	public GetPickedPointColor(): number[] { return this.pickedPointColor.toArray(); }
+	private renderPointCloud(gl: WebGLRenderingContext, pickedIndex: number, pickedSize: number, pickedColor: vec3): void {
 		gl.useProgram(this.programPointCloud);
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
 		gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 
-		gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloud, "model_matrix"), false, this.trackball.transformMatrix.transpose().toArray());
 		gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloud, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
 		gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloud, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
 		gl.uniform1f(gl.getUniformLocation(this.programPointCloud, "pointSize"), this.outlierPointSize);
 		gl.uniform3f(gl.getUniformLocation(this.programPointCloud, "color"), 1, 1, 1);
 
 		gl.drawArrays(gl.POINTS, 0, this.pointcloud.count);
+
+		if (pickedIndex != -1) {
+			let depthTest: GLboolean = gl.getParameter(gl.DEPTH_TEST);
+			gl.disable(gl.DEPTH_TEST);
+
+			gl.uniform1f(gl.getUniformLocation(this.programPointCloud, "pointSize"), this.selectedPointSize);
+			gl.uniform3f(gl.getUniformLocation(this.programPointCloud, "color"), pickedColor.x, pickedColor.y, pickedColor.z);
+
+			gl.drawArrays(gl.POINTS, pickedIndex, 1);
+
+			if (depthTest == true) gl.enable(gl.DEPTH_TEST);
+		}
+
 		gl.bindBuffer(gl.ARRAY_BUFFER, null);
 		gl.useProgram(null);
 	}
@@ -4095,10 +4033,9 @@ class WebGLApp extends WebGLAppBase {
 				gl.bindBuffer(gl.ARRAY_BUFFER, objectVBO.vbo);
 				gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 		
-				gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloud, "model_matrix"), false, this.trackball.transformMatrix.transpose().toArray());
 				gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloud, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
 				gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloud, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
-				gl.uniform1f(gl.getUniformLocation(this.programPointCloud, "pointSize"), objectData.pointSelected ? this.selectedPointSize : this.inlierPointSize);
+				gl.uniform1f(gl.getUniformLocation(this.programPointCloud, "pointSize"), objectData.inlierSelected ? this.selectedPointSize : this.inlierPointSize);
 				gl.uniform3fv(gl.getUniformLocation(this.programPointCloud, "color"), objectData.pointColor.toArray());
 
 				gl.drawArrays(gl.POINTS, 0, objectVBO.count);
@@ -4112,7 +4049,7 @@ class WebGLApp extends WebGLAppBase {
 				gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 				gl.useProgram(this.programWireGeometry);
 
-				gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(objectData.modelMatrix).transpose().toArray());	
+				gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "model_matrix"), false, objectData.modelMatrix.transpose().toArray());	
 				gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
 				gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
 				gl.uniform3fv(gl.getUniformLocation(this.programWireGeometry, "color"), objectData.geometryColor.toArray());
@@ -4206,13 +4143,8 @@ class WebGLApp extends WebGLAppBase {
 		gl.viewport(this.frame.pos.x, this.height-this.frame.pos.y-this.frame.size.height, this.frame.size.width, this.frame.size.height);
 
 		gl.useProgram(this.programGeometry);
-		switch(this._trackballBase) {
-			case "front": gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "view_matrix"), false, this._trackballHomeFront.view.transpose().toArray()); break;
-			case "side": gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "view_matrix"), false, this._trackballHomeSide.view.transpose().toArray()); break;
-			case "top": gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "view_matrix"), false, this._trackballHomeTop.view.transpose().toArray()); break;
-		}
-		
-		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "proj_matrix"), false, mat4.orthographic(2, 2, 0.001, this.boxRadius * 10).transpose().toArray());
+		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "view_matrix"), false, this.trackball.rotationMatrix.transpose().toArray());
+		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "proj_matrix"), false, mat4.orthographic(2, 2, 0.001, 200).transpose().toArray());
 
 		// draw origin sphere
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.originSphere.vbo);
@@ -4221,7 +4153,7 @@ class WebGLApp extends WebGLAppBase {
 		
 		gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 1);			
 		gl.uniform3fv(gl.getUniformLocation(this.programGeometry, "color"), this.frame.color.origin);
-		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(mat4.scale(this.frame.scale.origin_radius, this.frame.scale.origin_radius, this.frame.scale.origin_radius)).transpose().toArray());
+		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, mat4.scale(this.frame.scale.origin_radius, this.frame.scale.origin_radius, this.frame.scale.origin_radius).transpose().toArray());
 		
 		gl.drawElements(gl.TRIANGLES, this.originSphere.count, gl.UNSIGNED_SHORT, 0);
 
@@ -4248,11 +4180,11 @@ class WebGLApp extends WebGLAppBase {
 		let RX: mat4 = mat4.rotateZ(-Math.PI/2);
 
 		gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 2);			
-		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(RX.mul(cylTS)).transpose().toArray());
+		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, RX.mul(cylTS).transpose().toArray());
 		gl.drawElements(gl.TRIANGLES, this.arrowCylinder.count, gl.UNSIGNED_SHORT, 0);
 
 		gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 3);
-		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(RX.mul(conTS)).transpose().toArray());
+		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, RX.mul(conTS).transpose().toArray());
 		gl.drawElements(gl.TRIANGLES, this.arrowCylinder.count, gl.UNSIGNED_SHORT, 0);
 
 		//let posX: vec4 = textTransform.mul(new vec4(0.7, 0, 0, 0));
@@ -4264,11 +4196,11 @@ class WebGLApp extends WebGLAppBase {
 		//let R: mat4 = mat4.rotateZ(-Math.PI/2);
 
 		gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 2);			
-		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(cylTS).transpose().toArray());
+		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, cylTS.transpose().toArray());
 		gl.drawElements(gl.TRIANGLES, this.arrowCylinder.count, gl.UNSIGNED_SHORT, 0);
 
 		gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 3);
-		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(conTS).transpose().toArray());
+		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, conTS.transpose().toArray());
 		gl.drawElements(gl.TRIANGLES, this.arrowCylinder.count, gl.UNSIGNED_SHORT, 0);
 
 		//let posY: vec4 = textTransform.mul(new vec4(0, 0.7, 0, 0));
@@ -4280,11 +4212,11 @@ class WebGLApp extends WebGLAppBase {
 		let RZ: mat4 = mat4.rotateX(Math.PI/2);
 		
 		gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 2);			
-		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(RZ.mul(cylTS)).transpose().toArray());
+		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, RZ.mul(cylTS).transpose().toArray());
 		gl.drawElements(gl.TRIANGLES, this.arrowCylinder.count, gl.UNSIGNED_SHORT, 0);
 
 		gl.uniform1i(gl.getUniformLocation(this.programGeometry, "subroutine_index"), 3);
-		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, this.trackball.transformMatrix.mul(RZ.mul(conTS)).transpose().toArray());
+		gl.uniformMatrix4fv(gl.getUniformLocation(this.programGeometry, "model_matrix"), false, RZ.mul(conTS).transpose().toArray());
 		gl.drawElements(gl.TRIANGLES, this.arrowCylinder.count, gl.UNSIGNED_SHORT, 0);
 
 		//let posZ: vec4 = textTransform.mul(new vec4(0, 0, 0.7, 0));
@@ -4445,32 +4377,50 @@ class WebGLApp extends WebGLAppBase {
 		x*=this.width*0.5*this.trackball.zoomFactor;
 		y*=this.height*0.5*this.trackball.zoomFactor;
 
-		let invView: mat4 = this.trackball.transformMatrix.transpose().mul(mat4.lookAtInv(this.trackball.eye, this.trackball.at, this.trackball.up));
+		let invView: mat4 = this.trackball.invViewMatrix;
 		let ray_org: vec3 = invView.mul(new vec4(x, y, 0, 1)).xyz;
-		let ray_dir: vec3 = invView.mul(new vec4(x, y, -1, 1)).xyz.sub(ray_org).normalize();
+		let ray_dir: vec3 = invView.mul(new vec4(0, 0, -1, 0)).xyz.normalize();
 		let ray_radius: number = pixel_length*this.proveRadius; // 4 px radius
+		let ray_radius2: number = ray_radius * ray_radius;
 
 		let min_index: number = -1;
-		let min_dist: number = Number.MAX_VALUE;
-		let min_pt: vec3 = null;
+		let min_dist2: number = Number.MAX_VALUE;
+		
+		let min_px: number;
+		let min_py: number;
+		let min_pz: number;
 
 		// circle-sweeping along the ray (cylinder).
-		let candidate_point_indices: { index: number, point: vec3 }[] = [];
+		let candidate_point_indices: { index: number, px: number, py: number, pz: number }[] = [];
 		for(let k=0; k < this.vertexData.length; k+=3) {
-			let pt: vec3 = new vec3(this.vertexData[k], this.vertexData[k+1], this.vertexData[k+2]);
-			let pto: vec3 = pt.sub(ray_org);
-
-			let is_behind_cam: boolean = pto.dot(ray_dir) < 0;
+			let px: number = this.vertexData[k];
+			let py: number = this.vertexData[k+1];
+			let pz: number = this.vertexData[k+2];
+			let ptox: number = px - ray_org.x;
+			let ptoy: number = py - ray_org.y;
+			let ptoz: number = pz - ray_org.z;
+			
+			let dirDotPto: number = ptox * ray_dir.x + ptoy * ray_dir.y + ptoz * ray_dir.z;
+			
+			//let is_behind_cam: boolean = pto.dot(ray_dir) < 0;
+			let is_behind_cam: boolean = dirDotPto < 0;
 			if (is_behind_cam) continue; // discards points if it is behind the camera.
 
-			let dist: number = pto.sub(ray_dir.mul(ray_dir.dot(pto))).length;
-			if(dist < ray_radius) {
-				candidate_point_indices.push({ index: k/3, point: pt });
+			let dx: number = ptox - ray_dir.x * dirDotPto;
+			let dy: number = ptoy - ray_dir.y * dirDotPto;
+			let dz: number = ptoz - ray_dir.z * dirDotPto;
+
+			let dist2: number = dx * dx + dy * dy + dz * dz;
+			if(dist2 < ray_radius2) {
+				candidate_point_indices.push({ index: k/3, px: px, py: py, pz: pz });
 			}
-			if(dist < min_dist) {
+			if(dist2 < min_dist2) {
 				min_index = k/3;
-				min_dist = dist;
-				min_pt = pt;
+				min_dist2 = dist2;
+				
+				min_px = px;
+				min_py = py;
+				min_pz = pz;
 			}
 		}
 		
@@ -4478,26 +4428,37 @@ class WebGLApp extends WebGLAppBase {
 		if(candidate_point_indices.length==0) {
 			this.ray_org = ray_org;
 			this.ray_dir = ray_dir;
-			this.picked_point = min_pt;
+			
+			this.picked_point = new vec3(min_px, min_py, min_pz);
 			return min_index;
 		}
 
 		// pick one nearest to the camera among points in the cylinder.
 		let closest_index: number = -1;
-		let closest_dist: number = Number.MAX_VALUE;
+		let closest_px: number;
+		let closest_py: number;
+		let closest_pz: number;
+		let closest_dist2: number = Number.MAX_VALUE;
 		for(let k=0; k < candidate_point_indices.length; k++) {
-			let candidate: { index: number, point: vec3 } = candidate_point_indices[k];
-			let dist: number = this.trackball.eye.sub(candidate.point).length;
-			if(dist < closest_dist) {
-				closest_index = k;
-				closest_dist = dist;
+			let candidate: { index: number, px: number, py: number, pz: number } = candidate_point_indices[k];
+			
+			let dx: number = this.trackball.position.x - candidate.px;
+			let dy: number = this.trackball.position.y - candidate.py;
+			let dz: number = this.trackball.position.z - candidate.pz;
+			let dist2: number = dx * dx + dy * dy + dz * dz;
+			if(dist2 < closest_dist2) {
+				closest_index = candidate.index;
+				closest_px = candidate.px;
+				closest_py = candidate.py;
+				closest_pz = candidate.pz;
+				closest_dist2 = dist2;
 			}			
 		}
 
 		this.ray_org = ray_org;
 		this.ray_dir = ray_dir;
-		this.picked_point = candidate_point_indices[closest_index].point;
-		return candidate_point_indices[closest_index].index;
+		this.picked_point = new vec3(closest_px, closest_py, closest_pz);
+		return closest_index;
 	}
 
 	public GetOutliers(): number[] {
@@ -4510,7 +4471,7 @@ class WebGLApp extends WebGLAppBase {
 		let y: number = pos.y;
 
 		if(event.button==0) {
-			this.trackball.mouse(x, y, this._trackballBehavior);
+			this.trackball.mouse(x, y, this.trackballMode);
 		}
     }
 	protected onMouseUp(event: MouseEvent): void {
@@ -4519,7 +4480,7 @@ class WebGLApp extends WebGLAppBase {
 		let y: number = pos.y;
 
 		if(event.button==0) {
-			this.trackball.mouse(x, y, CameraBehavior.NOTHING);
+			this.trackball.mouse(x, y, Camera.TrackballMode.NOTHING);
 		}
 	}
 	private mouseX: number;
@@ -4533,6 +4494,8 @@ class WebGLApp extends WebGLAppBase {
 		this.mouseY = clamp(1 - 2 * y, -1, 1);
 		this.trackball.motion(x, y);
 		this.isMouseOut = false;
+
+		this.pickedPointIndex = this.PickPoint(this.mouseX, this.mouseY);
 	}
 	
 	protected onMouseOut(event: MouseEvent): void {
@@ -4540,7 +4503,7 @@ class WebGLApp extends WebGLAppBase {
 		let x: number = pos.x;
 		let y: number = pos.y;
 		if(event.button==0) {
-			this.trackball.mouse(x, y, CameraBehavior.NOTHING);
+			this.trackball.mouse(x, y, Camera.TrackballMode.NOTHING);
 		}
 		this.isMouseOut = true;
 	}
@@ -4563,7 +4526,7 @@ class WebGLApp extends WebGLAppBase {
 			let pos: vec2 = this._TouchScreen2Client(event.touches[0]);
 			this.touchStartPos.assign(pos.x, pos.y);
 
-			this.trackball.mouse(pos.x/this.width, pos.y/this.height, this._trackballBehavior);
+			this.trackball.mouse(pos.x/this.width, pos.y/this.height, this.trackballMode);
 		}
 	}
 
@@ -4590,7 +4553,7 @@ class WebGLApp extends WebGLAppBase {
 			if(touch.identifier === this.touchID) {
 				let pos: vec2 = this._TouchScreen2Client(touch);
 				
-				this.trackball.mouse(pos.x/this.width, pos.y/this.height, CameraBehavior.NOTHING);
+				this.trackball.mouse(pos.x/this.width, pos.y/this.height, Camera.TrackballMode.NOTHING);
 
 				let diffTime = (new Date()).getTime() - this.touchStartTime;
 				let diffDist = this.touchStartPos.sub(pos.x, pos.y).length;
@@ -4630,43 +4593,8 @@ class WebGLApp extends WebGLAppBase {
 			if(touch.identifier === this.touchID) {
 				let pos: vec2 = this._TouchScreen2Client(touch);
 
-				this.trackball.mouse(pos.x/this.width, pos.y/this.height, CameraBehavior.NOTHING);
+				this.trackball.mouse(pos.x/this.width, pos.y/this.height, Camera.TrackballMode.NOTHING);
 			}
 		}
 	}
 }
-
-/*
-function test() {
-	
-	let canvas: HTMLCanvasElement;
-	let vertexData: number[];
-
-	let app: WebGLApp = new WebGLApp(canvas, []); // 파일 읽은 후 생성
-
-	app.Init();	// 초기화 한번
-	app.Run(); // 렌더링 실행
-
-	app.Resize(1, 1); // 캔버스 크기 바뀔 때,
-	app.Stop(); // 새 파일 읽기 전에 호출하고 기존 app 객체는 버려버림.
-
-	app.AppendObject("key", null); // inlier와 mesh 추가할 때
-	app.PickPoint(0.1, 0.1);	// 클릭 했을 때
-	app.GetOutliers();
-	app.SetCameraFront();		// 카메라 앞에서
-	app.SetCameraSide();		// 카메라 옆에서
-	app.SetCameraTop();			// 카메라 위에서
-	app.SetInlierColor("key", [1, 0, 0]);		// inlier 색 바꾸기
-	app.SetInlierVisible("key", true);			// inlier 보이기/숨기기
-	app.SetMeshColor("key", [0, 1, 0]);				// mesh 색 바꾸기
-	app.SetMeshVisible("key", true);			// mesh 보이기/숨기기
-	app.SetObjectVisible("key", true);			// inlier&mesh 보이기/숨기기
-	app.SetTrackballPan();		// 카메라 이동
-	app.SetTrackballRotate();	// 카메라 회전
-	app.SetTrackballZoom();		// 카메라 줌
-	app.SetTrackballStop();		// 카메라 아무것도 안함.
-
-	app.RemoveObject("key"); // inlier&mesh 제거
-	app.Reset(); // 파일 안바뀌고 리셋
-}
-*/
