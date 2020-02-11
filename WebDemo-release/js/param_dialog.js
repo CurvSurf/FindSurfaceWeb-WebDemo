@@ -16,7 +16,7 @@ function _LoadParamPreset(which) {
 		case "S1":
 			gFSParam.accuracy = 0.003;
 			gFSParam.meanDist = 0.05;
-			gFSParam.touchR   = 0.05;
+			gFSParam.touchR   = 0.08;
 			gFSParam.probeR   = 4;
 			gFSParam.radExp   = 5;
 			gFSParam.latExt   = 10;
