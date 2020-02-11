@@ -2292,7 +2292,7 @@ namespace Camera {
 		}
 
 		public clone(): OrthographicCamera {
-			return new OrthographicCamera(new vec3().assign(this.eye), new vec3().assign(this.at), new vec3().assign(this.up), this.width, this.height, this.near, this.far, this.zoomFactor);
+			return new OrthographicCamera(this.eye.clone(), this.at.clone(), this.up.clone(), this.width, this.height, this.near, this.far, this.zoomFactor);
 		}
 	}
 
@@ -2326,7 +2326,7 @@ namespace Camera {
 		
 		public constructor(bbox: Geometry.BoundingBox, width: number, height: number) {
 			let radius: number = bbox.radius;
-			let at: vec3 = bbox.center;
+			let at: vec3 = bbox.massCenter;
 			let eye: vec3 = at.add(0, 0, radius+1);
 			let up: vec3 = new vec3(0, 1, 0);
 			let zoomFactor: number = 2 * radius / max(width, height);
@@ -2340,8 +2340,8 @@ namespace Camera {
 			this.home = cam.clone();
 
 			this.frontCam = cam.clone();
-			this.sideCam = new OrthographicCamera(at.add(radius+1, 0, 0), at, up, width, height, near, far, zoomFactor);
-			this.topCam = new OrthographicCamera(at.add(0, radius+1, 0), at, new vec3(0, 0, -1), width, height, near, far, zoomFactor);
+			this.sideCam = new OrthographicCamera(at.add(radius+1, 0, 0), at.clone(), up.clone(), width, height, near, far, zoomFactor);
+			this.topCam = new OrthographicCamera(at.add(0, radius+1, 0), at.clone(), new vec3(0, 0, -1), width, height, near, far, zoomFactor);
 		}
 
 		public get zoomFactor(): number { return this.curr.zoomFactor; }
@@ -3692,6 +3692,9 @@ class WebGLApp extends WebGLAppBase {
 				vertices[k + 1] -= mcy;
 				vertices[k + 2] -= mcz;
 			}
+			this.bbox.lowerBound = this.bbox.lowerBound.sub(this.bbox.massCenter);
+			this.bbox.upperBound = this.bbox.upperBound.sub(this.bbox.massCenter);
+			this.bbox.massCenter.assign(0, 0, 0);
 		}
 
 		this._vertexDataBackup = vertices.slice();

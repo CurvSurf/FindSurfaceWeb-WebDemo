@@ -3495,7 +3495,7 @@ var Camera;
             return this;
         };
         OrthographicCamera.prototype.clone = function () {
-            return new OrthographicCamera(new vec3().assign(this.eye), new vec3().assign(this.at), new vec3().assign(this.up), this.width, this.height, this.near, this.far, this.zoomFactor);
+            return new OrthographicCamera(this.eye.clone(), this.at.clone(), this.up.clone(), this.width, this.height, this.near, this.far, this.zoomFactor);
         };
         return OrthographicCamera;
     }());
@@ -3514,7 +3514,7 @@ var Camera;
             this.mode = TrackballMode.NOTHING;
             this.cursor = new vec2();
             var radius = bbox.radius;
-            var at = bbox.center;
+            var at = bbox.massCenter;
             var eye = at.add(0, 0, radius + 1);
             var up = new vec3(0, 1, 0);
             var zoomFactor = 2 * radius / max(width, height);
@@ -3525,8 +3525,8 @@ var Camera;
             this.prev = cam.clone();
             this.home = cam.clone();
             this.frontCam = cam.clone();
-            this.sideCam = new OrthographicCamera(at.add(radius + 1, 0, 0), at, up, width, height, near, far, zoomFactor);
-            this.topCam = new OrthographicCamera(at.add(0, radius + 1, 0), at, new vec3(0, 0, -1), width, height, near, far, zoomFactor);
+            this.sideCam = new OrthographicCamera(at.add(radius + 1, 0, 0), at.clone(), up.clone(), width, height, near, far, zoomFactor);
+            this.topCam = new OrthographicCamera(at.add(0, radius + 1, 0), at.clone(), new vec3(0, 0, -1), width, height, near, far, zoomFactor);
         }
         Object.defineProperty(Trackball.prototype, "zoomFactor", {
             get: function () { return this.curr.zoomFactor; },
@@ -4552,6 +4552,9 @@ var WebGLApp = (function (_super) {
                 vertices[k + 1] -= mcy;
                 vertices[k + 2] -= mcz;
             }
+            _this.bbox.lowerBound = _this.bbox.lowerBound.sub(_this.bbox.massCenter);
+            _this.bbox.upperBound = _this.bbox.upperBound.sub(_this.bbox.massCenter);
+            _this.bbox.massCenter.assign(0, 0, 0);
         }
         _this._vertexDataBackup = vertices.slice();
         _this.outlierPointSize = 1.0;
