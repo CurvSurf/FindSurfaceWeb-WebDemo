@@ -102,6 +102,8 @@
 <td>Touch Radius</td>
 <td style="text-align:left">Radius of seed region (also, it means minimum target object size)</td>
 </tr>
+<td>Probe Radius</td>
+<td style="text-align:left">Point picking sensitivity (radius in pixels)</td>
 <tr>
 <td>Radial Expansion</td>
 <td style="text-align:left">Level of segmentation referenced to the direction of surface normal</td>
@@ -114,6 +116,9 @@
 </table>
 <blockquote>
 <p>Note: Parameter values are dependent on a measurement unit of point cloud data. For example, if a measurement unit is <em>meter</em> and measurement accuracy is less than <em>5 mm</em>, an appropriate value of <em>Accuracy</em> may be 0.005. If a measurement unit is <em>millimeter</em> and measurement accuracy is less than <em>3 mm</em>, an appropriate value of <em>Accuracy</em> may be 3.</p>
+</blockquote>
+<blockquote>
+<p>Note: Probe radius affects only point picking. For example, if the radius is set to 4, the topmost (z-order) point among points having 4 a distance of pixels from your mouse cursor.</p>
 </blockquote>
 </li>
 </ol>
