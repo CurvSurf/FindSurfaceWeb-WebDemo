@@ -17,7 +17,7 @@ function _LoadParamPreset(which) {
 			gFSParam.accuracy = 0.003;
 			gFSParam.meanDist = 0.05;
 			gFSParam.touchR   = 0.05;
-			gFSParam.proveR   = 4;
+			gFSParam.probeR   = 4;
 			gFSParam.radExp   = 5;
 			gFSParam.latExt   = 10;
 			break;
@@ -25,7 +25,7 @@ function _LoadParamPreset(which) {
 			gFSParam.accuracy = 0.003;
 			gFSParam.meanDist = 0.01;
 			gFSParam.touchR   = 0.2;
-			gFSParam.proveR   = 4;
+			gFSParam.probeR   = 4;
 			gFSParam.radExp   = 5;
 			gFSParam.latExt   = 5;
 			break;
@@ -33,7 +33,7 @@ function _LoadParamPreset(which) {
 			gFSParam.accuracy = 0.04;
 			gFSParam.meanDist = 0.05;
 			gFSParam.touchR   = 0.4;
-			gFSParam.proveR   = 4;
+			gFSParam.probeR   = 4;
 			gFSParam.radExp   = 5;
 			gFSParam.latExt   = 5;
 			break;
@@ -41,7 +41,7 @@ function _LoadParamPreset(which) {
 			gFSParam.accuracy = 0.005;
 			gFSParam.meanDist = 0.01;
 			gFSParam.touchR   = 0.05;
-			gFSParam.proveR   = 4;
+			gFSParam.probeR   = 4;
 			gFSParam.radExp   = 5;
 			gFSParam.latExt   = 5;
 			break;
@@ -62,7 +62,7 @@ function _ValidateParamInput() {
 		return false;
 	}
 	if( !P_INT_REGEXP.test( document.getElementById("FS_PARAM_PR").value ) ) {
-		myAlert("[Prove Radius]\nPlease input positive integer");
+		myAlert("[Probe Radius]\nPlease input positive integer");
 		return false;
 	}
 	
@@ -84,7 +84,7 @@ function _UpdateFormData(bSave) {
 		gFSParam.accuracy = Number( document.getElementById('FS_PARAM_ACC').value ); 
 		gFSParam.meanDist = Number( document.getElementById('FS_PARAM_MD').value );
 		gFSParam.touchR = Number( document.getElementById('FS_PARAM_TR').value );
-		gFSParam.proveR = Number(document.getElementById("FS_PARAM_PR").value);
+		gFSParam.probeR = Number(document.getElementById("FS_PARAM_PR").value);
 		gFSParam.radExp = Number( document.getElementById('FS_PARAM_RE').value );
 		gFSParam.latExt = Number( document.getElementById('FS_PARAM_LE').value );
 	}
@@ -92,7 +92,7 @@ function _UpdateFormData(bSave) {
 		document.getElementById('FS_PARAM_ACC').value = gFSParam.accuracy; 
 		document.getElementById('FS_PARAM_MD').value = gFSParam.meanDist;
 		document.getElementById('FS_PARAM_TR').value = gFSParam.touchR;
-		document.getElementById("FS_PARAM_PR").value = gFSParam.proveR;
+		document.getElementById("FS_PARAM_PR").value = gFSParam.probeR;
 		
 		document.getElementById('FS_PARAM_RE').value = gFSParam.radExp;
 		document.getElementById('FS_PARAM_LE').value = gFSParam.latExt;
@@ -118,12 +118,12 @@ function FSPD_ChangeCircleColor(target) {
 			});
 		} break;
   
-		case "proveR": {
-			var initColor = gApp != null && gApp instanceof WebGLApp ? _ColorFloat32Hex(gApp.GetProveRadiusCircleColor()) : false;
+		case "probeR": {
+			var initColor = gApp != null && gApp instanceof WebGLApp ? _ColorFloat32Hex(gApp.GetProbeRadiusCircleColor()) : false;
 			OpenColorPickerDialog(initColor, function(colorHex) {
 				if (gApp != null && gApp instanceof WebGLApp) {
 					var color_float3 = _ColorHex2Float3(colorHex);
-					if (color_float3 !== false) gApp.SetProveRadiusCircleColor( color_float3[0], color_float3[1], color_float3[2] );
+					if (color_float3 !== false) gApp.SetProbeRadiusCircleColor( color_float3[0], color_float3[1], color_float3[2] );
 				}
 			});
 		} break;
@@ -141,7 +141,7 @@ function ApplyFSParam()
 	if(_ValidateParamInput()) {
 		_UpdateFormData(true);
 		gApp.SetTouchRadius(gFSParam.touchR);
-		gApp.SetProveRadius(gFSParam.proveR);
+		gApp.SetProbeRadius(gFSParam.probeR);
 		CloseFSParamDialog();
 	}
 }

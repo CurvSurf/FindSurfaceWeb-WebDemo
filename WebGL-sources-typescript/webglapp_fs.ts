@@ -3604,9 +3604,9 @@ class WebGLApp extends WebGLAppBase {
 	private picked_point: vec3 = null;
 	private ray_org: vec3 = null;
 	private ray_dir: vec3 = null;
-	private proveRadius: number = 4;
-	public GetProveRadius(): number { return this.proveRadius; }
-	public SetProveRadius(radiusInPixels: number) { this.proveRadius = radiusInPixels; }
+	private probeRadius: number = 4;
+	public GetProbeRadius(): number { return this.probeRadius; }
+	public SetProbeRadius(radiusInPixels: number) { this.probeRadius = radiusInPixels; }
 
 	private touchID: number = 0;
 	private touchStartTime: number = 0;
@@ -3648,21 +3648,21 @@ class WebGLApp extends WebGLAppBase {
 	public SetTouchRadiusCircleColor(r: number, g: number, b: number): void { this.touchRadiusCircleColor.assign(r, g, b); }
 	public GetTouchRadiusCircleColor(): number[] { return this.touchRadiusCircleColor.toArray(); }
 
-	private showProveRadiusCircle: boolean = true;
-	private proveRadiusCircleExp: number = 16;
-	private proveRadiusCircleMin: number = 0.1;
-	private proveRadiusCircleMax: number = 1.0;
-	private proveRadiusCircleColor: vec3 = new vec3(0, 1, 1);
-	public ShowProveRadiusCircle(visible: boolean): void { this.showProveRadiusCircle = visible; }
-	public ShouldShowProveRadiusCircle(): boolean { return this.showProveRadiusCircle; }
-	public SetProveRadiusCircleExp(exp: number): void { this.proveRadiusCircleExp = exp; }
-	public GetProveRadiusCircleExp(): number { return this.proveRadiusCircleExp; }
-	public SetProveRadiusCircleMin(min: number): void { this.proveRadiusCircleMin = min; }
-	public GetProveRadiusCircleMin(): number { return this.proveRadiusCircleMin; }
-	public SetProveRadiusCircleMax(max: number): void { this.proveRadiusCircleMax = max; }
-	public GetProveRadiusCircleMax(): number { return this.proveRadiusCircleMax; }
-	public SetProveRadiusCircleColor(r: number, g: number, b: number): void { this.proveRadiusCircleColor.assign(r, g, b); }
-	public GetProveRadiusCircleColor(): number[] { return this.proveRadiusCircleColor.toArray(); }
+	private showProbeRadiusCircle: boolean = true;
+	private probeRadiusCircleExp: number = 16;
+	private probeRadiusCircleMin: number = 0.1;
+	private probeRadiusCircleMax: number = 1.0;
+	private probeRadiusCircleColor: vec3 = new vec3(0, 1, 1);
+	public ShowProbeRadiusCircle(visible: boolean): void { this.showProbeRadiusCircle = visible; }
+	public ShouldShowProbeRadiusCircle(): boolean { return this.showProbeRadiusCircle; }
+	public SetProbeRadiusCircleExp(exp: number): void { this.probeRadiusCircleExp = exp; }
+	public GetProbeRadiusCircleExp(): number { return this.probeRadiusCircleExp; }
+	public SetProbeRadiusCircleMin(min: number): void { this.probeRadiusCircleMin = min; }
+	public GetProbeRadiusCircleMin(): number { return this.probeRadiusCircleMin; }
+	public SetProbeRadiusCircleMax(max: number): void { this.probeRadiusCircleMax = max; }
+	public GetProbeRadiusCircleMax(): number { return this.probeRadiusCircleMax; }
+	public SetProbeRadiusCircleColor(r: number, g: number, b: number): void { this.probeRadiusCircleColor.assign(r, g, b); }
+	public GetProbeRadiusCircleColor(): number[] { return this.probeRadiusCircleColor.toArray(); }
 
 	public Resize(width: number, height: number) { 
 		this.width = width; this.height = height;
@@ -3985,8 +3985,8 @@ class WebGLApp extends WebGLAppBase {
 			if (this.showTouchRadiusCircle == true) {
 				this.renderCircles(gl, this.touchRadius, this.touchRadiusCircleColor, this.touchRadiusCircleExp, this.touchRadiusCircleMin, this.touchRadiusCircleMax);
 			}
-			if (this.showProveRadiusCircle == true) {
-				this.renderCircles(gl, this.proveRadius * this.trackball.zoomFactor, this.proveRadiusCircleColor, this.proveRadiusCircleExp, this.proveRadiusCircleMin, this.proveRadiusCircleMax);
+			if (this.showProbeRadiusCircle == true) {
+				this.renderCircles(gl, this.probeRadius * this.trackball.zoomFactor, this.probeRadiusCircleColor, this.probeRadiusCircleExp, this.probeRadiusCircleMin, this.probeRadiusCircleMax);
 			}
 		}
 		this.renderUnitFrame(gl);
@@ -4383,7 +4383,7 @@ class WebGLApp extends WebGLAppBase {
 		let invView: mat4 = this.trackball.invViewMatrix;
 		let ray_org: vec3 = invView.mul(new vec4(x, y, 0, 1)).xyz;
 		let ray_dir: vec3 = invView.mul(new vec4(0, 0, -1, 0)).xyz.normalize();
-		let ray_radius: number = pixel_length*this.proveRadius; // 4 px radius
+		let ray_radius: number = pixel_length*this.probeRadius; // 4 px radius
 		let ray_radius2: number = ray_radius * ray_radius;
 
 		let min_index: number = -1;

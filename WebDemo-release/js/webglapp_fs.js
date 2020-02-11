@@ -4516,7 +4516,7 @@ var WebGLApp = (function (_super) {
         _this.picked_point = null;
         _this.ray_org = null;
         _this.ray_dir = null;
-        _this.proveRadius = 4;
+        _this.probeRadius = 4;
         _this.touchID = 0;
         _this.touchStartTime = 0;
         _this.touchStartPos = new vec2();
@@ -4529,11 +4529,11 @@ var WebGLApp = (function (_super) {
         _this.touchRadiusCircleMin = 0.1;
         _this.touchRadiusCircleMax = 1.0;
         _this.touchRadiusCircleColor = new vec3(1, 1, 0);
-        _this.showProveRadiusCircle = true;
-        _this.proveRadiusCircleExp = 16;
-        _this.proveRadiusCircleMin = 0.1;
-        _this.proveRadiusCircleMax = 1.0;
-        _this.proveRadiusCircleColor = new vec3(0, 1, 1);
+        _this.showProbeRadiusCircle = true;
+        _this.probeRadiusCircleExp = 16;
+        _this.probeRadiusCircleMin = 0.1;
+        _this.probeRadiusCircleMax = 1.0;
+        _this.probeRadiusCircleColor = new vec3(0, 1, 1);
         _this.pickedPointIndex = -1;
         _this.pickedPointColor = new vec3(1, 0, 0);
         _this.count = 0;
@@ -4620,8 +4620,8 @@ var WebGLApp = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    WebGLApp.prototype.GetProveRadius = function () { return this.proveRadius; };
-    WebGLApp.prototype.SetProveRadius = function (radiusInPixels) { this.proveRadius = radiusInPixels; };
+    WebGLApp.prototype.GetProbeRadius = function () { return this.probeRadius; };
+    WebGLApp.prototype.SetProbeRadius = function (radiusInPixels) { this.probeRadius = radiusInPixels; };
     WebGLApp.prototype.SetTrackballRotate = function () { this.trackballMode = Camera.TrackballMode.OBJECT_ROTATING; };
     WebGLApp.prototype.SetTrackballZoom = function () { this.trackballMode = Camera.TrackballMode.CAMERA_ZOOMING; };
     WebGLApp.prototype.SetTrackballPan = function () { this.trackballMode = Camera.TrackballMode.CAMERA_PANNING; };
@@ -4645,16 +4645,16 @@ var WebGLApp = (function (_super) {
     WebGLApp.prototype.GetTouchRadiusCircleMax = function () { return this.touchRadiusCircleMax; };
     WebGLApp.prototype.SetTouchRadiusCircleColor = function (r, g, b) { this.touchRadiusCircleColor.assign(r, g, b); };
     WebGLApp.prototype.GetTouchRadiusCircleColor = function () { return this.touchRadiusCircleColor.toArray(); };
-    WebGLApp.prototype.ShowProveRadiusCircle = function (visible) { this.showProveRadiusCircle = visible; };
-    WebGLApp.prototype.ShouldShowProveRadiusCircle = function () { return this.showProveRadiusCircle; };
-    WebGLApp.prototype.SetProveRadiusCircleExp = function (exp) { this.proveRadiusCircleExp = exp; };
-    WebGLApp.prototype.GetProveRadiusCircleExp = function () { return this.proveRadiusCircleExp; };
-    WebGLApp.prototype.SetProveRadiusCircleMin = function (min) { this.proveRadiusCircleMin = min; };
-    WebGLApp.prototype.GetProveRadiusCircleMin = function () { return this.proveRadiusCircleMin; };
-    WebGLApp.prototype.SetProveRadiusCircleMax = function (max) { this.proveRadiusCircleMax = max; };
-    WebGLApp.prototype.GetProveRadiusCircleMax = function () { return this.proveRadiusCircleMax; };
-    WebGLApp.prototype.SetProveRadiusCircleColor = function (r, g, b) { this.proveRadiusCircleColor.assign(r, g, b); };
-    WebGLApp.prototype.GetProveRadiusCircleColor = function () { return this.proveRadiusCircleColor.toArray(); };
+    WebGLApp.prototype.ShowProbeRadiusCircle = function (visible) { this.showProbeRadiusCircle = visible; };
+    WebGLApp.prototype.ShouldShowProbeRadiusCircle = function () { return this.showProbeRadiusCircle; };
+    WebGLApp.prototype.SetProbeRadiusCircleExp = function (exp) { this.probeRadiusCircleExp = exp; };
+    WebGLApp.prototype.GetProbeRadiusCircleExp = function () { return this.probeRadiusCircleExp; };
+    WebGLApp.prototype.SetProbeRadiusCircleMin = function (min) { this.probeRadiusCircleMin = min; };
+    WebGLApp.prototype.GetProbeRadiusCircleMin = function () { return this.probeRadiusCircleMin; };
+    WebGLApp.prototype.SetProbeRadiusCircleMax = function (max) { this.probeRadiusCircleMax = max; };
+    WebGLApp.prototype.GetProbeRadiusCircleMax = function () { return this.probeRadiusCircleMax; };
+    WebGLApp.prototype.SetProbeRadiusCircleColor = function (r, g, b) { this.probeRadiusCircleColor.assign(r, g, b); };
+    WebGLApp.prototype.GetProbeRadiusCircleColor = function () { return this.probeRadiusCircleColor.toArray(); };
     WebGLApp.prototype.Resize = function (width, height) {
         this.width = width;
         this.height = height;
@@ -4878,8 +4878,8 @@ var WebGLApp = (function (_super) {
             if (this.showTouchRadiusCircle == true) {
                 this.renderCircles(gl, this.touchRadius, this.touchRadiusCircleColor, this.touchRadiusCircleExp, this.touchRadiusCircleMin, this.touchRadiusCircleMax);
             }
-            if (this.showProveRadiusCircle == true) {
-                this.renderCircles(gl, this.proveRadius * this.trackball.zoomFactor, this.proveRadiusCircleColor, this.proveRadiusCircleExp, this.proveRadiusCircleMin, this.proveRadiusCircleMax);
+            if (this.showProbeRadiusCircle == true) {
+                this.renderCircles(gl, this.probeRadius * this.trackball.zoomFactor, this.probeRadiusCircleColor, this.probeRadiusCircleExp, this.probeRadiusCircleMin, this.probeRadiusCircleMax);
             }
         }
         this.renderUnitFrame(gl);
@@ -5174,7 +5174,7 @@ var WebGLApp = (function (_super) {
         var invView = this.trackball.invViewMatrix;
         var ray_org = invView.mul(new vec4(x, y, 0, 1)).xyz;
         var ray_dir = invView.mul(new vec4(0, 0, -1, 0)).xyz.normalize();
-        var ray_radius = pixel_length * this.proveRadius;
+        var ray_radius = pixel_length * this.probeRadius;
         var ray_radius2 = ray_radius * ray_radius;
         var min_index = -1;
         var min_dist2 = Number.MAX_VALUE;
