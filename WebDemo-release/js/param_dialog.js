@@ -106,30 +106,6 @@ function FSPD_CheckNumber(input_obj, test_int) {
 	}
 }
 
-function FSPD_ChangeCircleColor(target) {
-	switch (target) {
-		case "touchR": {
-			var initColor = gApp != null && gApp instanceof WebGLApp ? _ColorFloat32Hex(gApp.GetTouchRadiusCircleColor()) : false;
-			OpenColorPickerDialog(initColor, function(colorHex) {
-				if (gApp != null && gApp instanceof WebGLApp) {
-					var color_float3 = _ColorHex2Float3(colorHex);
-					if (color_float3 !== false) gApp.SetTouchRadiusCircleColor( color_float3[0], color_float3[1], color_float3[2] );
-				}
-			});
-		} break;
-  
-		case "probeR": {
-			var initColor = gApp != null && gApp instanceof WebGLApp ? _ColorFloat32Hex(gApp.GetProbeRadiusCircleColor()) : false;
-			OpenColorPickerDialog(initColor, function(colorHex) {
-				if (gApp != null && gApp instanceof WebGLApp) {
-					var color_float3 = _ColorHex2Float3(colorHex);
-					if (color_float3 !== false) gApp.SetProbeRadiusCircleColor( color_float3[0], color_float3[1], color_float3[2] );
-				}
-			});
-		} break;
-	}
-}
-
 function OpenFSParamWindow()
 {
 	document.getElementById('FS_PARAM_DIALOG').style.display = "block";
