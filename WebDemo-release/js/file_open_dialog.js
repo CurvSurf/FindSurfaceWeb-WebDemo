@@ -42,7 +42,7 @@ function _initApplication(points, which) {
 	ClearInfoList();
 	_resetVisibleButtonGroup();
 	
-  try { gApp = new WebGLApp( document.getElementById("GL_CANVAS"), points, document.getElementById("TEXT_CANVAS") ); gApp.SetTouchRadius(gFSParam.touchR); } 
+  try { gApp = new WebGLApp( document.getElementById("GL_CANVAS"), points, document.getElementById("TEXT_CANVAS") ); } 
   catch (e) { myAlert(ERR_MSG_WEBGL_FAILED); gApp = null; return; }
 	
 	_LoadParamPreset(which);
@@ -50,7 +50,9 @@ function _initApplication(points, which) {
 	if(gApp.WebGLContext == null) { myAlert(ERR_MSG_WEBGL_SUPPORT); return; }
 	gApp.Init();
 	gApp.Run();
-	
+	gApp.SetTouchRadius(gFSParam.touchR); 
+	gApp.SetProbeRadius(gFSParam.probeR); 
+
 	UpdateOutliersInfo( gApp.pointcloud.count );
 }
 
