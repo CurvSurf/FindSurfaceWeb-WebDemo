@@ -141,14 +141,14 @@
 			<form class="param_form">
 				<div class="form_group">
 					<h3><span class="group_header">Measurement Parameter</span></h3>
-					<p><label for="FS_PARAM_ACC">Accuracy: </label> <input id="FS_PARAM_ACC" type="text" onblur="javascript:FSPD_CheckNumber(this);" /></p>
-					<p><label for="FS_PARAM_MD">Mean Distance: </label> <input id="FS_PARAM_MD" type="text" onblur="javascript:FSPD_CheckNumber(this);" /></p>
+					<p><label for="FS_PARAM_ACC" class="valid">Accuracy: </label> <input id="FS_PARAM_ACC" type="text" oninput="javascript:FSPD_CheckPositiveRealNumber(this);" onblur="javascript:FSPD_InvalidateIfCheckFailed(this);" /></p>
+					<p><label for="FS_PARAM_MD" class="valid">Mean Distance: </label> <input id="FS_PARAM_MD" type="text" oninput="javascript:FSPD_CheckPositiveRealNumber(this);" onblur="javascript:FSPD_InvalidateIfCheckFailed(this);" /></p>
 				</div>
 				
 				<div class="form_group">
 					<h3><span class="group_header">Target Size</span></h3>
-					<p><label for="FS_PARAM_TR">Touch Radius: </label> <input id="FS_PARAM_TR" type="text" onblur="javascript:FSPD_CheckNumber(this);" /> </p>
-					<p><label for="FS_PARAM_PR">Probe Radius: </label> <input id="FS_PARAM_PR" type="text" onblur="javascript:FSPD_CheckNumber(this, true);" /> </p>
+					<p><label for="FS_PARAM_TR">Touch Radius: </label> <input id="FS_PARAM_TR" type="text" oninput="javascript:FSPD_CheckPositiveRealNumber(this);" onblur="javascript:FSPD_InvalidateIfCheckFailed(this);" /> </p>
+					<p><label for="FS_PARAM_PR">Probe Radius: </label> <input id="FS_PARAM_PR" type="text" oninput="javascript:FSPD_CheckPositiveInteger(this);" onblur="javascript:FSPD_InvalidateIfCheckFailed(this);" /> </p>
 				</div>
 				
 				<div class="form_group">

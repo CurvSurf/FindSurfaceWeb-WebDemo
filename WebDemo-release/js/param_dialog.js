@@ -49,20 +49,24 @@ function _LoadParamPreset(which) {
 }
 
 function _ValidateParamInput() {
-	if( !P_REAL_REGEXP.test( document.getElementById('FS_PARAM_ACC').value ) ) {
-		myAlert("[Accuracy]\nPlease input positive real number");
+
+	if( document.getElementById('FS_PARAM_ACC').value === '' ) {
+		myAlert("[Accuracy]\nPlease input a positive real number");
 		return false;
 	} 
-	if( !P_REAL_REGEXP.test( document.getElementById('FS_PARAM_MD').value ) ) {
-		myAlert("[Mean Distance]\nPlease input positive real number");
+
+	if( document.getElementById('FS_PARAM_MD').value === '' ) {
+		myAlert("[Mean Distance]\nPlease input a positive real number");
 		return false;
 	}
-	if( !P_REAL_REGEXP.test( document.getElementById('FS_PARAM_TR').value ) ) {
-		myAlert("[Touch Radius]\nPlease input positive real number");
+
+	if( document.getElementById('FS_PARAM_TR').value === '' ) {
+		myAlert("[Touch Radius]\nPlease input a positive real number");
 		return false;
 	}
-	if( !P_INT_REGEXP.test( document.getElementById("FS_PARAM_PR").value ) ) {
-		myAlert("[Probe Radius]\nPlease input positive integer");
+
+	if( document.getElementById("FS_PARAM_PR").value === '' ) {
+		myAlert("[Probe Radius]\nPlease input a positive integer");
 		return false;
 	}
 	
@@ -99,9 +103,23 @@ function _UpdateFormData(bSave) {
 	}
 }
 
-function FSPD_CheckNumber(input_obj, test_int) {
+function FSPD_CheckPositiveInteger(input_obj) {
 	if(input_obj instanceof Element && input_obj.tagName.toLowerCase() == 'input') {
-		if( !P_REAL_REGEXP.test(input_obj.value) || (test_int === true && !P_INT_REGEXP.test(input_obj.value) ) ) { input_obj.value = ''; } 
+		if( !P_INT_REGEXP.test(input_obj.value) || Number(input_obj.value) === 0 ) { input_obj.className = 'invalid'; } 
+		else { input_obj.className = 'valid'; }
+	}
+}
+
+function FSPD_CheckPositiveRealNumber(input_obj) {
+	if(input_obj instanceof Element && input_obj.tagName.toLowerCase() == 'input') {
+		if( !P_REAL_REGEXP.test(input_obj.value) || Number(input_obj.value) === 0 ) { input_obj.className = 'invalid'; } 
+		else { input_obj.className = 'valid'; }
+	}
+}
+
+function FSPD_InvalidateIfCheckFailed(input_obj) {
+	if(input_obj instanceof Element && input_obj.tagName.toLowerCase() == 'input') {
+		if( input_obj.className === "invalid" ) { input_obj.value = ''; }
 		else { input_obj.value = Number(input_obj.value); }
 	}
 }
@@ -116,8 +134,10 @@ function ApplyFSParam()
 {
 	if(_ValidateParamInput()) {
 		_UpdateFormData(true);
-		gApp.SetTouchRadius(gFSParam.touchR);
-		gApp.SetProbeRadius(gFSParam.probeR);
+		if (gApp !== null) {
+			gApp.SetTouchRadius(gFSParam.touchR);
+			gApp.SetProbeRadius(gFSParam.probeR);
+		}
 		CloseFSParamDialog();
 	}
 }
