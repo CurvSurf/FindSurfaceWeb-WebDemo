@@ -53,6 +53,7 @@
 .param_form label { width: 110px; display:inline-block; }
 .param_form input[type=text] { width: 100px; }
 .param_form input[type=text].invalid { width: 100px; color: #FF0000; }
+.param_form input[type=range] { width: 100px; height: 14px; position: relative; top: 4px; }
 .param_form select { width: 100px; }
 .param_form button.color_btn {
   background: url(../img/ic_color.png);

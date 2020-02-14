@@ -148,7 +148,11 @@
 				<div class="form_group">
 					<h3><span class="group_header">Target Size</span></h3>
 					<p><label for="FS_PARAM_TR">Touch Radius: </label> <input id="FS_PARAM_TR" type="text" oninput="javascript:FSPD_CheckPositiveRealNumber(this);" onblur="javascript:FSPD_InvalidateIfCheckFailed(this);" /> </p>
-					<p><label for="FS_PARAM_PR">Probe Radius: </label> <input id="FS_PARAM_PR" type="text" oninput="javascript:FSPD_CheckPositiveInteger(this);" onblur="javascript:FSPD_InvalidateIfCheckFailed(this);" /> </p>
+					<p>
+						<label for="FS_PARAM_PR">Probe Radius: </label> 
+						<input id="FS_PARAM_PR" type="range" min="1" max="10" step="1" value="5" oninput="FS_PARAM_PR_OUTPUT.value = FS_PARAM_PR.value" />
+						<output id="FS_PARAM_PR_OUTPUT"></output>
+					</p>
 				</div>
 				
 				<div class="form_group">

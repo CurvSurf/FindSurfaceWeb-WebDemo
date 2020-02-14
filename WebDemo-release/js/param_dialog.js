@@ -7,8 +7,8 @@
  */
 
 var P_REAL_REGEXP = /^[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
-var P_INT_REGEXP = /^[0-9]+$/;
 function _LevelCheck(level) { return !(level < 0 || level > 10); }
+function _ProbeRadiusCheck(radius) { return 0 < radius && radius <= 10; }
 
 function _LoadParamPreset(which) {
 	switch(which)
@@ -65,8 +65,8 @@ function _ValidateParamInput() {
 		return false;
 	}
 
-	if( document.getElementById("FS_PARAM_PR").value === '' ) {
-		myAlert("[Probe Radius]\nPlease input a positive integer");
+	if( !_ProbeRadiusCheck( Number( document.getElementById("FS_PARAM_PR").value ) ) ) {
+		myAlert("[Probe Radius]\nPlease set a value between 1 to 10");
 		return false;
 	}
 	
@@ -97,16 +97,9 @@ function _UpdateFormData(bSave) {
 		document.getElementById('FS_PARAM_MD').value = gFSParam.meanDist;
 		document.getElementById('FS_PARAM_TR').value = gFSParam.touchR;
 		document.getElementById("FS_PARAM_PR").value = gFSParam.probeR;
-		
+		document.getElementById("FS_PARAM_PR_OUTPUT").value = gFSParam.probeR; // TODO: integrate this with input range.
 		document.getElementById('FS_PARAM_RE').value = gFSParam.radExp;
 		document.getElementById('FS_PARAM_LE').value = gFSParam.latExt;
-	}
-}
-
-function FSPD_CheckPositiveInteger(input_obj) {
-	if(input_obj instanceof Element && input_obj.tagName.toLowerCase() == 'input') {
-		if( !P_INT_REGEXP.test(input_obj.value) || Number(input_obj.value) === 0 ) { input_obj.className = 'invalid'; } 
-		else { input_obj.className = 'valid'; }
 	}
 }
 
