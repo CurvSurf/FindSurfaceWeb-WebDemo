@@ -4462,8 +4462,8 @@ class WebGLApp extends WebGLAppBase {
 
 	protected onMouseWheel(event: WheelEvent): void {
 		if (event.deltaY == 0) return;
-		let base: number = Math.abs(event.deltaY) > 3 ? +120 : -3;
-		let deltaY: number = event.deltaY / base;
+		let deltaY: number = typeof event.deltaY === 'undefined' ? event.detail : event.deltaY;
+		deltaY = Math.sign(deltaY);
 		if (!Number.isNaN(deltaY)) this.trackball.CameraZoom(deltaY);
 	}
 

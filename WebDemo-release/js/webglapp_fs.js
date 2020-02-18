@@ -5225,8 +5225,8 @@ var WebGLApp = (function (_super) {
     WebGLApp.prototype.onMouseWheel = function (event) {
         if (event.deltaY == 0)
             return;
-        var base = Math.abs(event.deltaY) > 3 ? +120 : -3;
-        var deltaY = event.deltaY / base;
+        var deltaY = typeof event.deltaY === 'undefined' ? event.detail : event.deltaY;
+        deltaY = Math.sign(deltaY);
         if (!Number.isNaN(deltaY))
             this.trackball.CameraZoom(deltaY);
     };
