@@ -5227,7 +5227,8 @@ var WebGLApp = (function (_super) {
             return;
         var base = Math.abs(event.deltaY) > 3 ? +120 : -3;
         var deltaY = event.deltaY / base;
-        this.trackball.CameraZoom(deltaY);
+        if (!Number.isNaN(deltaY))
+            this.trackball.CameraZoom(deltaY);
     };
     WebGLApp.prototype._TouchScreen2Client = function (t) {
         var canvasBB = this.canvas.getBoundingClientRect();

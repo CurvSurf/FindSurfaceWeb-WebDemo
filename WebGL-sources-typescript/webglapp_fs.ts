@@ -4464,7 +4464,7 @@ class WebGLApp extends WebGLAppBase {
 		if (event.deltaY == 0) return;
 		let base: number = Math.abs(event.deltaY) > 3 ? +120 : -3;
 		let deltaY: number = event.deltaY / base;
-		this.trackball.CameraZoom(deltaY);
+		if (!Number.isNaN(deltaY)) this.trackball.CameraZoom(deltaY);
 	}
 
 	private _TouchScreen2Client(t: Touch): vec2{
