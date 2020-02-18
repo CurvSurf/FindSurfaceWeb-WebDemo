@@ -1,6 +1,6 @@
 "use strict";
 /*!
- * File: webglapp_fs.js
+ * File: webglapp_fs.ts
  * Author: Sunggoo Kim <sg.kim@curvsurf.com>
  *
  * Released under the MIT license
@@ -3659,6 +3659,11 @@ var Camera;
             this.curr.zoomFactor = this.prev.zoomFactor * t;
             this.curr.updateProjectionMatrix();
         };
+        Trackball.prototype.CameraZoom = function (delta) {
+            var t = Math.pow(1.2, delta);
+            this.prev.zoomFactor = this.curr.zoomFactor = this.prev.zoomFactor * t;
+            this.curr.updateProjectionMatrix();
+        };
         Trackball.prototype.cameraRoll = function (d) {
             var p0 = new vec3().assign(this.cursor, 0).normalize();
             var p1 = new vec3().assign(this.cursor.add(d), 0).normalize();
@@ -4063,6 +4068,7 @@ var AppBase = (function () {
     AppBase.prototype.onMouseMove = function (event) { };
     AppBase.prototype.onMouseOver = function (event) { };
     AppBase.prototype.onMouseOut = function (event) { };
+    AppBase.prototype.onMouseWheel = function (event) { };
     AppBase.prototype.onTouchStart = function (event) { };
     AppBase.prototype.onTouchMove = function (event) { };
     AppBase.prototype.onTouchEnd = function (event) { };
@@ -4083,6 +4089,8 @@ var WebGLAppBase = (function (_super) {
             canvas.addEventListener("mousemove", _this.onMouseMove.bind(_this));
             canvas.addEventListener("mouseover", _this.onMouseOver.bind(_this));
             canvas.addEventListener("mouseout", _this.onMouseOut.bind(_this));
+            canvas.addEventListener("mousewheel", _this.onMouseWheel.bind(_this), false);
+            canvas.addEventListener("DOMMouseScroll", _this.onMouseWheel.bind(_this), false);
             canvas.addEventListener("touchstart", _this.onTouchStart.bind(_this));
             canvas.addEventListener("touchmove", _this.onTouchMove.bind(_this));
             canvas.addEventListener("touchend", _this.onTouchEnd.bind(_this));
@@ -4137,70 +4145,6 @@ var WebGLAppBase = (function (_super) {
     WebGLAppBase.prototype.update = function (gl, timeElapsed) { };
     WebGLAppBase.prototype.finalUpdate = function (gl) { return true; };
     return WebGLAppBase;
-}(AppBase));
-var WebGL2AppBase = (function (_super) {
-    __extends(WebGL2AppBase, _super);
-    function WebGL2AppBase(canvas) {
-        var _this = _super.call(this, canvas) || this;
-        _this._glContext = null;
-        _this._glContext = canvas.getContext("webgl2", { premultipliedAlpha: false });
-        if (_this._glContext !== null) {
-            canvas.addEventListener("mousedown", _this.onMouseDown.bind(_this));
-            canvas.addEventListener("mouseup", _this.onMouseUp.bind(_this));
-            canvas.addEventListener("mousemove", _this.onMouseMove.bind(_this));
-            canvas.addEventListener("mouseover", _this.onMouseOver.bind(_this));
-            canvas.addEventListener("mouseout", _this.onMouseOut.bind(_this));
-            canvas.addEventListener("touchstart", _this.onTouchStart.bind(_this));
-            canvas.addEventListener("touchmove", _this.onTouchMove.bind(_this));
-            canvas.addEventListener("touchend", _this.onTouchEnd.bind(_this));
-            canvas.addEventListener("touchcancel", _this.onTouchCancel.bind(_this));
-        }
-        return _this;
-    }
-    Object.defineProperty(WebGL2AppBase.prototype, "WebGLContext", {
-        get: function () { return this._glContext; },
-        enumerable: true,
-        configurable: true
-    });
-    WebGL2AppBase.prototype.Init = function () {
-        return this.init(this.WebGLContext);
-    };
-    WebGL2AppBase.prototype.Run = function () {
-        var _this = this;
-        var handle0 = setInterval(function () {
-            if (_this.initialUpdate(_this.WebGLContext)) {
-                clearInterval(handle0);
-            }
-        }, 1000);
-        this._run = true;
-        this._renderLoop();
-    };
-    WebGL2AppBase.prototype.Stop = function () {
-        var _this = this;
-        this._run = false;
-        var handle1 = setInterval(function () {
-            if (_this.finalUpdate(_this.WebGLContext)) {
-                clearInterval(handle1);
-                _this.cleanUp(_this.WebGLContext);
-            }
-        }, 1000);
-    };
-    WebGL2AppBase.prototype._renderLoop = function (timeStamp, prevTimeStamp) {
-        var _this = this;
-        if (timeStamp === void 0) { timeStamp = new Date().valueOf(); }
-        if (prevTimeStamp === void 0) { prevTimeStamp = timeStamp; }
-        var dt = timeStamp - prevTimeStamp;
-        this.WebGLContext.clear(this.WebGLContext.COLOR_BUFFER_BIT | this.WebGLContext.DEPTH_BUFFER_BIT);
-        this.update(this.WebGLContext, dt);
-        this.render(this.WebGLContext, dt);
-        if (this._run) {
-            window.requestAnimationFrame(function (t) { _this._renderLoop.call(_this, t); });
-        }
-    };
-    WebGL2AppBase.prototype.initialUpdate = function (gl) { return true; };
-    WebGL2AppBase.prototype.update = function (gl, timeElapsed) { };
-    WebGL2AppBase.prototype.finalUpdate = function (gl) { return true; };
-    return WebGL2AppBase;
 }(AppBase));
 var PrimitiveData = (function () {
     function PrimitiveData() {
@@ -4528,7 +4472,7 @@ var WebGLApp = (function (_super) {
         _this.touchRadiusCircleExp = 32;
         _this.touchRadiusCircleMin = 0.1;
         _this.touchRadiusCircleMax = 1.0;
-        _this.touchRadiusCircleColor = new vec3(1, 1, 0);
+        _this.touchRadiusCircleColor = new vec3(0.7, 0.7, 0);
         _this.showProbeRadiusCircle = true;
         _this.probeRadiusCircleExp = 16;
         _this.probeRadiusCircleMin = 0.1;
@@ -4710,6 +4654,7 @@ var WebGLApp = (function (_super) {
         return inlier;
     };
     WebGLApp.prototype.AppendObject = function (key, objInfo) {
+        this.pickedPointIndex = -1;
         var inlier = this.extractInlier(objInfo.flags);
         this.inlierVAO[key] = CreateVertexBuffer(this.WebGLContext, inlier);
         this.objectNames.push(key);
@@ -4750,6 +4695,7 @@ var WebGLApp = (function (_super) {
         this.inlierObjects = {};
         this.inlierVAO = {};
         this.objectNames = [];
+        this.pickedPointIndex = -1;
         var gl = this.WebGLContext;
         gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this._vertexData), gl.STATIC_DRAW);
@@ -5275,6 +5221,13 @@ var WebGLApp = (function (_super) {
             this.trackball.mouse(x, y, Camera.TrackballMode.NOTHING);
         }
         this.isMouseOut = true;
+    };
+    WebGLApp.prototype.onMouseWheel = function (event) {
+        if (event.deltaY == 0)
+            return;
+        var base = Math.abs(event.deltaY) > 3 ? +120 : -3;
+        var deltaY = event.deltaY / base;
+        this.trackball.CameraZoom(deltaY);
     };
     WebGLApp.prototype._TouchScreen2Client = function (t) {
         var canvasBB = this.canvas.getBoundingClientRect();

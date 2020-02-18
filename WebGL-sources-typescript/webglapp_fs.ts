@@ -2461,6 +2461,14 @@ namespace Camera {
 			this.curr.updateProjectionMatrix();
 		}
 
+		public CameraZoom(delta: number): void {
+			const t: number = Math.pow(1.2, delta);
+
+			this.prev.zoomFactor = this.curr.zoomFactor = this.prev.zoomFactor * t;
+
+			this.curr.updateProjectionMatrix();
+		}
+
 		private cameraRoll(d: vec2): void {
 
 			const p0: vec3 = new vec3().assign(this.cursor, 0).normalize();
@@ -2971,6 +2979,7 @@ abstract class AppBase {
 	protected onMouseMove(event: MouseEvent): void {}
 	protected onMouseOver(event: MouseEvent): void {}
 	protected onMouseOut(event: MouseEvent): void {}
+	protected onMouseWheel(event: WheelEvent): void {}
 
 	protected onTouchStart(event: TouchEvent): void {}
 	protected onTouchMove(event: TouchEvent): void {}
@@ -2996,6 +3005,8 @@ abstract class WebGLAppBase extends AppBase {
 			canvas.addEventListener("mousemove", this.onMouseMove.bind(this));
 			canvas.addEventListener("mouseover", this.onMouseOver.bind(this));
 			canvas.addEventListener("mouseout", this.onMouseOut.bind(this));
+			canvas.addEventListener("mousewheel", this.onMouseWheel.bind(this), false);
+			canvas.addEventListener("DOMMouseScroll", this.onMouseWheel.bind(this), false);
 
 			canvas.addEventListener("touchstart", this.onTouchStart.bind(this));
 			canvas.addEventListener("touchmove", this.onTouchMove.bind(this));
@@ -3045,70 +3056,6 @@ abstract class WebGLAppBase extends AppBase {
 	protected finalUpdate(gl: WebGLRenderingContext): Boolean { return true; }
 	protected abstract cleanUp(gl: WebGLRenderingContext): void;
 
-}
-abstract class WebGL2AppBase extends AppBase {
-
-	private _glContext: WebGL2RenderingContext = null;
-	public get WebGLContext(): WebGL2RenderingContext { return this._glContext; }
-
-	public constructor(canvas: HTMLCanvasElement) {
-		super(canvas);
-		this._glContext = canvas.getContext("webgl2", { premultipliedAlpha: false }) as WebGL2RenderingContext;
-
-		if(this._glContext !== null) {
-			canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
-			canvas.addEventListener("mouseup", this.onMouseUp.bind(this));
-			canvas.addEventListener("mousemove", this.onMouseMove.bind(this));
-			canvas.addEventListener("mouseover", this.onMouseOver.bind(this));
-			canvas.addEventListener("mouseout", this.onMouseOut.bind(this));
-
-			canvas.addEventListener("touchstart", this.onTouchStart.bind(this));
-			canvas.addEventListener("touchmove", this.onTouchMove.bind(this));
-			canvas.addEventListener("touchend", this.onTouchEnd.bind(this));
-			canvas.addEventListener("touchcancel", this.onTouchCancel.bind(this));
-		}
-	}
-
-	public Init(): Boolean {
-		return this.init(this.WebGLContext);
-	}
-	public Run(): void {
-		let handle0: number|NodeJS.Timer = setInterval(()=>{
-			if (this.initialUpdate(this.WebGLContext)) {
-				clearInterval(handle0 as number); 
-			}
-			}, 1000);
-		
-		this._run = true;
-		this._renderLoop();
-	}
-	public Stop(): void {
-		this._run = false;
-
-		let handle1 = setInterval(()=>{
-			if (this.finalUpdate(this.WebGLContext)) {
-				clearInterval(handle1);
-				this.cleanUp(this.WebGLContext);
-			}
-		}, 1000);
-	}
-	private _renderLoop(timeStamp: number=new Date().valueOf(), prevTimeStamp: number=timeStamp): void {
-		let dt: number = timeStamp-prevTimeStamp;
-		this.WebGLContext.clear(this.WebGLContext.COLOR_BUFFER_BIT|this.WebGLContext.DEPTH_BUFFER_BIT);
-
-		this.update(this.WebGLContext, dt);
-		this.render(this.WebGLContext, dt);
-
-		if(this._run) {
-			window.requestAnimationFrame((t)=>{this._renderLoop.call(this, t);});
-		}
-	}
-	protected abstract init(gl: WebGL2RenderingContext): Boolean;
-	protected initialUpdate(gl: WebGL2RenderingContext): Boolean { return true; }
-	protected update(gl: WebGL2RenderingContext, timeElapsed: number): void {}
-	protected abstract render(gl: WebGL2RenderingContext, timeElapsed: number): void;
-	protected finalUpdate(gl: WebGL2RenderingContext): Boolean { return true; }
-	protected abstract cleanUp(gl: WebGL2RenderingContext): void;
 }
 
 /* webglapp.ts */
@@ -3636,7 +3583,7 @@ class WebGLApp extends WebGLAppBase {
 	private touchRadiusCircleExp: number = 32;
 	private touchRadiusCircleMin: number = 0.1;
 	private touchRadiusCircleMax: number = 1.0;
-	private touchRadiusCircleColor: vec3 = new vec3(1, 1, 0);
+	private touchRadiusCircleColor: vec3 = new vec3(0.7, 0.7, 0);
 	public ShowTouchRadiusCircle(visible: boolean): void { this.showTouchRadiusCircle = visible; }
 	public ShouldShowTouchRadiusCircle(): boolean { return this.showTouchRadiusCircle; }
 	public SetTouchRadiusCircleExp(exp: number): void { this.touchRadiusCircleExp = exp; }
@@ -3789,7 +3736,7 @@ class WebGLApp extends WebGLAppBase {
 	}
 
 	public AppendObject(key: string, objInfo: iObjectInfo): void {
-
+		this.pickedPointIndex = -1;
 		let inlier: number[] = this.extractInlier(objInfo.flags);
 		this.inlierVAO[key] = CreateVertexBuffer(this.WebGLContext, inlier);
 
@@ -3818,6 +3765,7 @@ class WebGLApp extends WebGLAppBase {
 	}
 
 	public Reset(): void {
+		
 		this._vertexData = this._vertexDataBackup.slice();
 		this.objectNames.forEach(name=>{
 			this.WebGLContext.deleteBuffer(this.inlierVAO[name].vbo);
@@ -3825,6 +3773,7 @@ class WebGLApp extends WebGLAppBase {
 		this.inlierObjects={};
 		this.inlierVAO = {};
 		this.objectNames = [];
+		this.pickedPointIndex = -1;
 
 		let gl: WebGLRenderingContext = this.WebGLContext;
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
@@ -4509,6 +4458,13 @@ class WebGLApp extends WebGLAppBase {
 			this.trackball.mouse(x, y, Camera.TrackballMode.NOTHING);
 		}
 		this.isMouseOut = true;
+	}
+
+	protected onMouseWheel(event: WheelEvent): void {
+		if (event.deltaY == 0) return;
+		let base: number = Math.abs(event.deltaY) > 3 ? +120 : -3;
+		let deltaY: number = event.deltaY / base;
+		this.trackball.CameraZoom(deltaY);
 	}
 
 	private _TouchScreen2Client(t: Touch): vec2{
