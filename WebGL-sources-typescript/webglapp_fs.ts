@@ -2317,12 +2317,13 @@ namespace Camera {
 
 		private cursor: vec2 = new vec2();
 
-		public static CAMERA_ORBITING_RATIO: number = 0.75;
-		public static CAMERA_PANNING_RATIO: number = 0.1;
-		public static CAMERA_ZOOMING_RATIO: number = 0.5;
-		public static CAMERA_ROLLING_RATIO: number = 0.75;
-		public static OBJECT_ROTATING_RATIO: number = 0.75;
-		public static OBJECT_ROLLING_RATIO: number = 0.75;
+		public static CAMERA_ORBITING_RATIO: number = 1;
+		public static CAMERA_PANNING_RATIO: number = 1;
+		public static CAMERA_ZOOMING_RATIO: number = 1;
+		public static CAMERA_ZOOMING_STEP: number = 1.2;
+		public static CAMERA_ROLLING_RATIO: number = 1;
+		public static OBJECT_ROTATING_RATIO: number = 1;
+		public static OBJECT_ROLLING_RATIO: number = 1;
 		
 		public constructor(bbox: Geometry.BoundingBox, width: number, height: number) {
 			let radius: number = bbox.radius;
@@ -2420,7 +2421,7 @@ namespace Camera {
 		private cameraOrbit(d: vec2): void {
 			const HALF_PI: number = Math.PI * 0.5;
 			
-			const angle: number = d.length * HALF_PI;
+			const angle: number = d.length * HALF_PI * Trackball.CAMERA_ORBITING_RATIO;
 			const axis: vec3 = new vec3(-d.y, d.x, 0).normalize().mul(this.prev.view.mat3());
 		
 			let R: mat4 = mat4.rotate(axis, angle);
@@ -2436,7 +2437,7 @@ namespace Camera {
 		}
 
 		private cameraPan(d: vec2): void {
-			const NORM_FACTOR: number = this.prev.zoomFactor * 0.5;
+			const NORM_FACTOR: number = this.prev.zoomFactor * 0.5 * Trackball.CAMERA_PANNING_RATIO;
 			const dx: number = d.x * this.prev.width * NORM_FACTOR;
 			const dy: number = d.y * this.prev.height * NORM_FACTOR;
 
@@ -2454,15 +2455,15 @@ namespace Camera {
 
 		private cameraZoom(d: vec2): void {
 
-			const t: number = Math.pow(2, -d.x);
+			const t: number = Math.pow(2, -d.x * Trackball.CAMERA_ZOOMING_RATIO);
 
 			this.curr.zoomFactor = this.prev.zoomFactor * t;
 
 			this.curr.updateProjectionMatrix();
 		}
 
-		public CameraZoom(delta: number): void {
-			const t: number = Math.pow(1.2, delta);
+		public CameraZoom(dy: number): void {
+			const t: number = Math.pow(Trackball.CAMERA_ZOOMING_STEP, -dy);
 
 			this.prev.zoomFactor = this.curr.zoomFactor = this.prev.zoomFactor * t;
 
@@ -2473,7 +2474,7 @@ namespace Camera {
 
 			const p0: vec3 = new vec3().assign(this.cursor, 0).normalize();
 			const p1: vec3 = new vec3().assign(this.cursor.add(d), 0).normalize();
-			const angle: number = vec3.angleBetween(p0, p1, new vec3(0, 0, 1));
+			const angle: number = vec3.angleBetween(p0, p1, new vec3(0, 0, 1)) * Trackball.CAMERA_ROLLING_RATIO;
 
 			this.curr.up.assign(mat4.rotate(this.prev.dir, angle).mul(this.prev.up, 0).xyz);
 
@@ -2483,7 +2484,7 @@ namespace Camera {
 		private objectRotate(d: vec2): void {
 			const HALF_PI: number = Math.PI * 0.5;
 			
-			const angle: number = -d.length * HALF_PI;
+			const angle: number = -d.length * HALF_PI * Trackball.OBJECT_ROTATING_RATIO;
 			const axis: vec3 = new vec3(-d.y, d.x, 0).normalize().mul(this.prev.view.mat3());
 		
 			const R: mat4 = mat4.rotate(axis, angle);
@@ -2508,7 +2509,7 @@ namespace Camera {
 		private objectRoll(d: vec2): void {
 			const p0: vec3 = new vec3().assign(this.cursor, 0).normalize();
 			const p1: vec3 = new vec3().assign(this.cursor.add(d), 0).normalize();
-			const angle: number = vec3.angleBetween(p0, p1, new vec3(0, 0, 1));
+			const angle: number = vec3.angleBetween(p0, p1, new vec3(0, 0, 1)) * Trackball.OBJECT_ROLLING_RATIO;
 
 			const R: mat4 = mat4.rotate(this.prev.dir, angle);
 
@@ -2999,7 +3000,11 @@ abstract class WebGLAppBase extends AppBase {
 		super(canvas);
 		this._glContext = canvas.getContext("webgl") as WebGLRenderingContext || canvas.getContext("experimental-webgl") as WebGLRenderingContext;
 		this.canvas = canvas;
+		canvas.tabIndex = 1;
 		if(this._glContext !== null) {
+			canvas.addEventListener("keydown", this.onKeyDown.bind(this));
+			canvas.addEventListener("keyup", this.onKeyUp.bind(this));
+
 			canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
 			canvas.addEventListener("mouseup", this.onMouseUp.bind(this));
 			canvas.addEventListener("mousemove", this.onMouseMove.bind(this));
@@ -3939,7 +3944,7 @@ class WebGLApp extends WebGLAppBase {
 			}
 		}
 		this.renderUnitFrame(gl);
-		this.renderRuler(gl);
+		this.renderRuler();
 	}
 	
 	private pickedPointIndex: number = -1;
@@ -4211,7 +4216,7 @@ class WebGLApp extends WebGLAppBase {
 		return significand + (Number(exponent)!=0 ? " " + String.fromCharCode(0x00D7) + "10" + this.toSuperscriptString(exponent) : "" );
 	} 
 
-	private renderRuler(gl: WebGLRenderingContext): void {
+	private renderRuler(): void {
 
 		let widthlength=this.width*this.trackball.zoomFactor;
 		
@@ -4417,45 +4422,95 @@ class WebGLApp extends WebGLAppBase {
 		return this._vertexData;
 	}
 
-   	protected onMouseDown(event: MouseEvent): void {
-		let pos: vec2 = this.GetNormalizedMousePosition(event);
-		let x: number = pos.x;
-		let y: number = pos.y;
+	private static readonly KEY_LEFT = 37;
+	private static readonly KEY_RIGHT = 39;
+	private static readonly KEY_UP = 38;
+	private static readonly KEY_DOWN = 40;
+	private leftArrowDown: boolean = false;
+	private rightArrowDown: boolean = false;
+	private upArrowDown: boolean = false;
+	private downArrowDown: boolean = false;
+	private isArrowKey(event: KeyboardEvent): boolean { return event.keyCode >= WebGLApp.KEY_LEFT && event.keyCode <= WebGLApp.KEY_DOWN; }
+	private get isArrowKeyDown(): boolean { return this.leftArrowDown || this.rightArrowDown || this.upArrowDown || this.downArrowDown; }
+	protected onKeyDown(event: KeyboardEvent): void {
+		if (this.mouseButtonDown || !this.isArrowKey(event)) return;
 
-		if(event.button==0) {
-			this.trackball.mouse(x, y, this.trackballMode);
+		let dx: number = 0.5;
+		let dy: number = 0.5;
+		let offset: number = 0;
+		switch (true) {
+			case event.shiftKey: offset = 1 / 18; break;
+			case event.ctrlKey:  offset = 1 / 180; break;
+			default:             offset = 1 / 1800; break;
 		}
+		switch (event.keyCode) {
+			case WebGLApp.KEY_LEFT:  dx += offset; this.leftArrowDown = true; break;
+			case WebGLApp.KEY_RIGHT: dx -= offset; this.rightArrowDown = true; break;
+			case WebGLApp.KEY_UP:    dy += offset; this.upArrowDown = true; break;
+			case WebGLApp.KEY_DOWN:  dy -= offset; this.downArrowDown = true; break;
+			default: return;
+		}
+		this.trackball.mouse(0.5, 0.5, Camera.TrackballMode.CAMERA_ORBITING);
+		this.trackball.motion(dx, dy);
+		this.trackball.mouse(dx, dy, Camera.TrackballMode.NOTHING);
+	}
+	protected onKeyUp(event: KeyboardEvent): void {
+		if (!this.isArrowKey(event)) return;
+
+		switch (event.keyCode) {
+			case WebGLApp.KEY_LEFT:  this.leftArrowDown = false; break;
+			case WebGLApp.KEY_RIGHT: this.rightArrowDown = false; break;
+			case WebGLApp.KEY_UP:    this.upArrowDown = false; break;
+			case WebGLApp.KEY_DOWN:  this.downArrowDown = false; break;
+		}
+	}
+
+	private mouseButtonDown: boolean = false;
+	private isMouseLeftButton(event: MouseEvent): boolean { return event.button === 0; }
+	private isMouseWheelButton(event: MouseEvent): boolean { return event.button === 1; }
+	protected onMouseDown(event: MouseEvent): void {
+		if (this.mouseButtonDown || this.isArrowKeyDown) return;
+
+		let pos: vec2 = this.GetNormalizedMousePosition(event);
+		if (this.isMouseLeftButton(event)) {
+			this.trackball.mouse(pos.x, pos.y, this.trackballMode);
+		} else if (this.isMouseWheelButton(event)) {
+			this.trackball.mouse(pos.x, pos.y, Camera.TrackballMode.CAMERA_PANNING);
+		}
+		this.mouseButtonDown = true;
     }
 	protected onMouseUp(event: MouseEvent): void {
-		let pos: vec2 = this.GetNormalizedMousePosition(event);
-		let x: number = pos.x;
-		let y: number = pos.y;
+		if (!this.mouseButtonDown || this.isArrowKeyDown) return;
 
-		if(event.button==0) {
-			this.trackball.mouse(x, y, Camera.TrackballMode.NOTHING);
+		let pos: vec2 = this.GetNormalizedMousePosition(event);
+		if(this.isMouseLeftButton(event) || this.isMouseWheelButton(event)) {
+			this.trackball.mouse(pos.x, pos.y, Camera.TrackballMode.NOTHING);
+			this.mouseButtonDown = false;
 		}
 	}
 	private mouseX: number;
 	private mouseY: number;
 	private isMouseOut: boolean = true;
 	protected onMouseMove(event: MouseEvent): void {
+		this.isMouseOut = false;
+		
 		let pos: vec2 = this.GetNormalizedMousePosition(event);
 		let x: number = pos.x;
 		let y: number = pos.y;
 		this.mouseX = clamp(2 * x - 1, -1, 1);
 		this.mouseY = clamp(1 - 2 * y, -1, 1);
-		this.trackball.motion(x, y);
-		this.isMouseOut = false;
-
+		if (this.mouseButtonDown) {
+			this.trackball.motion(x, y);
+		}
 		this.pickedPointIndex = this.PickPoint(this.mouseX, this.mouseY);
 	}
 	
 	protected onMouseOut(event: MouseEvent): void {
-		let pos: vec2 = this.GetNormalizedMousePosition(event);
-		let x: number = pos.x;
-		let y: number = pos.y;
-		if(event.button==0) {
-			this.trackball.mouse(x, y, Camera.TrackballMode.NOTHING);
+		
+		if (this.mouseButtonDown) {
+			let pos: vec2 = this.GetNormalizedMousePosition(event);
+			this.trackball.mouse(pos.x, pos.y, Camera.TrackballMode.NOTHING);
+			this.mouseButtonDown = false;
 		}
 		this.isMouseOut = true;
 	}
@@ -4463,7 +4518,7 @@ class WebGLApp extends WebGLAppBase {
 	protected onMouseWheel(event: WheelEvent): void {
 		if (event.deltaY == 0) return;
 		let deltaY: number = typeof event.deltaY === 'undefined' ? event.detail : event.deltaY;
-		deltaY = Math.sign(deltaY);
+		deltaY = -Math.sign(deltaY);
 		if (!Number.isNaN(deltaY)) this.trackball.CameraZoom(deltaY);
 	}
 

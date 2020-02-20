@@ -3632,7 +3632,7 @@ var Camera;
         };
         Trackball.prototype.cameraOrbit = function (d) {
             var HALF_PI = Math.PI * 0.5;
-            var angle = d.length * HALF_PI;
+            var angle = d.length * HALF_PI * Trackball.CAMERA_ORBITING_RATIO;
             var axis = new vec3(-d.y, d.x, 0).normalize().mul(this.prev.view.mat3());
             var R = mat4.rotate(axis, angle);
             var eye = this.prev.eye.sub(this.prev.at);
@@ -3643,7 +3643,7 @@ var Camera;
             this.curr.updateViewMatrix();
         };
         Trackball.prototype.cameraPan = function (d) {
-            var NORM_FACTOR = this.prev.zoomFactor * 0.5;
+            var NORM_FACTOR = this.prev.zoomFactor * 0.5 * Trackball.CAMERA_PANNING_RATIO;
             var dx = d.x * this.prev.width * NORM_FACTOR;
             var dy = d.y * this.prev.height * NORM_FACTOR;
             var n = this.prev.dir;
@@ -3655,25 +3655,25 @@ var Camera;
             this.curr.updateViewMatrix();
         };
         Trackball.prototype.cameraZoom = function (d) {
-            var t = Math.pow(2, -d.x);
+            var t = Math.pow(2, -d.x * Trackball.CAMERA_ZOOMING_RATIO);
             this.curr.zoomFactor = this.prev.zoomFactor * t;
             this.curr.updateProjectionMatrix();
         };
-        Trackball.prototype.CameraZoom = function (delta) {
-            var t = Math.pow(1.2, delta);
+        Trackball.prototype.CameraZoom = function (dy) {
+            var t = Math.pow(Trackball.CAMERA_ZOOMING_STEP, -dy);
             this.prev.zoomFactor = this.curr.zoomFactor = this.prev.zoomFactor * t;
             this.curr.updateProjectionMatrix();
         };
         Trackball.prototype.cameraRoll = function (d) {
             var p0 = new vec3().assign(this.cursor, 0).normalize();
             var p1 = new vec3().assign(this.cursor.add(d), 0).normalize();
-            var angle = vec3.angleBetween(p0, p1, new vec3(0, 0, 1));
+            var angle = vec3.angleBetween(p0, p1, new vec3(0, 0, 1)) * Trackball.CAMERA_ROLLING_RATIO;
             this.curr.up.assign(mat4.rotate(this.prev.dir, angle).mul(this.prev.up, 0).xyz);
             this.curr.updateViewMatrix();
         };
         Trackball.prototype.objectRotate = function (d) {
             var HALF_PI = Math.PI * 0.5;
-            var angle = -d.length * HALF_PI;
+            var angle = -d.length * HALF_PI * Trackball.OBJECT_ROTATING_RATIO;
             var axis = new vec3(-d.y, d.x, 0).normalize().mul(this.prev.view.mat3());
             var R = mat4.rotate(axis, angle);
             var eye = this.prev.eye.sub(this.home.at);
@@ -3690,7 +3690,7 @@ var Camera;
         Trackball.prototype.objectRoll = function (d) {
             var p0 = new vec3().assign(this.cursor, 0).normalize();
             var p1 = new vec3().assign(this.cursor.add(d), 0).normalize();
-            var angle = vec3.angleBetween(p0, p1, new vec3(0, 0, 1));
+            var angle = vec3.angleBetween(p0, p1, new vec3(0, 0, 1)) * Trackball.OBJECT_ROLLING_RATIO;
             var R = mat4.rotate(this.prev.dir, angle);
             var eye = this.prev.eye.sub(this.home.at);
             eye = R.mul(eye, 1).xyz;
@@ -3703,12 +3703,13 @@ var Camera;
             this.curr.up.assign(R.mul(this.prev.up, 0).xyz);
             this.curr.updateViewMatrix();
         };
-        Trackball.CAMERA_ORBITING_RATIO = 0.75;
-        Trackball.CAMERA_PANNING_RATIO = 0.1;
-        Trackball.CAMERA_ZOOMING_RATIO = 0.5;
-        Trackball.CAMERA_ROLLING_RATIO = 0.75;
-        Trackball.OBJECT_ROTATING_RATIO = 0.75;
-        Trackball.OBJECT_ROLLING_RATIO = 0.75;
+        Trackball.CAMERA_ORBITING_RATIO = 1;
+        Trackball.CAMERA_PANNING_RATIO = 1;
+        Trackball.CAMERA_ZOOMING_RATIO = 1;
+        Trackball.CAMERA_ZOOMING_STEP = 1.2;
+        Trackball.CAMERA_ROLLING_RATIO = 1;
+        Trackball.OBJECT_ROTATING_RATIO = 1;
+        Trackball.OBJECT_ROLLING_RATIO = 1;
         return Trackball;
     }());
     Camera.Trackball = Trackball;
@@ -4083,7 +4084,10 @@ var WebGLAppBase = (function (_super) {
         _this.canvas = null;
         _this._glContext = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
         _this.canvas = canvas;
+        canvas.tabIndex = 1;
         if (_this._glContext !== null) {
+            canvas.addEventListener("keydown", _this.onKeyDown.bind(_this));
+            canvas.addEventListener("keyup", _this.onKeyUp.bind(_this));
             canvas.addEventListener("mousedown", _this.onMouseDown.bind(_this));
             canvas.addEventListener("mouseup", _this.onMouseUp.bind(_this));
             canvas.addEventListener("mousemove", _this.onMouseMove.bind(_this));
@@ -4481,6 +4485,11 @@ var WebGLApp = (function (_super) {
         _this.pickedPointIndex = -1;
         _this.pickedPointColor = new vec3(1, 0, 0);
         _this.count = 0;
+        _this.leftArrowDown = false;
+        _this.rightArrowDown = false;
+        _this.upArrowDown = false;
+        _this.downArrowDown = false;
+        _this.mouseButtonDown = false;
         _this.isMouseOut = true;
         _this.text = textCanvas instanceof HTMLCanvasElement ? textCanvas.getContext("2d") : document.createElement("canvas").getContext("2d");
         _this.text.font = "20px Arial";
@@ -4829,7 +4838,7 @@ var WebGLApp = (function (_super) {
             }
         }
         this.renderUnitFrame(gl);
-        this.renderRuler(gl);
+        this.renderRuler();
     };
     WebGLApp.prototype.SetPickedPointColor = function (r, g, b) { this.pickedPointColor.assign(r, g, b); };
     WebGLApp.prototype.GetPickedPointColor = function () { return this.pickedPointColor.toArray(); };
@@ -5031,7 +5040,7 @@ var WebGLApp = (function (_super) {
         var _a = expstr.split("e"), significand = _a[0], exponent = _a[1];
         return significand + (Number(exponent) != 0 ? " " + String.fromCharCode(0x00D7) + "10" + this.toSuperscriptString(exponent) : "");
     };
-    WebGLApp.prototype.renderRuler = function (gl) {
+    WebGLApp.prototype.renderRuler = function () {
         var widthlength = this.width * this.trackball.zoomFactor;
         var x = this.ruler.pos.x;
         var y = this.height - this.ruler.pos.y - this.ruler.size.height;
@@ -5187,38 +5196,99 @@ var WebGLApp = (function (_super) {
     WebGLApp.prototype.GetOutliers = function () {
         return this._vertexData;
     };
-    WebGLApp.prototype.onMouseDown = function (event) {
-        var pos = this.GetNormalizedMousePosition(event);
-        var x = pos.x;
-        var y = pos.y;
-        if (event.button == 0) {
-            this.trackball.mouse(x, y, this.trackballMode);
+    WebGLApp.prototype.isArrowKey = function (event) { return event.keyCode >= WebGLApp.KEY_LEFT && event.keyCode <= WebGLApp.KEY_DOWN; };
+    Object.defineProperty(WebGLApp.prototype, "isArrowKeyDown", {
+        get: function () { return this.leftArrowDown || this.rightArrowDown || this.upArrowDown || this.downArrowDown; },
+        enumerable: true,
+        configurable: true
+    });
+    WebGLApp.prototype.onKeyDown = function (event) {
+        if (this.mouseButtonDown || !this.isArrowKey(event))
+            return;
+        var dx = 0.5;
+        var dy = 0.5;
+        var offset = 1 / (event.ctrlKey ? 180 : 1800);
+        switch (event.keyCode) {
+            case WebGLApp.KEY_LEFT:
+                dx += offset;
+                this.leftArrowDown = true;
+                break;
+            case WebGLApp.KEY_RIGHT:
+                dx -= offset;
+                this.rightArrowDown = true;
+                break;
+            case WebGLApp.KEY_UP:
+                dy += offset;
+                this.upArrowDown = true;
+                break;
+            case WebGLApp.KEY_DOWN:
+                dy -= offset;
+                this.downArrowDown = true;
+                break;
+            default: return;
+        }
+        this.trackball.mouse(0.5, 0.5, Camera.TrackballMode.CAMERA_ORBITING);
+        this.trackball.motion(dx, dy);
+        this.trackball.mouse(dx, dy, Camera.TrackballMode.NOTHING);
+    };
+    WebGLApp.prototype.onKeyUp = function (event) {
+        if (!this.isArrowKey(event))
+            return;
+        switch (event.keyCode) {
+            case WebGLApp.KEY_LEFT:
+                this.leftArrowDown = false;
+                break;
+            case WebGLApp.KEY_RIGHT:
+                this.rightArrowDown = false;
+                break;
+            case WebGLApp.KEY_UP:
+                this.upArrowDown = false;
+                break;
+            case WebGLApp.KEY_DOWN:
+                this.downArrowDown = false;
+                break;
         }
     };
-    WebGLApp.prototype.onMouseUp = function (event) {
+    WebGLApp.prototype.isMouseLeftButton = function (event) { return event.button === 0; };
+    WebGLApp.prototype.isMouseWheelButton = function (event) { return event.button === 1; };
+    WebGLApp.prototype.onMouseDown = function (event) {
+        if (this.mouseButtonDown || this.isArrowKeyDown)
+            return;
         var pos = this.GetNormalizedMousePosition(event);
-        var x = pos.x;
-        var y = pos.y;
-        if (event.button == 0) {
-            this.trackball.mouse(x, y, Camera.TrackballMode.NOTHING);
+        if (this.isMouseLeftButton(event)) {
+            this.trackball.mouse(pos.x, pos.y, this.trackballMode);
+        }
+        else if (this.isMouseWheelButton(event)) {
+            this.trackball.mouse(pos.x, pos.y, Camera.TrackballMode.CAMERA_PANNING);
+        }
+        this.mouseButtonDown = true;
+    };
+    WebGLApp.prototype.onMouseUp = function (event) {
+        if (!this.mouseButtonDown || this.isArrowKeyDown)
+            return;
+        var pos = this.GetNormalizedMousePosition(event);
+        if (this.isMouseLeftButton(event) || this.isMouseWheelButton(event)) {
+            this.trackball.mouse(pos.x, pos.y, Camera.TrackballMode.NOTHING);
+            this.mouseButtonDown = false;
         }
     };
     WebGLApp.prototype.onMouseMove = function (event) {
+        this.isMouseOut = false;
         var pos = this.GetNormalizedMousePosition(event);
         var x = pos.x;
         var y = pos.y;
         this.mouseX = clamp(2 * x - 1, -1, 1);
         this.mouseY = clamp(1 - 2 * y, -1, 1);
-        this.trackball.motion(x, y);
-        this.isMouseOut = false;
+        if (this.mouseButtonDown) {
+            this.trackball.motion(x, y);
+        }
         this.pickedPointIndex = this.PickPoint(this.mouseX, this.mouseY);
     };
     WebGLApp.prototype.onMouseOut = function (event) {
-        var pos = this.GetNormalizedMousePosition(event);
-        var x = pos.x;
-        var y = pos.y;
-        if (event.button == 0) {
-            this.trackball.mouse(x, y, Camera.TrackballMode.NOTHING);
+        if (this.mouseButtonDown) {
+            var pos = this.GetNormalizedMousePosition(event);
+            this.trackball.mouse(pos.x, pos.y, Camera.TrackballMode.NOTHING);
+            this.mouseButtonDown = false;
         }
         this.isMouseOut = true;
     };
@@ -5226,7 +5296,7 @@ var WebGLApp = (function (_super) {
         if (event.deltaY == 0)
             return;
         var deltaY = typeof event.deltaY === 'undefined' ? event.detail : event.deltaY;
-        deltaY = Math.sign(deltaY);
+        deltaY = -Math.sign(deltaY);
         if (!Number.isNaN(deltaY))
             this.trackball.CameraZoom(deltaY);
     };
@@ -5304,5 +5374,9 @@ var WebGLApp = (function (_super) {
     WebGLApp.fsGeometryES2 = "#version 100\n\tprecision mediump float;\n\n\tuniform vec3 color;\n\n\t/*http://codeflow.org/entries/2012/aug/02/easy-wireframe-display-with-barycentric-coordinates/*/\n\t/*float edgeFactor() { \n\t\tvec3 d=fwidth(bary); \n\t\tvec3 a3=smoothstep(vec3(0.0), d*1.5, bary); \n\t\treturn min(min(a3.x, a3.y), a3.z); \n\t}*/\n\tvoid main() {\n\t\t/*float edge = edgeFactor();\n\t\tif(edge==0.0) discard;\n\t\tgl_FragColor = vec4(mix(color, vec3(0.5), edge), 1.0);*/\n\t\tgl_FragColor = vec4(color, 1.0);\n\t}\n\t";
     WebGLApp.vsCircleES2 = "#version 100\n\t#define PI 3.141592653589793\n\tattribute float vertexID;\n\n\tuniform vec2 pos;\n\tuniform float radius;\n\tuniform int vertexCount; // ex) 38 = 36(points on circle) + 1(center) + 1(point enclosing circle)\n\tuniform mat4 proj_matrix;\n\n\tvarying float alphaFactor;\n  \n\tvoid main() {\n\t\t\n\t\tint ID = int(vertexID) - 1;\n\t\tif (ID == 0) {\n\t\t\tvec4 npos = proj_matrix * vec4(pos, -1, 1);\n\t\t\tgl_Position = vec4(npos.xy, 0, 1);\n\t\t\talphaFactor = 0.0;\n\t\t} else {\n\t\t\tint count = vertexCount - 2;\n\t\t\tint index = int(mod(float(ID - 1), float(count)));\n\t\t\tfloat angle = 2.0 * float(PI) * float(index) / float(count);\n\t\t\tfloat x = radius * cos(angle);\n\t\t\tfloat y = radius * sin(angle);\n\t\t\tvec4 npos = proj_matrix * vec4(pos.x + x, pos.y + y, -1, 1);\n\t\t\tgl_Position = vec4(npos.xy, 0, 1);\n\t\t\talphaFactor = 1.0;\n\t\t}\n\t}\n\t";
     WebGLApp.fsCircleES2 = "#version 100\n\tprecision mediump float;\n\t\n\tuniform vec3 color;\n\tuniform float alphaExp;\n\tuniform float alphaMin;\n\tuniform float alphaMax;\n\tvarying float alphaFactor;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color, clamp(pow(alphaFactor, alphaExp), alphaMin, alphaMax));\n\t}\n\t";
+    WebGLApp.KEY_LEFT = 37;
+    WebGLApp.KEY_RIGHT = 39;
+    WebGLApp.KEY_UP = 38;
+    WebGLApp.KEY_DOWN = 40;
     return WebGLApp;
 }(WebGLAppBase));
