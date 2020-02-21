@@ -4426,6 +4426,12 @@ class WebGLApp extends WebGLAppBase {
 	private static readonly KEY_RIGHT = 39;
 	private static readonly KEY_UP = 38;
 	private static readonly KEY_DOWN = 40;
+	private static readonly ROTATION_STEP_PRECISE_DEGREE = 0.05;
+	private static readonly ROTATION_STEP_NORMAL_DEGREE = 1;
+	private static readonly ROTATION_STEP_FAST_DEGREE = 10;
+	private static readonly ROTATION_STEP_PRECISE = WebGLApp.ROTATION_STEP_PRECISE_DEGREE / 180;
+	private static readonly ROTATION_STEP_NORMAL = WebGLApp.ROTATION_STEP_NORMAL_DEGREE / 180;
+	private static readonly ROTATION_STEP_FAST = WebGLApp.ROTATION_STEP_FAST_DEGREE / 180;
 	private leftArrowDown: boolean = false;
 	private rightArrowDown: boolean = false;
 	private upArrowDown: boolean = false;
@@ -4439,9 +4445,9 @@ class WebGLApp extends WebGLAppBase {
 		let dy: number = 0.5;
 		let offset: number = 0;
 		switch (true) {
-			case event.shiftKey: offset = 1 / 18; break;
-			case event.ctrlKey:  offset = 1 / 180; break;
-			default:             offset = 1 / 1800; break;
+			case event.shiftKey: offset = WebGLApp.ROTATION_STEP_FAST; break;
+			case event.ctrlKey:  offset = WebGLApp.ROTATION_STEP_PRECISE; break;
+			default:             offset = WebGLApp.ROTATION_STEP_NORMAL; break;
 		}
 		switch (event.keyCode) {
 			case WebGLApp.KEY_LEFT:  dx += offset; this.leftArrowDown = true; break;

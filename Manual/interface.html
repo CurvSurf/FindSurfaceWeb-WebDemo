@@ -7,6 +7,8 @@
 <link rel="stylesheet" type="text/css" href="css/manual.css">
 <style>
 td img { max-width: none !important; }
+.shortcut-icons img { vertical-align: bottom; }
+.shortcut-icons tr > td:first-child { min-width: 220px; }
 </style>
 </head>
 <body>
@@ -68,17 +70,17 @@ td img { max-width: none !important; }
 <tr>
 <td><img src="img/rotate.png" alt=""></td>
 <td style="text-align:center">Rotate</td>
-<td style="text-align:left">Enables user mouse events on the WebGL canvas, so you can rotate the point cloud by dragging your mouse cursor to rotate the point cloud.</td>
+<td style="text-align:left">Enables user mouse events for rotation mode on the WebGL canvas, so you can rotate the point cloud by dragging your mouse cursor or by <a href="#alternative-ways" target="_self">pressing arrow keys</a> to rotate the point cloud.</td>
 </tr>
 <tr>
 <td><img src="img/zoom.png" alt=""></td>
 <td style="text-align:center">Zoom</td>
-<td style="text-align:left">Enables user mouse events on the WebGL canvas, so you can zoom in/out the point cloud by dragging your mouse cursor horizontally (or by using the mouse wheel except in the case of using IE browsers).</td>
+<td style="text-align:left">Enables user mouse events for zoom mode on the WebGL canvas, so you can zoom in/out the point cloud by dragging your mouse cursor horizontally (or by <a href="#alternative-ways" target="_self">using the mouse wheel</a> except in the case of using IE browsers).</td>
 </tr>
 <tr>
 <td><img src="img/move.png" alt=""></td>
 <td style="text-align:center">Move</td>
-<td style="text-align:left">Enables user mouse events on the WebGL canvas, so you can move the point cloud by dragging your mouse cursor.</td>
+<td style="text-align:left">Enables user mouse events for panning mode on the WebGL canvas, so you can move the point cloud by dragging your mouse cursor with the left button clicked or by using <a href="#alternative-ways" target="_self">the mouse middle (wheel) dragging</a>. </td>
 </tr>
 <tr>
 <td><img src="img/top-view.png" alt=""></td>
@@ -143,6 +145,36 @@ td img { max-width: none !important; }
 </tbody>
 </table>
 <h2 id="webgl-canvas">WebGL Canvas</h2>
+<h3 id="alternative-ways">Alternative ways to manipulate the view</h3>
+<p>You can manipulate the view by using the following shortcuts regardless of which button you have clicked in the menu bar: </p>
+<table class="shortcut-icons">
+<tbody>
+<tr>
+<td style="text-align:center"><span></span><img src="img/arrow-left.png" alt=""><img src="img/arrow-up.png" alt=""><img src="img/arrow-down.png" alt=""><img src="img/arrow-right.png" alt=""></span></td>
+<td style="text-align:left">Rotates the point cloud by 1 degree in a given direction. </td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="img/ctrl.png" alt="" > + <span><img src="img/arrow-left.png" alt=""><img src="img/arrow-up.png" alt=""><img src="img/arrow-down.png" alt=""><img src="img/arrow-right.png" alt=""></span></td>
+<td style="text-align:left">Rotates the point cloud by 0.05 degree in a given direction. </td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="img/shift.png" alt=""> + <span><img src="img/arrow-left.png" alt=""><img src="img/arrow-up.png" alt=""><img src="img/arrow-down.png" alt=""><img src="img/arrow-right.png" alt=""></span></td>
+<td style="text-align:left">Rotates the point cloud by 10 degree in a given direction. </td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="img/wheel-button.png" alt=""> + <img src="img/drag.png" alt=""><br/>(Dragging mouse wheel)</td>
+<td style="text-align:left">Moves the point cloud.</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="img/rotate-wheel.png" alt=""><br/>(Rotating mouse wheel)</td>
+<td style="text-align:left">Zooms in/out the point cloud. This feature is not available in case of using Internet Explorer browsers.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Note: These shortcuts take effect if the canvas is in focus. You have to click the canvas before using the shortcuts, if you clicked other UI elements such as the menu-bar buttons, Information panels. </p>
+</blockquote>
+<h3 id="visual-cues">Visual Cues</h3>
 <table>
 <tbody>
 <tr>

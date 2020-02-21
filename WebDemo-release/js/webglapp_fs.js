@@ -5207,7 +5207,18 @@ var WebGLApp = (function (_super) {
             return;
         var dx = 0.5;
         var dy = 0.5;
-        var offset = 1 / (event.ctrlKey ? 180 : 1800);
+        var offset = 0;
+        switch (true) {
+            case event.shiftKey:
+                offset = WebGLApp.ROTATION_STEP_FAST;
+                break;
+            case event.ctrlKey:
+                offset = WebGLApp.ROTATION_STEP_PRECISE;
+                break;
+            default:
+                offset = WebGLApp.ROTATION_STEP_NORMAL;
+                break;
+        }
         switch (event.keyCode) {
             case WebGLApp.KEY_LEFT:
                 dx += offset;
@@ -5378,5 +5389,11 @@ var WebGLApp = (function (_super) {
     WebGLApp.KEY_RIGHT = 39;
     WebGLApp.KEY_UP = 38;
     WebGLApp.KEY_DOWN = 40;
+    WebGLApp.ROTATION_STEP_PRECISE_DEGREE = 0.05;
+    WebGLApp.ROTATION_STEP_NORMAL_DEGREE = 1;
+    WebGLApp.ROTATION_STEP_FAST_DEGREE = 10;
+    WebGLApp.ROTATION_STEP_PRECISE = WebGLApp.ROTATION_STEP_PRECISE_DEGREE / 180;
+    WebGLApp.ROTATION_STEP_NORMAL = WebGLApp.ROTATION_STEP_NORMAL_DEGREE / 180;
+    WebGLApp.ROTATION_STEP_FAST = WebGLApp.ROTATION_STEP_FAST_DEGREE / 180;
     return WebGLApp;
 }(WebGLAppBase));
