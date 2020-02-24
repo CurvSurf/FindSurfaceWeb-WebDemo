@@ -4445,6 +4445,7 @@ var WebGLApp = (function (_super) {
         var _this = _super.call(this, canvas) || this;
         _this.programDebug = null;
         _this.programPointCloud = null;
+        _this.programPointCloudDistanceColored = null;
         _this.programWireGeometry = null;
         _this.programCircle = null;
         _this.plane = null;
@@ -4482,8 +4483,10 @@ var WebGLApp = (function (_super) {
         _this.probeRadiusCircleMin = 0.1;
         _this.probeRadiusCircleMax = 1.0;
         _this.probeRadiusCircleColor = new vec3(0, 1, 1);
+        _this.showDistanceColoredPointCloud = false;
         _this.pickedPointIndex = -1;
         _this.pickedPointColor = new vec3(1, 0, 0);
+        _this.bboxVertices = [new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3()];
         _this.count = 0;
         _this.leftArrowDown = false;
         _this.rightArrowDown = false;
@@ -4608,6 +4611,8 @@ var WebGLApp = (function (_super) {
     WebGLApp.prototype.GetProbeRadiusCircleMax = function () { return this.probeRadiusCircleMax; };
     WebGLApp.prototype.SetProbeRadiusCircleColor = function (r, g, b) { this.probeRadiusCircleColor.assign(r, g, b); };
     WebGLApp.prototype.GetProbeRadiusCircleColor = function () { return this.probeRadiusCircleColor.toArray(); };
+    WebGLApp.prototype.SetShowDistanceColoredPointCloud = function (show) { this.showDistanceColoredPointCloud = show; };
+    WebGLApp.prototype.GetShowDistanceColoredPointCloud = function () { return this.showDistanceColoredPointCloud; };
     WebGLApp.prototype.Resize = function (width, height) {
         this.width = width;
         this.height = height;
@@ -4622,6 +4627,7 @@ var WebGLApp = (function (_super) {
         this.programDebug = CreateShaderProgram(gl, WebGLApp.vsDebugES2, WebGLApp.fsDebugES2);
         this.programCircle = CreateShaderProgram(gl, WebGLApp.vsCircleES2, WebGLApp.fsCircleES2);
         this.programPointCloud = CreateShaderProgram(gl, WebGLApp.vsPointCloudES2, WebGLApp.fsPointCloudES2);
+        this.programPointCloudDistanceColored = CreateShaderProgram(gl, WebGLApp.vsPointCloudDistanceColoredES2, WebGLApp.fsPointCloudDistanceColoredES2);
         this.programWireGeometry = CreateShaderProgram(gl, WebGLApp.vsWireGeometryES2, WebGLApp.fsWireGeometryES2);
         this.programGeometry = CreateShaderProgram(gl, WebGLApp.vsGeometryES2, WebGLApp.fsGeometryES2);
         this.pointcloud = CreateVertexBuffer(gl, this.vertexData);
@@ -4812,7 +4818,10 @@ var WebGLApp = (function (_super) {
         this.text.clearRect(0, 0, this.text.canvas.width, this.text.canvas.height);
         this.text.fillStyle = "white";
         gl.viewport(0, 0, this.width, this.height);
-        this.renderPointCloud(gl, this.pickedPointIndex, this.selectedPointSize, this.pickedPointColor);
+        if (this.showDistanceColoredPointCloud)
+            this.renderDistanceColoredPointCloud(gl, this.pickedPointIndex, this.pickedPointColor);
+        else
+            this.renderPointCloud(gl, this.pickedPointIndex, this.pickedPointColor);
         this.renderInliers(gl);
         if (this.bTouchAreaVisible && this.picked_point instanceof vec3) {
             gl.useProgram(this.programWireGeometry);
@@ -4842,7 +4851,7 @@ var WebGLApp = (function (_super) {
     };
     WebGLApp.prototype.SetPickedPointColor = function (r, g, b) { this.pickedPointColor.assign(r, g, b); };
     WebGLApp.prototype.GetPickedPointColor = function () { return this.pickedPointColor.toArray(); };
-    WebGLApp.prototype.renderPointCloud = function (gl, pickedIndex, pickedSize, pickedColor) {
+    WebGLApp.prototype.renderPointCloud = function (gl, pickedIndex, pickedColor) {
         gl.useProgram(this.programPointCloud);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
@@ -4856,6 +4865,52 @@ var WebGLApp = (function (_super) {
             gl.disable(gl.DEPTH_TEST);
             gl.uniform1f(gl.getUniformLocation(this.programPointCloud, "pointSize"), this.selectedPointSize);
             gl.uniform3f(gl.getUniformLocation(this.programPointCloud, "color"), pickedColor.x, pickedColor.y, pickedColor.z);
+            gl.drawArrays(gl.POINTS, pickedIndex, 1);
+            if (depthTest == true)
+                gl.enable(gl.DEPTH_TEST);
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.useProgram(null);
+    };
+    WebGLApp.prototype.calcDepthRange = function (view_matrix) {
+        var mmm = this.bbox.lowerBound;
+        var MMM = this.bbox.upperBound;
+        this.bboxVertices[0].assign(mmm);
+        this.bboxVertices[1].assign(mmm.x, mmm.y, MMM.z);
+        this.bboxVertices[2].assign(mmm.x, MMM.y, mmm.z);
+        this.bboxVertices[3].assign(MMM.x, mmm.y, mmm.z);
+        this.bboxVertices[4].assign(MMM.x, MMM.y, mmm.z);
+        this.bboxVertices[5].assign(MMM.x, mmm.y, MMM.z);
+        this.bboxVertices[6].assign(mmm.x, MMM.y, MMM.z);
+        this.bboxVertices[7].assign(MMM);
+        var mmmd = Math.abs(view_matrix.mul(this.bboxVertices[0], 1).z);
+        var mmMd = Math.abs(view_matrix.mul(this.bboxVertices[1], 1).z);
+        var mMmd = Math.abs(view_matrix.mul(this.bboxVertices[2], 1).z);
+        var Mmmd = Math.abs(view_matrix.mul(this.bboxVertices[3], 1).z);
+        var MMmd = Math.abs(view_matrix.mul(this.bboxVertices[4], 1).z);
+        var MmMd = Math.abs(view_matrix.mul(this.bboxVertices[5], 1).z);
+        var mMMd = Math.abs(view_matrix.mul(this.bboxVertices[6], 1).z);
+        var MMMd = Math.abs(view_matrix.mul(this.bboxVertices[7], 1).z);
+        var md = Math.min(mmmd, mmMd, mMmd, Mmmd, MMmd, MmMd, mMMd, MMMd);
+        var Md = Math.max(mmmd, mmMd, mMmd, Mmmd, MMmd, MmMd, mMMd, MMMd);
+        return new vec2(md, Md);
+    };
+    WebGLApp.prototype.renderDistanceColoredPointCloud = function (gl, pickedIndex, pickedColor) {
+        gl.useProgram(this.programPointCloudDistanceColored);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+        var depthRange = this.calcDepthRange(this.trackball.viewMatrix);
+        gl.uniform2f(gl.getUniformLocation(this.programPointCloudDistanceColored, "depthRange"), depthRange.x, depthRange.y);
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloudDistanceColored, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloudDistanceColored, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
+        gl.uniform1f(gl.getUniformLocation(this.programPointCloudDistanceColored, "pointSize"), this.outlierPointSize);
+        gl.uniform3f(gl.getUniformLocation(this.programPointCloudDistanceColored, "color"), 1, 1, 1);
+        gl.drawArrays(gl.POINTS, 0, this.pointcloud.count);
+        if (pickedIndex != -1) {
+            var depthTest = gl.getParameter(gl.DEPTH_TEST);
+            gl.disable(gl.DEPTH_TEST);
+            gl.uniform1f(gl.getUniformLocation(this.programPointCloudDistanceColored, "pointSize"), this.selectedPointSize);
+            gl.uniform3f(gl.getUniformLocation(this.programPointCloudDistanceColored, "color"), pickedColor.x, pickedColor.y, pickedColor.z);
             gl.drawArrays(gl.POINTS, pickedIndex, 1);
             if (depthTest == true)
                 gl.enable(gl.DEPTH_TEST);
@@ -5243,6 +5298,8 @@ var WebGLApp = (function (_super) {
         this.trackball.mouse(dx, dy, Camera.TrackballMode.NOTHING);
     };
     WebGLApp.prototype.onKeyUp = function (event) {
+        if (event.keyCode == WebGLApp.KEY_CAPS_LOCK)
+            this.showDistanceColoredPointCloud = !this.showDistanceColoredPointCloud;
         if (!this.isArrowKey(event))
             return;
         switch (event.keyCode) {
@@ -5378,7 +5435,9 @@ var WebGLApp = (function (_super) {
     WebGLApp.vsDebugES2 = "#version 100\n\tattribute vec3 pos;\n\n\tuniform vec3 line[2];\n\tuniform mat4 model_matrix;\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\n\tvoid main() {\n\t\tgl_Position = proj_matrix*view_matrix*model_matrix*vec4(line[int(pos.x)], 1);\n\t}\n\t";
     WebGLApp.fsDebugES2 = "#version 100\n\tprecision mediump float;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(1, 0, 0, 1);\n\t}\n\t";
     WebGLApp.vsPointCloudES2 = "#version 100\n    attribute vec3 pos;\n\t\n    uniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\tuniform float pointSize;\n\n    void main() {\n        gl_PointSize = pointSize;\n        gl_Position = proj_matrix*view_matrix*vec4(pos, 1);\n    }\n    ";
-    WebGLApp.fsPointCloudES2 = "#version 100\n    precision mediump float;\n\n    uniform vec3 color;\n\n    void main() {\n        gl_FragColor = vec4(color, 1.0);\n    }\n    ";
+    WebGLApp.fsPointCloudES2 = "#version 100\n    precision mediump float;\n\n    uniform vec3 color;\n\n    void main() {\n        gl_FragColor = vec4(color, 1.0);\n    }\n\t";
+    WebGLApp.vsPointCloudDistanceColoredES2 = "#version 100\n\tattribute vec3 pos;\n\t\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\tuniform float pointSize;\n\tuniform vec2 depthRange;\n\n\tvarying float distance;\n\tvoid main() {\n\t\tgl_PointSize = pointSize;\n\t\tvec4 epos = view_matrix * vec4(pos, 1);\n\t\tdistance = 1.0 - 0.75 * smoothstep(abs(depthRange.x), abs(depthRange.y), abs(epos.z));\n\t\tgl_Position = proj_matrix * epos;\n\t}\n\t";
+    WebGLApp.fsPointCloudDistanceColoredES2 = "#version 100\n\tprecision mediump float;\n\t\n\tvarying float distance;\n\n\tuniform vec3 color;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color * distance, 1.0);\n\t}\n\t";
     WebGLApp.vsWireGeometryES2 = "#version 100\n\tattribute vec3 pos;\n\n\tuniform int subroutine_index;\t// 0: plane, 1: sphere, 2: cylinder, 3: cone, 4: torus\n\tuniform vec3 quad[4];\t// ll, lr, ur, ul\n\tuniform float radius0;\t// bottom or tube\n\tuniform float radius1;\t// top or mean\n\tuniform mat4 model_matrix;\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\n\tvec4 Plane() { return vec4(quad[int(pos.x)], 1); }\n\tvec4 Sphere() { return vec4(pos, 1); }\n\tvec4 Cylinder() { return vec4(pos, 1); }\n\tvec4 Cone() {\n\t\tfloat height = (pos.y + 1.0)*0.5;\n\t\tfloat interpolated_radius = mix(radius0, radius1, height);\n\t\treturn vec4(vec3(interpolated_radius, 1, interpolated_radius)*pos, 1);\n\t}\n\tvec4 Torus() {\n\t\tvec3 tdir = normalize(vec3(pos.x, 0, pos.z));\n\t\tvec3 pdir = normalize(pos-tdir);\n\t\treturn vec4(radius1*tdir+radius0*pdir, 1);\n\t}\n\tvoid main() {\n\t\tvec4 pos;\n\t\tif(subroutine_index==0) pos = Plane();\n\t\telse if(subroutine_index==1) pos = Sphere();\n\t\telse if(subroutine_index==2) pos = Cylinder();\n\t\telse if(subroutine_index==3) pos = Cone();\n\t\telse if(subroutine_index==4) pos = Torus();\n\t\tgl_Position = proj_matrix*view_matrix*model_matrix*pos;\n\t}\n\t";
     WebGLApp.vsGeometryES2 = "#version 100\n\tattribute vec3 pos;\n\t\n\tuniform int subroutine_index;\t// 0: plane, 1: sphere, 2: cylinder, 3: cone, 4: torus\n\tuniform vec3 quad[4];\t// ll, lr, ur, ul\n\tuniform float radius0;\t// bottom or tube\n\tuniform float radius1;\t// top or mean\n\tuniform mat4 model_matrix;\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\n\tvec4 Plane() { return vec4(quad[int(pos.x)], 1); }\n\tvec4 Sphere() { return vec4(pos, 1); }\n\tvec4 Cylinder() { return vec4(pos, 1); }\n\tvec4 Cone() {\n\t\tfloat height = (pos.y + 1.0)*0.5;\n\t\tfloat interpolated_radius = mix(radius0, radius1, height);\n\t\treturn vec4(vec3(interpolated_radius, 1, interpolated_radius)*pos, 1);\n\t}\n\tvec4 Torus() {\n\t\tvec3 tdir = normalize(vec3(pos.x, 0, pos.z));\n\t\tvec3 pdir = normalize(pos-tdir);\n\t\treturn vec4(radius1*tdir+radius0*pdir, 1);\n\t}\n\tvoid main() {\n\t\tvec4 pos;\n\t\tif(subroutine_index==0) pos = Plane();\n\t\telse if(subroutine_index==1) pos = Sphere();\n\t\telse if(subroutine_index==2) pos = Cylinder();\n\t\telse if(subroutine_index==3) pos = Cone();\n\t\telse if(subroutine_index==4) pos = Torus();\n\t\tgl_Position = proj_matrix*view_matrix*model_matrix*pos;\n\t}\n\t";
     WebGLApp.fsWireGeometryES2 = "#version 100\n\tprecision mediump float;\n\t\n\tuniform vec3 color;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color, 0.5);\n\t}\n\t";
@@ -5389,6 +5448,7 @@ var WebGLApp = (function (_super) {
     WebGLApp.KEY_RIGHT = 39;
     WebGLApp.KEY_UP = 38;
     WebGLApp.KEY_DOWN = 40;
+    WebGLApp.KEY_CAPS_LOCK = 20;
     WebGLApp.ROTATION_STEP_PRECISE_DEGREE = 0.05;
     WebGLApp.ROTATION_STEP_NORMAL_DEGREE = 1;
     WebGLApp.ROTATION_STEP_FAST_DEGREE = 10;

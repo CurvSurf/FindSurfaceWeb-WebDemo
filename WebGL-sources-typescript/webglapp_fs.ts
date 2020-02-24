@@ -3339,7 +3339,36 @@ class WebGLApp extends WebGLAppBase {
     void main() {
         gl_FragColor = vec4(color, 1.0);
     }
-    `;
+	`;
+	
+	private static vsPointCloudDistanceColoredES2: string=`#version 100
+	attribute vec3 pos;
+	
+	uniform mat4 view_matrix;
+	uniform mat4 proj_matrix;
+	uniform float pointSize;
+	uniform vec2 depthRange;
+
+	varying float distance;
+	void main() {
+		gl_PointSize = pointSize;
+		vec4 epos = view_matrix * vec4(pos, 1);
+		distance = 1.0 - 0.75 * smoothstep(abs(depthRange.x), abs(depthRange.y), abs(epos.z));
+		gl_Position = proj_matrix * epos;
+	}
+	`;
+
+	private static fsPointCloudDistanceColoredES2: string=`#version 100
+	precision mediump float;
+	
+	varying float distance;
+
+	uniform vec3 color;
+
+	void main() {
+		gl_FragColor = vec4(color * distance, 1.0);
+	}
+	`
 
 	private static vsWireGeometryES2: string=`#version 100
 	attribute vec3 pos;
@@ -3489,6 +3518,7 @@ class WebGLApp extends WebGLAppBase {
 	
 	private programDebug: WebGLProgram = null;
 	private programPointCloud: WebGLProgram = null;
+	private programPointCloudDistanceColored: WebGLProgram = null;
 	private programWireGeometry: WebGLProgram = null;
 	private programCircle: WebGLProgram = null;
 	
@@ -3616,6 +3646,10 @@ class WebGLApp extends WebGLAppBase {
 	public SetProbeRadiusCircleColor(r: number, g: number, b: number): void { this.probeRadiusCircleColor.assign(r, g, b); }
 	public GetProbeRadiusCircleColor(): number[] { return this.probeRadiusCircleColor.toArray(); }
 
+	private showDistanceColoredPointCloud: boolean = false;
+	public SetShowDistanceColoredPointCloud(show: boolean): void { this.showDistanceColoredPointCloud = show; }
+	public GetShowDistanceColoredPointCloud(): boolean { return this.showDistanceColoredPointCloud; }
+
 	public Resize(width: number, height: number) { 
 		this.width = width; this.height = height;
 		this.trackball.updateViewport(width, height);
@@ -3689,6 +3723,7 @@ class WebGLApp extends WebGLAppBase {
 		this.programDebug = CreateShaderProgram(gl, WebGLApp.vsDebugES2, WebGLApp.fsDebugES2);
 		this.programCircle = CreateShaderProgram(gl, WebGLApp.vsCircleES2, WebGLApp.fsCircleES2);
 		this.programPointCloud = CreateShaderProgram(gl, WebGLApp.vsPointCloudES2, WebGLApp.fsPointCloudES2);
+		this.programPointCloudDistanceColored = CreateShaderProgram(gl, WebGLApp.vsPointCloudDistanceColoredES2, WebGLApp.fsPointCloudDistanceColoredES2);
 		this.programWireGeometry = CreateShaderProgram(gl, WebGLApp.vsWireGeometryES2, WebGLApp.fsWireGeometryES2);
 
 		this.programGeometry = CreateShaderProgram(gl, WebGLApp.vsGeometryES2, WebGLApp.fsGeometryES2);
@@ -3904,7 +3939,8 @@ class WebGLApp extends WebGLAppBase {
 		this.text.fillStyle="white";
 
 		gl.viewport(0, 0, this.width, this.height);
-		this.renderPointCloud(gl, this.pickedPointIndex, this.selectedPointSize, this.pickedPointColor);
+		if (this.showDistanceColoredPointCloud) this.renderDistanceColoredPointCloud(gl, this.pickedPointIndex, this.pickedPointColor);
+		else this.renderPointCloud(gl, this.pickedPointIndex, this.pickedPointColor);
 		this.renderInliers(gl);
 
 		// TODO: is it okay to remove this?
@@ -3951,7 +3987,7 @@ class WebGLApp extends WebGLAppBase {
 	private pickedPointColor: vec3 = new vec3(1, 0, 0);
 	public SetPickedPointColor(r: number, g: number, b: number): void { this.pickedPointColor.assign(r, g, b); }
 	public GetPickedPointColor(): number[] { return this.pickedPointColor.toArray(); }
-	private renderPointCloud(gl: WebGLRenderingContext, pickedIndex: number, pickedSize: number, pickedColor: vec3): void {
+	private renderPointCloud(gl: WebGLRenderingContext, pickedIndex: number, pickedColor: vec3): void {
 		gl.useProgram(this.programPointCloud);
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
 		gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
@@ -3969,6 +4005,60 @@ class WebGLApp extends WebGLAppBase {
 
 			gl.uniform1f(gl.getUniformLocation(this.programPointCloud, "pointSize"), this.selectedPointSize);
 			gl.uniform3f(gl.getUniformLocation(this.programPointCloud, "color"), pickedColor.x, pickedColor.y, pickedColor.z);
+
+			gl.drawArrays(gl.POINTS, pickedIndex, 1);
+
+			if (depthTest == true) gl.enable(gl.DEPTH_TEST);
+		}
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, null);
+		gl.useProgram(null);
+	}
+
+	private bboxVertices: vec3[] = [new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3()];
+	private calcDepthRange(view_matrix: mat4): vec2 {
+		let mmm: vec3 = this.bbox.lowerBound;
+		let MMM: vec3 = this.bbox.upperBound;
+		this.bboxVertices[0].assign(mmm);
+		this.bboxVertices[1].assign(mmm.x, mmm.y, MMM.z)
+		this.bboxVertices[2].assign(mmm.x, MMM.y, mmm.z)
+		this.bboxVertices[3].assign(MMM.x, mmm.y, mmm.z)
+		this.bboxVertices[4].assign(MMM.x, MMM.y, mmm.z)
+		this.bboxVertices[5].assign(MMM.x, mmm.y, MMM.z)
+		this.bboxVertices[6].assign(mmm.x, MMM.y, MMM.z)
+		this.bboxVertices[7].assign(MMM);
+		let mmmd: number = Math.abs(view_matrix.mul(this.bboxVertices[0], 1).z);
+		let mmMd: number = Math.abs(view_matrix.mul(this.bboxVertices[1], 1).z);
+		let mMmd: number = Math.abs(view_matrix.mul(this.bboxVertices[2], 1).z);
+		let Mmmd: number = Math.abs(view_matrix.mul(this.bboxVertices[3], 1).z);
+		let MMmd: number = Math.abs(view_matrix.mul(this.bboxVertices[4], 1).z);
+		let MmMd: number = Math.abs(view_matrix.mul(this.bboxVertices[5], 1).z);
+		let mMMd: number = Math.abs(view_matrix.mul(this.bboxVertices[6], 1).z);
+		let MMMd: number = Math.abs(view_matrix.mul(this.bboxVertices[7], 1).z);
+		let md: number = Math.min(mmmd, mmMd, mMmd, Mmmd, MMmd, MmMd, mMMd, MMMd);
+		let Md: number = Math.max(mmmd, mmMd, mMmd, Mmmd, MMmd, MmMd, mMMd, MMMd);
+		return new vec2(md, Md);
+	}
+	private renderDistanceColoredPointCloud(gl: WebGLRenderingContext, pickedIndex: number, pickedColor: vec3): void {
+		gl.useProgram(this.programPointCloudDistanceColored);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
+		gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+
+		let depthRange: vec2 = this.calcDepthRange(this.trackball.viewMatrix);
+		gl.uniform2f(gl.getUniformLocation(this.programPointCloudDistanceColored, "depthRange"), depthRange.x, depthRange.y);
+		gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloudDistanceColored, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
+		gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloudDistanceColored, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
+		gl.uniform1f(gl.getUniformLocation(this.programPointCloudDistanceColored, "pointSize"), this.outlierPointSize);
+		gl.uniform3f(gl.getUniformLocation(this.programPointCloudDistanceColored, "color"), 1, 1, 1);
+
+		gl.drawArrays(gl.POINTS, 0, this.pointcloud.count);
+
+		if (pickedIndex != -1) {
+			let depthTest: GLboolean = gl.getParameter(gl.DEPTH_TEST);
+			gl.disable(gl.DEPTH_TEST);
+
+			gl.uniform1f(gl.getUniformLocation(this.programPointCloudDistanceColored, "pointSize"), this.selectedPointSize);
+			gl.uniform3f(gl.getUniformLocation(this.programPointCloudDistanceColored, "color"), pickedColor.x, pickedColor.y, pickedColor.z);
 
 			gl.drawArrays(gl.POINTS, pickedIndex, 1);
 
@@ -4426,6 +4516,7 @@ class WebGLApp extends WebGLAppBase {
 	private static readonly KEY_RIGHT = 39;
 	private static readonly KEY_UP = 38;
 	private static readonly KEY_DOWN = 40;
+	private static readonly KEY_CAPS_LOCK = 20;
 	private static readonly ROTATION_STEP_PRECISE_DEGREE = 0.05;
 	private static readonly ROTATION_STEP_NORMAL_DEGREE = 1;
 	private static readonly ROTATION_STEP_FAST_DEGREE = 10;
@@ -4461,6 +4552,7 @@ class WebGLApp extends WebGLAppBase {
 		this.trackball.mouse(dx, dy, Camera.TrackballMode.NOTHING);
 	}
 	protected onKeyUp(event: KeyboardEvent): void {
+		if (event.keyCode == WebGLApp.KEY_CAPS_LOCK) this.showDistanceColoredPointCloud = !this.showDistanceColoredPointCloud;
 		if (!this.isArrowKey(event)) return;
 
 		switch (event.keyCode) {
