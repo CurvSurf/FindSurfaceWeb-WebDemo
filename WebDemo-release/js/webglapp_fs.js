@@ -4070,6 +4070,7 @@ var AppBase = (function () {
     AppBase.prototype.onMouseOver = function (event) { };
     AppBase.prototype.onMouseOut = function (event) { };
     AppBase.prototype.onMouseWheel = function (event) { };
+    AppBase.prototype.onBlur = function (event) { };
     AppBase.prototype.onTouchStart = function (event) { };
     AppBase.prototype.onTouchMove = function (event) { };
     AppBase.prototype.onTouchEnd = function (event) { };
@@ -4095,6 +4096,7 @@ var WebGLAppBase = (function (_super) {
             canvas.addEventListener("mouseout", _this.onMouseOut.bind(_this));
             canvas.addEventListener("mousewheel", _this.onMouseWheel.bind(_this), false);
             canvas.addEventListener("DOMMouseScroll", _this.onMouseWheel.bind(_this), false);
+            canvas.addEventListener("blur", _this.onBlur.bind(_this), true);
             canvas.addEventListener("touchstart", _this.onTouchStart.bind(_this));
             canvas.addEventListener("touchmove", _this.onTouchMove.bind(_this));
             canvas.addEventListener("touchend", _this.onTouchEnd.bind(_this));
@@ -4445,8 +4447,9 @@ var WebGLApp = (function (_super) {
         var _this = _super.call(this, canvas) || this;
         _this.programDebug = null;
         _this.programPointCloud = null;
-        _this.programPointCloudDistanceColored = null;
+        _this.programPointCloudDC = null;
         _this.programWireGeometry = null;
+        _this.programWireGeometryDC = null;
         _this.programCircle = null;
         _this.plane = null;
         _this.sphere = null;
@@ -4483,10 +4486,11 @@ var WebGLApp = (function (_super) {
         _this.probeRadiusCircleMin = 0.1;
         _this.probeRadiusCircleMax = 1.0;
         _this.probeRadiusCircleColor = new vec3(0, 1, 1);
-        _this.showDistanceColoredPointCloud = false;
+        _this.distanceColoringEnabled = false;
+        _this.bboxVertices = [new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3()];
+        _this.depthRange = new vec2();
         _this.pickedPointIndex = -1;
         _this.pickedPointColor = new vec3(1, 0, 0);
-        _this.bboxVertices = [new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3()];
         _this.count = 0;
         _this.leftArrowDown = false;
         _this.rightArrowDown = false;
@@ -4611,8 +4615,8 @@ var WebGLApp = (function (_super) {
     WebGLApp.prototype.GetProbeRadiusCircleMax = function () { return this.probeRadiusCircleMax; };
     WebGLApp.prototype.SetProbeRadiusCircleColor = function (r, g, b) { this.probeRadiusCircleColor.assign(r, g, b); };
     WebGLApp.prototype.GetProbeRadiusCircleColor = function () { return this.probeRadiusCircleColor.toArray(); };
-    WebGLApp.prototype.SetShowDistanceColoredPointCloud = function (show) { this.showDistanceColoredPointCloud = show; };
-    WebGLApp.prototype.GetShowDistanceColoredPointCloud = function () { return this.showDistanceColoredPointCloud; };
+    WebGLApp.prototype.SetDistanceColoringEnabled = function (enabled) { this.distanceColoringEnabled = enabled; };
+    WebGLApp.prototype.GetDistanceColoringEnabled = function () { return this.distanceColoringEnabled; };
     WebGLApp.prototype.Resize = function (width, height) {
         this.width = width;
         this.height = height;
@@ -4627,8 +4631,9 @@ var WebGLApp = (function (_super) {
         this.programDebug = CreateShaderProgram(gl, WebGLApp.vsDebugES2, WebGLApp.fsDebugES2);
         this.programCircle = CreateShaderProgram(gl, WebGLApp.vsCircleES2, WebGLApp.fsCircleES2);
         this.programPointCloud = CreateShaderProgram(gl, WebGLApp.vsPointCloudES2, WebGLApp.fsPointCloudES2);
-        this.programPointCloudDistanceColored = CreateShaderProgram(gl, WebGLApp.vsPointCloudDistanceColoredES2, WebGLApp.fsPointCloudDistanceColoredES2);
+        this.programPointCloudDC = CreateShaderProgram(gl, WebGLApp.vsPointCloudDCES2, WebGLApp.fsPointCloudDCES2);
         this.programWireGeometry = CreateShaderProgram(gl, WebGLApp.vsWireGeometryES2, WebGLApp.fsWireGeometryES2);
+        this.programWireGeometryDC = CreateShaderProgram(gl, WebGLApp.vsWireGeometryDCES2, WebGLApp.fsWireGeometryDCES2);
         this.programGeometry = CreateShaderProgram(gl, WebGLApp.vsGeometryES2, WebGLApp.fsGeometryES2);
         this.pointcloud = CreateVertexBuffer(gl, this.vertexData);
         this.attributeLessIndices = CreateVertexBuffer(gl, Array.apply(0, { length: 38 }).map(function (_, i) { return i + 1; }));
@@ -4815,28 +4820,27 @@ var WebGLApp = (function (_super) {
         this.trackball.update();
     };
     WebGLApp.prototype.render = function (gl, timeElapsed) {
+        var _this = this;
         this.text.clearRect(0, 0, this.text.canvas.width, this.text.canvas.height);
         this.text.fillStyle = "white";
         gl.viewport(0, 0, this.width, this.height);
-        if (this.showDistanceColoredPointCloud)
-            this.renderDistanceColoredPointCloud(gl, this.pickedPointIndex, this.pickedPointColor);
-        else
-            this.renderPointCloud(gl, this.pickedPointIndex, this.pickedPointColor);
-        this.renderInliers(gl);
+        if (this.distanceColoringEnabled)
+            this.calcDepthRange(this.trackball.viewMatrix);
+        this.renderPointCloud(gl, this.pickedPointIndex, this.pickedPointColor);
+        this.objectNames.forEach(function (name) {
+            var objectData = _this.inlierObjects[name];
+            var objectVBO = _this.inlierVAO[name];
+            if (objectData.pointVisible)
+                _this.renderInlierPoints(gl, objectData, objectVBO);
+        });
+        this.objectNames.forEach(function (name) {
+            var objectData = _this.inlierObjects[name];
+            var objectVBO = _this.inlierVAO[name];
+            if (objectData.geometryVisible)
+                _this.renderGeometry(gl, objectData);
+        });
         if (this.bTouchAreaVisible && this.picked_point instanceof vec3) {
-            gl.useProgram(this.programWireGeometry);
-            gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "model_matrix"), false, mat4.translate(this.picked_point).mul(mat4.scale(this.touchRadius, this.touchRadius, this.touchRadius)).transpose().toArray());
-            gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
-            gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
-            gl.uniform3f(gl.getUniformLocation(this.programWireGeometry, "color"), 1, 0, 0);
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.sphere.vbo);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.sphere.ibo);
-            gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-            gl.uniform1i(gl.getUniformLocation(this.programWireGeometry, "subroutine_index"), 1);
-            gl.drawElements(gl.LINES, this.sphere.count, gl.UNSIGNED_SHORT, 0);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
-            gl.useProgram(null);
+            this.renderTouchRadiusSphere(gl);
         }
         if (this.isMouseOut == false) {
             if (this.showTouchRadiusCircle == true) {
@@ -4848,29 +4852,6 @@ var WebGLApp = (function (_super) {
         }
         this.renderUnitFrame(gl);
         this.renderRuler();
-    };
-    WebGLApp.prototype.SetPickedPointColor = function (r, g, b) { this.pickedPointColor.assign(r, g, b); };
-    WebGLApp.prototype.GetPickedPointColor = function () { return this.pickedPointColor.toArray(); };
-    WebGLApp.prototype.renderPointCloud = function (gl, pickedIndex, pickedColor) {
-        gl.useProgram(this.programPointCloud);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
-        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloud, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloud, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
-        gl.uniform1f(gl.getUniformLocation(this.programPointCloud, "pointSize"), this.outlierPointSize);
-        gl.uniform3f(gl.getUniformLocation(this.programPointCloud, "color"), 1, 1, 1);
-        gl.drawArrays(gl.POINTS, 0, this.pointcloud.count);
-        if (pickedIndex != -1) {
-            var depthTest = gl.getParameter(gl.DEPTH_TEST);
-            gl.disable(gl.DEPTH_TEST);
-            gl.uniform1f(gl.getUniformLocation(this.programPointCloud, "pointSize"), this.selectedPointSize);
-            gl.uniform3f(gl.getUniformLocation(this.programPointCloud, "color"), pickedColor.x, pickedColor.y, pickedColor.z);
-            gl.drawArrays(gl.POINTS, pickedIndex, 1);
-            if (depthTest == true)
-                gl.enable(gl.DEPTH_TEST);
-        }
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        gl.useProgram(null);
     };
     WebGLApp.prototype.calcDepthRange = function (view_matrix) {
         var mmm = this.bbox.lowerBound;
@@ -4893,24 +4874,29 @@ var WebGLApp = (function (_super) {
         var MMMd = Math.abs(view_matrix.mul(this.bboxVertices[7], 1).z);
         var md = Math.min(mmmd, mmMd, mMmd, Mmmd, MMmd, MmMd, mMMd, MMMd);
         var Md = Math.max(mmmd, mmMd, mMmd, Mmmd, MMmd, MmMd, mMMd, MMMd);
-        return new vec2(md, Md);
+        this.depthRange.assign(md, Md);
     };
-    WebGLApp.prototype.renderDistanceColoredPointCloud = function (gl, pickedIndex, pickedColor) {
-        gl.useProgram(this.programPointCloudDistanceColored);
+    WebGLApp.prototype.SetPickedPointColor = function (r, g, b) { this.pickedPointColor.assign(r, g, b); };
+    WebGLApp.prototype.GetPickedPointColor = function () { return this.pickedPointColor.toArray(); };
+    WebGLApp.prototype.renderPointCloud = function (gl, pickedIndex, pickedColor) {
+        var program = this.distanceColoringEnabled ? this.programPointCloudDC : this.programPointCloud;
+        gl.enable(gl.DEPTH_TEST);
+        gl.useProgram(program);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-        var depthRange = this.calcDepthRange(this.trackball.viewMatrix);
-        gl.uniform2f(gl.getUniformLocation(this.programPointCloudDistanceColored, "depthRange"), depthRange.x, depthRange.y);
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloudDistanceColored, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
-        gl.uniformMatrix4fv(gl.getUniformLocation(this.programPointCloudDistanceColored, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
-        gl.uniform1f(gl.getUniformLocation(this.programPointCloudDistanceColored, "pointSize"), this.outlierPointSize);
-        gl.uniform3f(gl.getUniformLocation(this.programPointCloudDistanceColored, "color"), 1, 1, 1);
+        if (this.distanceColoringEnabled) {
+            gl.uniform2f(gl.getUniformLocation(this.programPointCloudDC, "depthRange"), this.depthRange.x, this.depthRange.y);
+        }
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
+        gl.uniform1f(gl.getUniformLocation(program, "pointSize"), this.outlierPointSize);
+        gl.uniform3f(gl.getUniformLocation(program, "color"), 1, 1, 1);
         gl.drawArrays(gl.POINTS, 0, this.pointcloud.count);
         if (pickedIndex != -1) {
             var depthTest = gl.getParameter(gl.DEPTH_TEST);
             gl.disable(gl.DEPTH_TEST);
-            gl.uniform1f(gl.getUniformLocation(this.programPointCloudDistanceColored, "pointSize"), this.selectedPointSize);
-            gl.uniform3f(gl.getUniformLocation(this.programPointCloudDistanceColored, "color"), pickedColor.x, pickedColor.y, pickedColor.z);
+            gl.uniform1f(gl.getUniformLocation(program, "pointSize"), this.selectedPointSize);
+            gl.uniform3f(gl.getUniformLocation(program, "color"), pickedColor.x, pickedColor.y, pickedColor.z);
             gl.drawArrays(gl.POINTS, pickedIndex, 1);
             if (depthTest == true)
                 gl.enable(gl.DEPTH_TEST);
@@ -4918,95 +4904,127 @@ var WebGLApp = (function (_super) {
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.useProgram(null);
     };
-    WebGLApp.prototype.renderInliers = function (gl) {
-        var _this = this;
-        this.objectNames.forEach(function (name) {
-            var objectData = _this.inlierObjects[name];
-            var objectVBO = _this.inlierVAO[name];
-            if (objectData.pointVisible) {
-                gl.useProgram(_this.programPointCloud);
-                gl.bindBuffer(gl.ARRAY_BUFFER, objectVBO.vbo);
-                gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-                gl.uniformMatrix4fv(gl.getUniformLocation(_this.programPointCloud, "view_matrix"), false, _this.trackball.viewMatrix.transpose().toArray());
-                gl.uniformMatrix4fv(gl.getUniformLocation(_this.programPointCloud, "proj_matrix"), false, _this.trackball.projectionMatrix.transpose().toArray());
-                gl.uniform1f(gl.getUniformLocation(_this.programPointCloud, "pointSize"), objectData.inlierSelected ? _this.selectedPointSize : _this.inlierPointSize);
-                gl.uniform3fv(gl.getUniformLocation(_this.programPointCloud, "color"), objectData.pointColor.toArray());
-                gl.drawArrays(gl.POINTS, 0, objectVBO.count);
-                gl.bindBuffer(gl.ARRAY_BUFFER, null);
-                gl.useProgram(null);
-            }
-            if (objectData.geometryVisible) {
-                gl.enable(gl.BLEND);
-                gl.disable(gl.DEPTH_TEST);
-                gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-                gl.useProgram(_this.programWireGeometry);
-                gl.uniformMatrix4fv(gl.getUniformLocation(_this.programWireGeometry, "model_matrix"), false, objectData.modelMatrix.transpose().toArray());
-                gl.uniformMatrix4fv(gl.getUniformLocation(_this.programWireGeometry, "view_matrix"), false, _this.trackball.viewMatrix.transpose().toArray());
-                gl.uniformMatrix4fv(gl.getUniformLocation(_this.programWireGeometry, "proj_matrix"), false, _this.trackball.projectionMatrix.transpose().toArray());
-                gl.uniform3fv(gl.getUniformLocation(_this.programWireGeometry, "color"), objectData.geometryColor.toArray());
-                switch (true) {
-                    case objectData instanceof PlaneData:
-                        gl.bindBuffer(gl.ARRAY_BUFFER, _this.plane.vbo);
-                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, _this.plane.ibo);
-                        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-                        gl.uniform1i(gl.getUniformLocation(_this.programWireGeometry, "subroutine_index"), 0);
-                        gl.uniform3fv(gl.getUniformLocation(_this.programWireGeometry, "quad[0]"), objectData.ll.toArray());
-                        gl.uniform3fv(gl.getUniformLocation(_this.programWireGeometry, "quad[1]"), objectData.lr.toArray());
-                        gl.uniform3fv(gl.getUniformLocation(_this.programWireGeometry, "quad[2]"), objectData.ur.toArray());
-                        gl.uniform3fv(gl.getUniformLocation(_this.programWireGeometry, "quad[3]"), objectData.ul.toArray());
-                        gl.drawElements(gl.LINES, _this.plane.count, gl.UNSIGNED_SHORT, 0);
-                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-                        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-                        break;
-                    case objectData instanceof SphereData:
-                        gl.bindBuffer(gl.ARRAY_BUFFER, _this.sphere.vbo);
-                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, _this.sphere.ibo);
-                        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-                        gl.uniform1i(gl.getUniformLocation(_this.programWireGeometry, "subroutine_index"), 1);
-                        gl.drawElements(gl.LINES, _this.sphere.count, gl.UNSIGNED_SHORT, 0);
-                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-                        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-                        break;
-                    case objectData instanceof CylinderData:
-                        gl.bindBuffer(gl.ARRAY_BUFFER, _this.cylinder.vbo);
-                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, _this.cylinder.ibo);
-                        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-                        gl.uniform1i(gl.getUniformLocation(_this.programWireGeometry, "subroutine_index"), 2);
-                        gl.drawElements(gl.LINES, _this.cylinder.count, gl.UNSIGNED_SHORT, 0);
-                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-                        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-                        break;
-                    case objectData instanceof ConeData:
-                        gl.bindBuffer(gl.ARRAY_BUFFER, _this.cone.vbo);
-                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, _this.cone.ibo);
-                        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-                        gl.uniform1i(gl.getUniformLocation(_this.programWireGeometry, "subroutine_index"), 3);
-                        gl.uniform1f(gl.getUniformLocation(_this.programWireGeometry, "radius0"), objectData.bottomRadius);
-                        gl.uniform1f(gl.getUniformLocation(_this.programWireGeometry, "radius1"), objectData.topRadius);
-                        gl.drawElements(gl.LINES, _this.cone.count, gl.UNSIGNED_SHORT, 0);
-                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-                        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-                        break;
-                    case objectData instanceof TorusData:
-                        gl.bindBuffer(gl.ARRAY_BUFFER, _this.torus.vbo);
-                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, _this.torus.ibo);
-                        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-                        gl.uniform1i(gl.getUniformLocation(_this.programWireGeometry, "subroutine_index"), 4);
-                        gl.uniform1f(gl.getUniformLocation(_this.programWireGeometry, "radius0"), objectData.tubeRadius);
-                        gl.uniform1f(gl.getUniformLocation(_this.programWireGeometry, "radius1"), objectData.meanRadius);
-                        var ipr = 8 * 10;
-                        var ratio = objectData.tubeAngle / (2 * Math.PI);
-                        var count = ipr * (Math.floor(ratio * _this.torus.count / ipr) + 1);
-                        gl.drawElements(gl.LINES, count, gl.UNSIGNED_SHORT, 0);
-                        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-                        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-                        break;
-                }
-                gl.useProgram(null);
-                gl.disable(gl.BLEND);
-                gl.enable(gl.DEPTH_TEST);
-            }
-        });
+    WebGLApp.prototype.renderInlierPoints = function (gl, objectData, objectVBO) {
+        var program = this.distanceColoringEnabled ? this.programPointCloudDC : this.programPointCloud;
+        gl.enable(gl.DEPTH_TEST);
+        gl.useProgram(program);
+        gl.bindBuffer(gl.ARRAY_BUFFER, objectVBO.vbo);
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+        if (this.distanceColoringEnabled) {
+            gl.uniform2f(gl.getUniformLocation(this.programPointCloudDC, "depthRange"), this.depthRange.x, this.depthRange.y);
+        }
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
+        gl.uniform1f(gl.getUniformLocation(program, "pointSize"), objectData.inlierSelected ? this.selectedPointSize : this.inlierPointSize);
+        gl.uniform3fv(gl.getUniformLocation(program, "color"), objectData.pointColor.toArray());
+        gl.drawArrays(gl.POINTS, 0, objectVBO.count);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.useProgram(null);
+    };
+    WebGLApp.prototype.renderGeometry = function (gl, objectData) {
+        gl.enable(gl.BLEND);
+        gl.disable(gl.DEPTH_TEST);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        var program = this.distanceColoringEnabled ? this.programWireGeometryDC : this.programWireGeometry;
+        gl.useProgram(program);
+        if (this.distanceColoringEnabled) {
+            gl.uniform2f(gl.getUniformLocation(this.programWireGeometryDC, "depthRange"), this.depthRange.x, this.depthRange.y);
+        }
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "model_matrix"), false, objectData.modelMatrix.transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
+        gl.uniform3fv(gl.getUniformLocation(program, "color"), objectData.geometryColor.toArray());
+        switch (true) {
+            case objectData instanceof PlaneData:
+                this.renderPlane(gl, program, objectData);
+                break;
+            case objectData instanceof SphereData:
+                this.renderSphere(gl, program);
+                break;
+            case objectData instanceof CylinderData:
+                this.renderCylinder(gl, program);
+                break;
+            case objectData instanceof ConeData:
+                this.renderCone(gl, program, objectData);
+                break;
+            case objectData instanceof TorusData:
+                this.renderTorus(gl, program, objectData);
+                break;
+        }
+        gl.useProgram(null);
+        gl.disable(gl.BLEND);
+        gl.enable(gl.DEPTH_TEST);
+    };
+    WebGLApp.prototype.renderPlane = function (gl, program, objectData) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.plane.vbo);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.plane.ibo);
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+        gl.uniform1i(gl.getUniformLocation(program, "subroutine_index"), 0);
+        gl.uniform3fv(gl.getUniformLocation(program, "quad[0]"), objectData.ll.toArray());
+        gl.uniform3fv(gl.getUniformLocation(program, "quad[1]"), objectData.lr.toArray());
+        gl.uniform3fv(gl.getUniformLocation(program, "quad[2]"), objectData.ur.toArray());
+        gl.uniform3fv(gl.getUniformLocation(program, "quad[3]"), objectData.ul.toArray());
+        gl.drawElements(gl.LINES, this.plane.count, gl.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    };
+    WebGLApp.prototype.renderSphere = function (gl, program) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.sphere.vbo);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.sphere.ibo);
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+        gl.uniform1i(gl.getUniformLocation(program, "subroutine_index"), 1);
+        gl.drawElements(gl.LINES, this.sphere.count, gl.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    };
+    WebGLApp.prototype.renderCylinder = function (gl, program) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.cylinder.vbo);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.cylinder.ibo);
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+        gl.uniform1i(gl.getUniformLocation(program, "subroutine_index"), 2);
+        gl.drawElements(gl.LINES, this.cylinder.count, gl.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    };
+    WebGLApp.prototype.renderCone = function (gl, program, objectData) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.cone.vbo);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.cone.ibo);
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+        gl.uniform1i(gl.getUniformLocation(program, "subroutine_index"), 3);
+        gl.uniform1f(gl.getUniformLocation(program, "radius0"), objectData.bottomRadius);
+        gl.uniform1f(gl.getUniformLocation(program, "radius1"), objectData.topRadius);
+        gl.drawElements(gl.LINES, this.cone.count, gl.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    };
+    WebGLApp.prototype.renderTorus = function (gl, program, objectData) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.torus.vbo);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.torus.ibo);
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+        gl.uniform1i(gl.getUniformLocation(program, "subroutine_index"), 4);
+        gl.uniform1f(gl.getUniformLocation(program, "radius0"), objectData.tubeRadius);
+        gl.uniform1f(gl.getUniformLocation(program, "radius1"), objectData.meanRadius);
+        var ipr = 8 * 10;
+        var ratio = objectData.tubeAngle / (2 * Math.PI);
+        var count = ipr * (Math.floor(ratio * this.torus.count / ipr) + 1);
+        gl.drawElements(gl.LINES, count, gl.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    };
+    WebGLApp.prototype.renderTouchRadiusSphere = function (gl) {
+        gl.useProgram(this.programWireGeometry);
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "model_matrix"), false, mat4.translate(this.picked_point).mul(mat4.scale(this.touchRadius, this.touchRadius, this.touchRadius)).transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.programWireGeometry, "proj_matrix"), false, this.trackball.projectionMatrix.transpose().toArray());
+        gl.uniform3f(gl.getUniformLocation(this.programWireGeometry, "color"), 1, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.sphere.vbo);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.sphere.ibo);
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+        gl.uniform1i(gl.getUniformLocation(this.programWireGeometry, "subroutine_index"), 1);
+        gl.drawElements(gl.LINES, this.sphere.count, gl.UNSIGNED_SHORT, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        gl.useProgram(null);
     };
     WebGLApp.prototype.renderUnitFrame = function (gl) {
         gl.viewport(this.frame.pos.x, this.height - this.frame.pos.y - this.frame.size.height, this.frame.size.width, this.frame.size.height);
@@ -5276,19 +5294,19 @@ var WebGLApp = (function (_super) {
         }
         switch (event.keyCode) {
             case WebGLApp.KEY_LEFT:
-                dx += offset;
+                dx -= offset;
                 this.leftArrowDown = true;
                 break;
             case WebGLApp.KEY_RIGHT:
-                dx -= offset;
+                dx += offset;
                 this.rightArrowDown = true;
                 break;
             case WebGLApp.KEY_UP:
-                dy += offset;
+                dy -= offset;
                 this.upArrowDown = true;
                 break;
             case WebGLApp.KEY_DOWN:
-                dy -= offset;
+                dy += offset;
                 this.downArrowDown = true;
                 break;
             default: return;
@@ -5299,7 +5317,7 @@ var WebGLApp = (function (_super) {
     };
     WebGLApp.prototype.onKeyUp = function (event) {
         if (event.keyCode == WebGLApp.KEY_CAPS_LOCK)
-            this.showDistanceColoredPointCloud = !this.showDistanceColoredPointCloud;
+            this.distanceColoringEnabled = !this.distanceColoringEnabled;
         if (!this.isArrowKey(event))
             return;
         switch (event.keyCode) {
@@ -5367,6 +5385,12 @@ var WebGLApp = (function (_super) {
         deltaY = -Math.sign(deltaY);
         if (!Number.isNaN(deltaY))
             this.trackball.CameraZoom(deltaY);
+    };
+    WebGLApp.prototype.onBlur = function (event) {
+        this.leftArrowDown = false;
+        this.rightArrowDown = false;
+        this.upArrowDown = false;
+        this.downArrowDown = false;
     };
     WebGLApp.prototype._TouchScreen2Client = function (t) {
         var canvasBB = this.canvas.getBoundingClientRect();
@@ -5436,11 +5460,13 @@ var WebGLApp = (function (_super) {
     WebGLApp.fsDebugES2 = "#version 100\n\tprecision mediump float;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(1, 0, 0, 1);\n\t}\n\t";
     WebGLApp.vsPointCloudES2 = "#version 100\n    attribute vec3 pos;\n\t\n    uniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\tuniform float pointSize;\n\n    void main() {\n        gl_PointSize = pointSize;\n        gl_Position = proj_matrix*view_matrix*vec4(pos, 1);\n    }\n    ";
     WebGLApp.fsPointCloudES2 = "#version 100\n    precision mediump float;\n\n    uniform vec3 color;\n\n    void main() {\n        gl_FragColor = vec4(color, 1.0);\n    }\n\t";
-    WebGLApp.vsPointCloudDistanceColoredES2 = "#version 100\n\tattribute vec3 pos;\n\t\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\tuniform float pointSize;\n\tuniform vec2 depthRange;\n\n\tvarying float distance;\n\tvoid main() {\n\t\tgl_PointSize = pointSize;\n\t\tvec4 epos = view_matrix * vec4(pos, 1);\n\t\tdistance = 1.0 - 0.75 * smoothstep(abs(depthRange.x), abs(depthRange.y), abs(epos.z));\n\t\tgl_Position = proj_matrix * epos;\n\t}\n\t";
-    WebGLApp.fsPointCloudDistanceColoredES2 = "#version 100\n\tprecision mediump float;\n\t\n\tvarying float distance;\n\n\tuniform vec3 color;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color * distance, 1.0);\n\t}\n\t";
+    WebGLApp.vsPointCloudDCES2 = "#version 100\n\tattribute vec3 pos;\n\t\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\tuniform float pointSize;\n\tuniform vec2 depthRange;\n\n\tvarying float distance;\n\tvoid main() {\n\t\tgl_PointSize = pointSize;\n\t\tvec4 epos = view_matrix * vec4(pos, 1);\n\t\tdistance = 1.0 - 0.75 * smoothstep(abs(depthRange.x), abs(depthRange.y), abs(epos.z));\n\t\tgl_Position = proj_matrix * epos;\n\t}\n\t";
+    WebGLApp.fsPointCloudDCES2 = "#version 100\n\tprecision mediump float;\n\t\n\tvarying float distance;\n\n\tuniform vec3 color;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color * distance, 1.0);\n\t}\n\t";
     WebGLApp.vsWireGeometryES2 = "#version 100\n\tattribute vec3 pos;\n\n\tuniform int subroutine_index;\t// 0: plane, 1: sphere, 2: cylinder, 3: cone, 4: torus\n\tuniform vec3 quad[4];\t// ll, lr, ur, ul\n\tuniform float radius0;\t// bottom or tube\n\tuniform float radius1;\t// top or mean\n\tuniform mat4 model_matrix;\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\n\tvec4 Plane() { return vec4(quad[int(pos.x)], 1); }\n\tvec4 Sphere() { return vec4(pos, 1); }\n\tvec4 Cylinder() { return vec4(pos, 1); }\n\tvec4 Cone() {\n\t\tfloat height = (pos.y + 1.0)*0.5;\n\t\tfloat interpolated_radius = mix(radius0, radius1, height);\n\t\treturn vec4(vec3(interpolated_radius, 1, interpolated_radius)*pos, 1);\n\t}\n\tvec4 Torus() {\n\t\tvec3 tdir = normalize(vec3(pos.x, 0, pos.z));\n\t\tvec3 pdir = normalize(pos-tdir);\n\t\treturn vec4(radius1*tdir+radius0*pdir, 1);\n\t}\n\tvoid main() {\n\t\tvec4 pos;\n\t\tif(subroutine_index==0) pos = Plane();\n\t\telse if(subroutine_index==1) pos = Sphere();\n\t\telse if(subroutine_index==2) pos = Cylinder();\n\t\telse if(subroutine_index==3) pos = Cone();\n\t\telse if(subroutine_index==4) pos = Torus();\n\t\tgl_Position = proj_matrix*view_matrix*model_matrix*pos;\n\t}\n\t";
-    WebGLApp.vsGeometryES2 = "#version 100\n\tattribute vec3 pos;\n\t\n\tuniform int subroutine_index;\t// 0: plane, 1: sphere, 2: cylinder, 3: cone, 4: torus\n\tuniform vec3 quad[4];\t// ll, lr, ur, ul\n\tuniform float radius0;\t// bottom or tube\n\tuniform float radius1;\t// top or mean\n\tuniform mat4 model_matrix;\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\n\tvec4 Plane() { return vec4(quad[int(pos.x)], 1); }\n\tvec4 Sphere() { return vec4(pos, 1); }\n\tvec4 Cylinder() { return vec4(pos, 1); }\n\tvec4 Cone() {\n\t\tfloat height = (pos.y + 1.0)*0.5;\n\t\tfloat interpolated_radius = mix(radius0, radius1, height);\n\t\treturn vec4(vec3(interpolated_radius, 1, interpolated_radius)*pos, 1);\n\t}\n\tvec4 Torus() {\n\t\tvec3 tdir = normalize(vec3(pos.x, 0, pos.z));\n\t\tvec3 pdir = normalize(pos-tdir);\n\t\treturn vec4(radius1*tdir+radius0*pdir, 1);\n\t}\n\tvoid main() {\n\t\tvec4 pos;\n\t\tif(subroutine_index==0) pos = Plane();\n\t\telse if(subroutine_index==1) pos = Sphere();\n\t\telse if(subroutine_index==2) pos = Cylinder();\n\t\telse if(subroutine_index==3) pos = Cone();\n\t\telse if(subroutine_index==4) pos = Torus();\n\t\tgl_Position = proj_matrix*view_matrix*model_matrix*pos;\n\t}\n\t";
     WebGLApp.fsWireGeometryES2 = "#version 100\n\tprecision mediump float;\n\t\n\tuniform vec3 color;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color, 0.5);\n\t}\n\t";
+    WebGLApp.vsWireGeometryDCES2 = "#version 100\n\tattribute vec3 pos;\n\n\tuniform vec2 depthRange;\n\tuniform int subroutine_index;\t// 0: plane, 1: sphere, 2: cylinder, 3: cone, 4: torus\n\tuniform vec3 quad[4];\t// ll, lr, ur, ul\n\tuniform float radius0;\t// bottom or tube\n\tuniform float radius1;\t// top or mean\n\tuniform mat4 model_matrix;\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\n\tvarying float distance;\n\n\tvec4 Plane() { return vec4(quad[int(pos.x)], 1); }\n\tvec4 Sphere() { return vec4(pos, 1); }\n\tvec4 Cylinder() { return vec4(pos, 1); }\n\tvec4 Cone() {\n\t\tfloat height = (pos.y + 1.0)*0.5;\n\t\tfloat interpolated_radius = mix(radius0, radius1, height);\n\t\treturn vec4(vec3(interpolated_radius, 1, interpolated_radius)*pos, 1);\n\t}\n\tvec4 Torus() {\n\t\tvec3 tdir = normalize(vec3(pos.x, 0, pos.z));\n\t\tvec3 pdir = normalize(pos-tdir);\n\t\treturn vec4(radius1*tdir+radius0*pdir, 1);\n\t}\n\tvoid main() {\n\t\tvec4 pos;\n\t\tif(subroutine_index==0) pos = Plane();\n\t\telse if(subroutine_index==1) pos = Sphere();\n\t\telse if(subroutine_index==2) pos = Cylinder();\n\t\telse if(subroutine_index==3) pos = Cone();\n\t\telse if(subroutine_index==4) pos = Torus();\n\t\tvec4 epos = view_matrix * model_matrix * pos;\n\t\tdistance = 1.0 - 0.75 * smoothstep(abs(depthRange.x), abs(depthRange.y), abs(epos.z));\n\t\tgl_Position = proj_matrix * epos;\n\t}\n\t";
+    WebGLApp.fsWireGeometryDCES2 = "#version 100\n\tprecision mediump float;\n\n\tuniform vec3 color;\n\tvarying float distance;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color * distance, 0.5);\n\t}\n\t";
+    WebGLApp.vsGeometryES2 = "#version 100\n\tattribute vec3 pos;\n\t\n\tuniform int subroutine_index;\t// 0: plane, 1: sphere, 2: cylinder, 3: cone, 4: torus\n\tuniform vec3 quad[4];\t// ll, lr, ur, ul\n\tuniform float radius0;\t// bottom or tube\n\tuniform float radius1;\t// top or mean\n\tuniform mat4 model_matrix;\n\tuniform mat4 view_matrix;\n\tuniform mat4 proj_matrix;\n\n\tvec4 Plane() { return vec4(quad[int(pos.x)], 1); }\n\tvec4 Sphere() { return vec4(pos, 1); }\n\tvec4 Cylinder() { return vec4(pos, 1); }\n\tvec4 Cone() {\n\t\tfloat height = (pos.y + 1.0)*0.5;\n\t\tfloat interpolated_radius = mix(radius0, radius1, height);\n\t\treturn vec4(vec3(interpolated_radius, 1, interpolated_radius)*pos, 1);\n\t}\n\tvec4 Torus() {\n\t\tvec3 tdir = normalize(vec3(pos.x, 0, pos.z));\n\t\tvec3 pdir = normalize(pos-tdir);\n\t\treturn vec4(radius1*tdir+radius0*pdir, 1);\n\t}\n\tvoid main() {\n\t\tvec4 pos;\n\t\tif(subroutine_index==0) pos = Plane();\n\t\telse if(subroutine_index==1) pos = Sphere();\n\t\telse if(subroutine_index==2) pos = Cylinder();\n\t\telse if(subroutine_index==3) pos = Cone();\n\t\telse if(subroutine_index==4) pos = Torus();\n\t\tgl_Position = proj_matrix*view_matrix*model_matrix*pos;\n\t}\n\t";
     WebGLApp.fsGeometryES2 = "#version 100\n\tprecision mediump float;\n\n\tuniform vec3 color;\n\n\t/*http://codeflow.org/entries/2012/aug/02/easy-wireframe-display-with-barycentric-coordinates/*/\n\t/*float edgeFactor() { \n\t\tvec3 d=fwidth(bary); \n\t\tvec3 a3=smoothstep(vec3(0.0), d*1.5, bary); \n\t\treturn min(min(a3.x, a3.y), a3.z); \n\t}*/\n\tvoid main() {\n\t\t/*float edge = edgeFactor();\n\t\tif(edge==0.0) discard;\n\t\tgl_FragColor = vec4(mix(color, vec3(0.5), edge), 1.0);*/\n\t\tgl_FragColor = vec4(color, 1.0);\n\t}\n\t";
     WebGLApp.vsCircleES2 = "#version 100\n\t#define PI 3.141592653589793\n\tattribute float vertexID;\n\n\tuniform vec2 pos;\n\tuniform float radius;\n\tuniform int vertexCount; // ex) 38 = 36(points on circle) + 1(center) + 1(point enclosing circle)\n\tuniform mat4 proj_matrix;\n\n\tvarying float alphaFactor;\n  \n\tvoid main() {\n\t\t\n\t\tint ID = int(vertexID) - 1;\n\t\tif (ID == 0) {\n\t\t\tvec4 npos = proj_matrix * vec4(pos, -1, 1);\n\t\t\tgl_Position = vec4(npos.xy, 0, 1);\n\t\t\talphaFactor = 0.0;\n\t\t} else {\n\t\t\tint count = vertexCount - 2;\n\t\t\tint index = int(mod(float(ID - 1), float(count)));\n\t\t\tfloat angle = 2.0 * float(PI) * float(index) / float(count);\n\t\t\tfloat x = radius * cos(angle);\n\t\t\tfloat y = radius * sin(angle);\n\t\t\tvec4 npos = proj_matrix * vec4(pos.x + x, pos.y + y, -1, 1);\n\t\t\tgl_Position = vec4(npos.xy, 0, 1);\n\t\t\talphaFactor = 1.0;\n\t\t}\n\t}\n\t";
     WebGLApp.fsCircleES2 = "#version 100\n\tprecision mediump float;\n\t\n\tuniform vec3 color;\n\tuniform float alphaExp;\n\tuniform float alphaMin;\n\tuniform float alphaMax;\n\tvarying float alphaFactor;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color, clamp(pow(alphaFactor, alphaExp), alphaMin, alphaMax));\n\t}\n\t";
