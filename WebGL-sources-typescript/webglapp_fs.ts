@@ -4456,7 +4456,7 @@ class WebGLApp extends WebGLAppBase {
 			case WebGLApp.KEY_DOWN:  dy -= offset; this.downArrowDown = true; break;
 			default: return;
 		}
-		this.trackball.mouse(0.5, 0.5, Camera.TrackballMode.CAMERA_ORBITING);
+		this.trackball.mouse(0.5, 0.5, Camera.TrackballMode.OBJECT_ROTATING);
 		this.trackball.motion(dx, dy);
 		this.trackball.mouse(dx, dy, Camera.TrackballMode.NOTHING);
 	}

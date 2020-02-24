@@ -5238,7 +5238,7 @@ var WebGLApp = (function (_super) {
                 break;
             default: return;
         }
-        this.trackball.mouse(0.5, 0.5, Camera.TrackballMode.CAMERA_ORBITING);
+        this.trackball.mouse(0.5, 0.5, Camera.TrackballMode.OBJECT_ROTATING);
         this.trackball.motion(dx, dy);
         this.trackball.mouse(dx, dy, Camera.TrackballMode.NOTHING);
     };
