@@ -140,10 +140,19 @@ function onResetScene() {
 function _resetVisibleButtonGroup() {
 	var btnList = document.querySelectorAll('#VISIBLE_BTN_GROUP button');
 	for(var i = 0; i < btnList.length; i++){
-		btnList[i].classList.remove('toggle_off');
+		var btnItem = btnList[i];
+		if (!btnItem.classList.contains('default_off')) {
+			btnItem.classList.remove('toggle_off');
 		
-		var imgObj = btnList[i].querySelector('img');
-		if(imgObj)imgObj.src = 'img/ic_show.png';
+			var imgObj = btnItem.querySelector('img');
+			if(imgObj)imgObj.src = 'img/ic_show.png';
+			
+		} else if (!btnItem.classList.contains('toggle_off')) {
+			btnItem.classList.add('toggle_off');
+
+			var imgObj = btnItem.querySelector('img');
+			if(imgObj)imgObj.src = 'img/ic_hide.png';
+		}
 	}
 }
 
@@ -174,6 +183,9 @@ function onClickToggleViewBtn(btnObj, which)
 		}
 		else if(which == 'inliers') { 
 			SetVisibleInliers(!isHide); 
+		}
+		else if(which == 'depth') {
+			SetDepthColorMapping(!isHide);
 		}
 	}
 }

@@ -8,7 +8,7 @@
 
 function SamplePointsQuarter(pointList)
 {
-	if(!Array.isArray(pointList) && pointList.length % 3 != 0) {
+	if(!Array.isArray(pointList) || pointList.length % 3 != 0) {
 		myAlert("SamplePointQuarter() - Invalid Parameter: input array is not expected"); 
 		return; 
 	}
@@ -17,7 +17,7 @@ function SamplePointsQuarter(pointList)
 }
 
 function SamplePoints(pointList, targetSize) {
-	if(!Array.isArray(pointList) && pointList.length % 3 != 0) {
+	if(!Array.isArray(pointList) || pointList.length % 3 != 0) {
 		myAlert("SamplePoint() - Invalid Parameter: input array is not expected"); 
 		return false; 
 	}

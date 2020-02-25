@@ -2971,17 +2971,12 @@ abstract class AppBase {
 		this.width = canvas.clientWidth;
 		this.height = canvas.clientHeight;
 	}
-
-	protected onKeyDown(event: KeyboardEvent): void {}
-	protected onKeyUp(event: KeyboardEvent): void {}
-
 	protected onMouseDown(event: MouseEvent): void {}
 	protected onMouseUp(event: MouseEvent): void {}
 	protected onMouseMove(event: MouseEvent): void {}
 	protected onMouseOver(event: MouseEvent): void {}
 	protected onMouseOut(event: MouseEvent): void {}
 	protected onMouseWheel(event: WheelEvent): void {}
-	protected onBlur(event: FocusEvent): void {}
 
 	protected onTouchStart(event: TouchEvent): void {}
 	protected onTouchMove(event: TouchEvent): void {}
@@ -3003,9 +2998,6 @@ abstract class WebGLAppBase extends AppBase {
 		this.canvas = canvas;
 		canvas.tabIndex = 1;
 		if(this._glContext !== null) {
-			canvas.addEventListener("keydown", this.onKeyDown.bind(this));
-			canvas.addEventListener("keyup", this.onKeyUp.bind(this));
-
 			canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
 			canvas.addEventListener("mouseup", this.onMouseUp.bind(this));
 			canvas.addEventListener("mousemove", this.onMouseMove.bind(this));
@@ -3013,8 +3005,7 @@ abstract class WebGLAppBase extends AppBase {
 			canvas.addEventListener("mouseout", this.onMouseOut.bind(this));
 			canvas.addEventListener("mousewheel", this.onMouseWheel.bind(this), false);
 			canvas.addEventListener("DOMMouseScroll", this.onMouseWheel.bind(this), false);
-			canvas.addEventListener("blur", this.onBlur.bind(this), true);
-
+			
 			canvas.addEventListener("touchstart", this.onTouchStart.bind(this));
 			canvas.addEventListener("touchmove", this.onTouchMove.bind(this));
 			canvas.addEventListener("touchend", this.onTouchEnd.bind(this));
@@ -3700,9 +3691,9 @@ class WebGLApp extends WebGLAppBase {
 	public SetProbeRadiusCircleColor(r: number, g: number, b: number): void { this.probeRadiusCircleColor.assign(r, g, b); }
 	public GetProbeRadiusCircleColor(): number[] { return this.probeRadiusCircleColor.toArray(); }
 
-	private distanceColoringEnabled: boolean = false;
-	public SetDistanceColoringEnabled(enabled: boolean): void { this.distanceColoringEnabled = enabled; }
-	public GetDistanceColoringEnabled(): boolean { return this.distanceColoringEnabled; }
+	private depthColorMappingEnabled: boolean = false;
+	public SetDepthColorMapping(enabled: boolean): void { this.depthColorMappingEnabled = enabled; }
+	public GetDepthColorMapping(): boolean { return this.depthColorMappingEnabled; }
 
 	public Resize(width: number, height: number) { 
 		this.width = width; this.height = height;
@@ -3995,7 +3986,7 @@ class WebGLApp extends WebGLAppBase {
 
 		gl.viewport(0, 0, this.width, this.height);
 
-		if (this.distanceColoringEnabled) this.calcDepthRange(this.trackball.viewMatrix);
+		if (this.depthColorMappingEnabled) this.calcDepthRange(this.trackball.viewMatrix);
 		this.renderPointCloud(gl, this.pickedPointIndex, this.pickedPointColor);
 
 		// NOTE: Don't merge those two loops below.
@@ -4073,13 +4064,13 @@ class WebGLApp extends WebGLAppBase {
 	public SetPickedPointColor(r: number, g: number, b: number): void { this.pickedPointColor.assign(r, g, b); }
 	public GetPickedPointColor(): number[] { return this.pickedPointColor.toArray(); }
 	private renderPointCloud(gl: WebGLRenderingContext, pickedIndex: number, pickedColor: vec3): void {
-		let program: WebGLProgram = this.distanceColoringEnabled ? this.programPointCloudDC : this.programPointCloud;
+		let program: WebGLProgram = this.depthColorMappingEnabled ? this.programPointCloudDC : this.programPointCloud;
 		gl.enable(gl.DEPTH_TEST);
 		gl.useProgram(program);
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
 		gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 
-		if (this.distanceColoringEnabled) {
+		if (this.depthColorMappingEnabled) {
 			gl.uniform2f(gl.getUniformLocation(this.programPointCloudDC, "depthRange"), this.depthRange.x, this.depthRange.y);
 		}
 		gl.uniformMatrix4fv(gl.getUniformLocation(program, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
@@ -4106,13 +4097,13 @@ class WebGLApp extends WebGLAppBase {
 	}
 
 	private renderInlierPoints(gl: WebGLRenderingContext, objectData: PrimitiveData, objectVBO: iVertexBuffer): void {
-		let program: WebGLProgram = this.distanceColoringEnabled ? this.programPointCloudDC : this.programPointCloud;
+		let program: WebGLProgram = this.depthColorMappingEnabled ? this.programPointCloudDC : this.programPointCloud;
 		gl.enable(gl.DEPTH_TEST);
 		gl.useProgram(program);
 		gl.bindBuffer(gl.ARRAY_BUFFER, objectVBO.vbo);
 		gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 		
-		if (this.distanceColoringEnabled) {
+		if (this.depthColorMappingEnabled) {
 			gl.uniform2f(gl.getUniformLocation(this.programPointCloudDC, "depthRange"), this.depthRange.x, this.depthRange.y);
 		}
 		gl.uniformMatrix4fv(gl.getUniformLocation(program, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
@@ -4129,10 +4120,10 @@ class WebGLApp extends WebGLAppBase {
 		gl.enable(gl.BLEND);
 		gl.disable(gl.DEPTH_TEST);
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		let program: WebGLProgram = this.distanceColoringEnabled ? this.programWireGeometryDC : this.programWireGeometry;
+		let program: WebGLProgram = this.depthColorMappingEnabled ? this.programWireGeometryDC : this.programWireGeometry;
 		gl.useProgram(program);
 
-		if (this.distanceColoringEnabled) {
+		if (this.depthColorMappingEnabled) {
 			gl.uniform2f(gl.getUniformLocation(this.programWireGeometryDC, "depthRange"), this.depthRange.x, this.depthRange.y);
 		}
 		gl.uniformMatrix4fv(gl.getUniformLocation(program, "model_matrix"), false, objectData.modelMatrix.transpose().toArray());	
@@ -4587,7 +4578,7 @@ class WebGLApp extends WebGLAppBase {
 	private static readonly KEY_RIGHT = 39;
 	private static readonly KEY_UP = 38;
 	private static readonly KEY_DOWN = 40;
-	private static readonly KEY_CAPS_LOCK = 20;
+	private static readonly KEY_D = 68;
 	private static readonly ROTATION_STEP_PRECISE_DEGREE = 0.05;
 	private static readonly ROTATION_STEP_NORMAL_DEGREE = 1;
 	private static readonly ROTATION_STEP_FAST_DEGREE = 10;
@@ -4600,7 +4591,7 @@ class WebGLApp extends WebGLAppBase {
 	private downArrowDown: boolean = false;
 	private isArrowKey(event: KeyboardEvent): boolean { return event.keyCode >= WebGLApp.KEY_LEFT && event.keyCode <= WebGLApp.KEY_DOWN; }
 	private get isArrowKeyDown(): boolean { return this.leftArrowDown || this.rightArrowDown || this.upArrowDown || this.downArrowDown; }
-	protected onKeyDown(event: KeyboardEvent): void {
+	public onArrowKeyDown(event: KeyboardEvent): void {
 		if (this.mouseButtonDown || !this.isArrowKey(event)) return;
 
 		let dx: number = 0.5;
@@ -4622,8 +4613,8 @@ class WebGLApp extends WebGLAppBase {
 		this.trackball.motion(dx, dy);
 		this.trackball.mouse(dx, dy, Camera.TrackballMode.NOTHING);
 	}
-	protected onKeyUp(event: KeyboardEvent): void {
-		if (event.keyCode == WebGLApp.KEY_CAPS_LOCK) this.distanceColoringEnabled = !this.distanceColoringEnabled;
+	public onArrowKeyUp(event: KeyboardEvent): void {
+		if (event.keyCode == WebGLApp.KEY_D) this.depthColorMappingEnabled = !this.depthColorMappingEnabled;
 		if (!this.isArrowKey(event)) return;
 
 		switch (event.keyCode) {
@@ -4689,13 +4680,6 @@ class WebGLApp extends WebGLAppBase {
 		let deltaY: number = typeof event.deltaY === 'undefined' ? event.detail : event.deltaY;
 		deltaY = -Math.sign(deltaY);
 		if (!Number.isNaN(deltaY)) this.trackball.CameraZoom(deltaY);
-	}
-
-	protected onBlur(event: FocusEvent): void {
-		this.leftArrowDown = false;
-		this.rightArrowDown = false;
-		this.upArrowDown = false;
-		this.downArrowDown = false;
 	}
 
 	private _TouchScreen2Client(t: Touch): vec2{

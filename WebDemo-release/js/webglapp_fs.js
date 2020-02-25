@@ -4062,15 +4062,12 @@ var AppBase = (function () {
         this.width = canvas.clientWidth;
         this.height = canvas.clientHeight;
     }
-    AppBase.prototype.onKeyDown = function (event) { };
-    AppBase.prototype.onKeyUp = function (event) { };
     AppBase.prototype.onMouseDown = function (event) { };
     AppBase.prototype.onMouseUp = function (event) { };
     AppBase.prototype.onMouseMove = function (event) { };
     AppBase.prototype.onMouseOver = function (event) { };
     AppBase.prototype.onMouseOut = function (event) { };
     AppBase.prototype.onMouseWheel = function (event) { };
-    AppBase.prototype.onBlur = function (event) { };
     AppBase.prototype.onTouchStart = function (event) { };
     AppBase.prototype.onTouchMove = function (event) { };
     AppBase.prototype.onTouchEnd = function (event) { };
@@ -4087,8 +4084,6 @@ var WebGLAppBase = (function (_super) {
         _this.canvas = canvas;
         canvas.tabIndex = 1;
         if (_this._glContext !== null) {
-            canvas.addEventListener("keydown", _this.onKeyDown.bind(_this));
-            canvas.addEventListener("keyup", _this.onKeyUp.bind(_this));
             canvas.addEventListener("mousedown", _this.onMouseDown.bind(_this));
             canvas.addEventListener("mouseup", _this.onMouseUp.bind(_this));
             canvas.addEventListener("mousemove", _this.onMouseMove.bind(_this));
@@ -4096,7 +4091,6 @@ var WebGLAppBase = (function (_super) {
             canvas.addEventListener("mouseout", _this.onMouseOut.bind(_this));
             canvas.addEventListener("mousewheel", _this.onMouseWheel.bind(_this), false);
             canvas.addEventListener("DOMMouseScroll", _this.onMouseWheel.bind(_this), false);
-            canvas.addEventListener("blur", _this.onBlur.bind(_this), true);
             canvas.addEventListener("touchstart", _this.onTouchStart.bind(_this));
             canvas.addEventListener("touchmove", _this.onTouchMove.bind(_this));
             canvas.addEventListener("touchend", _this.onTouchEnd.bind(_this));
@@ -4486,7 +4480,7 @@ var WebGLApp = (function (_super) {
         _this.probeRadiusCircleMin = 0.1;
         _this.probeRadiusCircleMax = 1.0;
         _this.probeRadiusCircleColor = new vec3(0, 1, 1);
-        _this.distanceColoringEnabled = false;
+        _this.depthColorMappingEnabled = false;
         _this.bboxVertices = [new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3()];
         _this.depthRange = new vec2();
         _this.pickedPointIndex = -1;
@@ -4615,8 +4609,8 @@ var WebGLApp = (function (_super) {
     WebGLApp.prototype.GetProbeRadiusCircleMax = function () { return this.probeRadiusCircleMax; };
     WebGLApp.prototype.SetProbeRadiusCircleColor = function (r, g, b) { this.probeRadiusCircleColor.assign(r, g, b); };
     WebGLApp.prototype.GetProbeRadiusCircleColor = function () { return this.probeRadiusCircleColor.toArray(); };
-    WebGLApp.prototype.SetDistanceColoringEnabled = function (enabled) { this.distanceColoringEnabled = enabled; };
-    WebGLApp.prototype.GetDistanceColoringEnabled = function () { return this.distanceColoringEnabled; };
+    WebGLApp.prototype.SetDepthColorMapping = function (enabled) { this.depthColorMappingEnabled = enabled; };
+    WebGLApp.prototype.GetDepthColorMapping = function () { return this.depthColorMappingEnabled; };
     WebGLApp.prototype.Resize = function (width, height) {
         this.width = width;
         this.height = height;
@@ -4824,7 +4818,7 @@ var WebGLApp = (function (_super) {
         this.text.clearRect(0, 0, this.text.canvas.width, this.text.canvas.height);
         this.text.fillStyle = "white";
         gl.viewport(0, 0, this.width, this.height);
-        if (this.distanceColoringEnabled)
+        if (this.depthColorMappingEnabled)
             this.calcDepthRange(this.trackball.viewMatrix);
         this.renderPointCloud(gl, this.pickedPointIndex, this.pickedPointColor);
         this.objectNames.forEach(function (name) {
@@ -4879,12 +4873,12 @@ var WebGLApp = (function (_super) {
     WebGLApp.prototype.SetPickedPointColor = function (r, g, b) { this.pickedPointColor.assign(r, g, b); };
     WebGLApp.prototype.GetPickedPointColor = function () { return this.pickedPointColor.toArray(); };
     WebGLApp.prototype.renderPointCloud = function (gl, pickedIndex, pickedColor) {
-        var program = this.distanceColoringEnabled ? this.programPointCloudDC : this.programPointCloud;
+        var program = this.depthColorMappingEnabled ? this.programPointCloudDC : this.programPointCloud;
         gl.enable(gl.DEPTH_TEST);
         gl.useProgram(program);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-        if (this.distanceColoringEnabled) {
+        if (this.depthColorMappingEnabled) {
             gl.uniform2f(gl.getUniformLocation(this.programPointCloudDC, "depthRange"), this.depthRange.x, this.depthRange.y);
         }
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
@@ -4905,12 +4899,12 @@ var WebGLApp = (function (_super) {
         gl.useProgram(null);
     };
     WebGLApp.prototype.renderInlierPoints = function (gl, objectData, objectVBO) {
-        var program = this.distanceColoringEnabled ? this.programPointCloudDC : this.programPointCloud;
+        var program = this.depthColorMappingEnabled ? this.programPointCloudDC : this.programPointCloud;
         gl.enable(gl.DEPTH_TEST);
         gl.useProgram(program);
         gl.bindBuffer(gl.ARRAY_BUFFER, objectVBO.vbo);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-        if (this.distanceColoringEnabled) {
+        if (this.depthColorMappingEnabled) {
             gl.uniform2f(gl.getUniformLocation(this.programPointCloudDC, "depthRange"), this.depthRange.x, this.depthRange.y);
         }
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
@@ -4925,9 +4919,9 @@ var WebGLApp = (function (_super) {
         gl.enable(gl.BLEND);
         gl.disable(gl.DEPTH_TEST);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        var program = this.distanceColoringEnabled ? this.programWireGeometryDC : this.programWireGeometry;
+        var program = this.depthColorMappingEnabled ? this.programWireGeometryDC : this.programWireGeometry;
         gl.useProgram(program);
-        if (this.distanceColoringEnabled) {
+        if (this.depthColorMappingEnabled) {
             gl.uniform2f(gl.getUniformLocation(this.programWireGeometryDC, "depthRange"), this.depthRange.x, this.depthRange.y);
         }
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "model_matrix"), false, objectData.modelMatrix.transpose().toArray());
@@ -5275,7 +5269,7 @@ var WebGLApp = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    WebGLApp.prototype.onKeyDown = function (event) {
+    WebGLApp.prototype.onArrowKeyDown = function (event) {
         if (this.mouseButtonDown || !this.isArrowKey(event))
             return;
         var dx = 0.5;
@@ -5315,9 +5309,9 @@ var WebGLApp = (function (_super) {
         this.trackball.motion(dx, dy);
         this.trackball.mouse(dx, dy, Camera.TrackballMode.NOTHING);
     };
-    WebGLApp.prototype.onKeyUp = function (event) {
-        if (event.keyCode == WebGLApp.KEY_CAPS_LOCK)
-            this.distanceColoringEnabled = !this.distanceColoringEnabled;
+    WebGLApp.prototype.onArrowKeyUp = function (event) {
+        if (event.keyCode == WebGLApp.KEY_D)
+            this.depthColorMappingEnabled = !this.depthColorMappingEnabled;
         if (!this.isArrowKey(event))
             return;
         switch (event.keyCode) {
@@ -5385,12 +5379,6 @@ var WebGLApp = (function (_super) {
         deltaY = -Math.sign(deltaY);
         if (!Number.isNaN(deltaY))
             this.trackball.CameraZoom(deltaY);
-    };
-    WebGLApp.prototype.onBlur = function (event) {
-        this.leftArrowDown = false;
-        this.rightArrowDown = false;
-        this.upArrowDown = false;
-        this.downArrowDown = false;
     };
     WebGLApp.prototype._TouchScreen2Client = function (t) {
         var canvasBB = this.canvas.getBoundingClientRect();
@@ -5474,7 +5462,7 @@ var WebGLApp = (function (_super) {
     WebGLApp.KEY_RIGHT = 39;
     WebGLApp.KEY_UP = 38;
     WebGLApp.KEY_DOWN = 40;
-    WebGLApp.KEY_CAPS_LOCK = 20;
+    WebGLApp.KEY_D = 68;
     WebGLApp.ROTATION_STEP_PRECISE_DEGREE = 0.05;
     WebGLApp.ROTATION_STEP_NORMAL_DEGREE = 1;
     WebGLApp.ROTATION_STEP_FAST_DEGREE = 10;

@@ -59,17 +59,69 @@ function _BrowserCheck() {
 	return true;
 }
 
+var G_DLG_LIST = [];
+function _CheckDlgOpen() {
+	var dlgCheck = { isOpen: false, openedDialogs: [] };
+	G_DLG_LIST.forEach(function(dialog) { 
+		var isOpen = dialog.style.display != "none";
+		this.isOpen |= isOpen;
+		if (isOpen) this.openedDialogs.push(dialog);
+	}, dlgCheck);
+	return dlgCheck;
+}
 window.onload = function() {
 	if(!_BrowserCheck()) {
 		_DisableAllMenus();
 		myAlert(ERR_MSG_WEBGL_SUPPORT);
 		return;
 	}
+
+	// InitDialogState -> Hide
+	G_DLG_LIST = document.querySelectorAll('div.modal_dialog');
+	G_DLG_LIST.forEach(function(e){ e.style.display = "none"; });
 	
 	_UpdateCanvasSize();
 	window.addEventListener('resize', function(){
 		var canvas = _UpdateCanvasSize();
 		if(gApp != null && gApp instanceof WebGLApp) { gApp.Resize(canvas.clientWidth, canvas.clientHeight); }
+	});
+
+	window.addEventListener('keydown', function(e) {
+		if(gApp != null && gApp instanceof WebGLApp) {
+			if (_CheckDlgOpen().isOpen) return;
+			switch (e.keyCode) {
+				case 37/*left*/:
+				case 38/*up*/:
+				case 39/*right*/:
+				case 40/*down*/: gApp.onArrowKeyDown(e); break;
+			}
+		}
+	});
+
+	window.addEventListener('keyup', function(e) {
+		var result = null;
+		if ((result = _CheckDlgOpen()).isOpen) {
+			if (e.keyCode == 27/*ESC*/) {
+				switch (result.openedDialogs[0].id) {
+					case "FILE_OPEN_DIALOG": CloseFileOpenDialog(); break;
+					case "FS_PARAM_DIALOG": CloseFSParamDialog(); break;
+					case "COLOR_PICKER_DIALOG": CloseColorPickerDialog(); break;
+					case "HELP_DIALOG": CloseHelpDialog(); break;
+					case "ALERT_DIALOG": OnCancelAlertDialog(); break;
+				}
+			}
+			return;
+		}
+	
+		if(gApp != null && gApp instanceof WebGLApp) {
+			switch (e.keyCode) {
+				case 68/*d*/: this.document.querySelector("button[name='DEPTH_BTN']").click(); break;
+				case 37/*left*/:
+				case 38/*up*/:
+				case 39/*right*/:
+				case 40/*down*/: gApp.onArrowKeyUp(e); break;
+			}
+		}
 	});
 
 	OpenHelpDialog();
