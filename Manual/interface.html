@@ -134,6 +134,26 @@ td img { max-width: none !important; }
 </tr>
 </tbody>
 </table>
+<h3 id="visibility">Visibility</h3>
+<table>
+<tbody>
+<tr>
+<td><img src="img/visibility-mesh.png" alt=""></td>
+<td style="text-align:center">Mesh Visibility</td>
+<td style="text-align:left">Show/Hide all meshes.</td>
+</tr>
+<tr>
+<td><img src="img/visibility-point.png" alt=""></td>
+<td style="text-align:center">(Inlier) Point Visibility</td>
+<td style="text-align:left">Show/Hide all inlier points.</td>
+</tr>
+<tr>
+<td><img src="img/visibility-depth.png" alt=""></td>
+<td style="text-align:center">Depth Visibility</td>
+<td style="text-align:left">Enable/Disable <a href="stepbystep.html#depth-color-mapping" target="_blank">depth-color mapping</a>.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="etc">ETC</h3>
 <table>
 <tbody>
@@ -145,35 +165,6 @@ td img { max-width: none !important; }
 </tbody>
 </table>
 <h2 id="webgl-canvas">WebGL Canvas</h2>
-<h3 id="alternative-ways">Alternative ways to manipulate the view</h3>
-<p>You can manipulate the view by using the following shortcuts regardless of which button you have clicked in the menu bar: </p>
-<table class="shortcut-icons">
-<tbody>
-<tr>
-<td style="text-align:center"><span></span><img src="img/arrow-left.png" alt=""><img src="img/arrow-up.png" alt=""><img src="img/arrow-down.png" alt=""><img src="img/arrow-right.png" alt=""></span></td>
-<td style="text-align:left">Rotates the point cloud by 1 degree in a given direction. </td>
-</tr>
-<tr>
-<td style="text-align:center"><img src="img/ctrl.png" alt="" > + <span><img src="img/arrow-left.png" alt=""><img src="img/arrow-up.png" alt=""><img src="img/arrow-down.png" alt=""><img src="img/arrow-right.png" alt=""></span></td>
-<td style="text-align:left">Rotates the point cloud by 0.05 degree in a given direction. </td>
-</tr>
-<tr>
-<td style="text-align:center"><img src="img/shift.png" alt=""> + <span><img src="img/arrow-left.png" alt=""><img src="img/arrow-up.png" alt=""><img src="img/arrow-down.png" alt=""><img src="img/arrow-right.png" alt=""></span></td>
-<td style="text-align:left">Rotates the point cloud by 10 degree in a given direction. </td>
-</tr>
-<tr>
-<td style="text-align:center"><img src="img/wheel-button.png" alt=""> + <img src="img/drag.png" alt=""><br/>(Dragging mouse wheel)</td>
-<td style="text-align:left">Moves the point cloud.</td>
-</tr>
-<tr>
-<td style="text-align:center"><img src="img/rotate-wheel.png" alt=""><br/>(Rotating mouse wheel)</td>
-<td style="text-align:left">Zooms in/out the point cloud. This feature is not available in case of using Internet Explorer browsers.</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p>Note: These shortcuts take effect if the canvas is in focus. You have to click the canvas before using the shortcuts, if you clicked other UI elements such as the menu-bar buttons, Information panels. </p>
-</blockquote>
 <h3 id="visual-cues">Visual Cues</h3>
 <table>
 <tbody>
@@ -223,6 +214,37 @@ td img { max-width: none !important; }
 <td><img src="img/remove.png" alt=""></td>
 <td style="text-align:center">Remove</td>
 <td style="text-align:left">Allows users to remove the mesh and inlier points of a geometry.</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="alternative-ways">Alternative ways to manipulate the view</h2>
+<p>You can manipulate the view by using the following shortcuts instead of accessing the menu bar: </p>
+<table class="shortcut-icons">
+<tbody>
+<tr>
+<td style="text-align:center"><span></span><img src="img/arrow-left.png" alt=""><img src="img/arrow-up.png" alt=""><img src="img/arrow-down.png" alt=""><img src="img/arrow-right.png" alt=""></span></td>
+<td style="text-align:left">Rotates the point cloud by 1 degree in a given direction. </td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="img/ctrl.png" alt="" > + <span><img src="img/arrow-left.png" alt=""><img src="img/arrow-up.png" alt=""><img src="img/arrow-down.png" alt=""><img src="img/arrow-right.png" alt=""></span></td>
+<td style="text-align:left">Rotates the point cloud by 0.05 degree in a given direction. </td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="img/shift.png" alt=""> + <span><img src="img/arrow-left.png" alt=""><img src="img/arrow-up.png" alt=""><img src="img/arrow-down.png" alt=""><img src="img/arrow-right.png" alt=""></span></td>
+<td style="text-align:left">Rotates the point cloud by 10 degree in a given direction. </td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="img/wheel-button.png" alt=""> + <img src="img/drag.png" alt=""><br/>(Dragging mouse wheel)</td>
+<td style="text-align:left">Moves the point cloud.</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="img/rotate-wheel.png" alt=""><br/>(Rotating mouse wheel)</td>
+<td style="text-align:left">Zooms in/out the point cloud. This feature is not available in case of using Internet Explorer browsers.</td>
+</tr>
+<tr>
+<td style="text-align:center"><img src="img/key-d.png" alt=""></td>
+<td style="text-align:left">Enable/disable depth-color mapping.</td>
 </tr>
 </tbody>
 </table>
