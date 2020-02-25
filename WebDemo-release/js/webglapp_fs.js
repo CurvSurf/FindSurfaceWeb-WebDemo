@@ -4031,32 +4031,6 @@ function CreateVertexBufferIndexed(gl, vertices, indices) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     return { count: indices.length, vbo: VB.vbo, ibo: IBO };
 }
-;
-;
-function CreateVertexArrayBuffer(gl, vertices) {
-    var VAO = gl.createVertexArray();
-    gl.bindVertexArray([VAO]);
-    var VBO = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, VBO);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-    gl.bindVertexArray(null);
-    return { vao: VAO, vbo: VBO, count: vertices.length / 3 };
-}
-function CreateVertexArrayBufferIndexed(gl, vertices, indices) {
-    if (indices == null) {
-        indices = vertices.indices;
-        vertices = vertices.vertices;
-    }
-    var VAB = CreateVertexArrayBuffer(gl, vertices);
-    gl.bindVertexArray(VAB.vao);
-    var IBO = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, IBO);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-    gl.bindVertexArray(null);
-    return { count: indices.length, vao: VAB.vao, vbo: VAB.vbo, ibo: IBO };
-}
 var AppBase = (function () {
     function AppBase(canvas) {
         this.width = canvas.clientWidth;
@@ -4633,10 +4607,10 @@ var WebGLApp = (function (_super) {
         this.attributeLessIndices = CreateVertexBuffer(gl, Array.apply(0, { length: 38 }).map(function (_, i) { return i + 1; }));
         this.attributeLessIndices.count = 38;
         this.plane = CreateVertexBufferIndexed(gl, [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3], [0, 1, 1, 2, 2, 3, 3, 0]);
-        this.sphere = CreateVertexBufferIndexed(gl, GenerateWireSphereVertexData(2));
-        this.cylinder = CreateVertexBufferIndexed(gl, GenerateWireCylinderVertexData(3, 18));
-        this.cone = CreateVertexBufferIndexed(gl, GenerateWireCylinderVertexData(2, 18));
-        this.torus = CreateVertexBufferIndexed(gl, GenerateWireTorusVertexData(18, 18));
+        this.sphere = CreateVertexBufferIndexed(gl, GenerateWireSphereVertexData(WebGLApp.WIRE_SPHERE_SUBDIV));
+        this.cylinder = CreateVertexBufferIndexed(gl, GenerateWireCylinderVertexData(WebGLApp.WIRE_CYLINDER_SUBDIV.l, WebGLApp.WIRE_CYLINDER_SUBDIV.r));
+        this.cone = CreateVertexBufferIndexed(gl, GenerateWireCylinderVertexData(WebGLApp.WIRE_CONE_SUBDIV.l, WebGLApp.WIRE_CONE_SUBDIV.r));
+        this.torus = CreateVertexBufferIndexed(gl, GenerateWireTorusVertexData(WebGLApp.WIRE_TORUS_SUBDIV.t, WebGLApp.WIRE_TORUS_SUBDIV.p));
         this.arrowCylinder = CreateVertexBufferIndexed(gl, GenerateCylinderVertexData(1));
         this.originSphere = CreateVertexBufferIndexed(gl, GenerateSphereVertexData(3));
         this.rulerQuad = CreateVertexBufferIndexed(gl, [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3], [0, 1, 2, 0, 2, 3]);
@@ -4998,9 +4972,9 @@ var WebGLApp = (function (_super) {
         gl.uniform1i(gl.getUniformLocation(program, "subroutine_index"), 4);
         gl.uniform1f(gl.getUniformLocation(program, "radius0"), objectData.tubeRadius);
         gl.uniform1f(gl.getUniformLocation(program, "radius1"), objectData.meanRadius);
-        var ipr = 8 * 10;
+        var ipr = 8 * WebGLApp.WIRE_TORUS_SUBDIV.p;
         var ratio = objectData.tubeAngle / (2 * Math.PI);
-        var count = ipr * (Math.floor(ratio * this.torus.count / ipr) + 1);
+        var count = Math.ceil(ratio * (this.torus.count / ipr)) * ipr;
         gl.drawElements(gl.LINES, count, gl.UNSIGNED_SHORT, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -5458,6 +5432,10 @@ var WebGLApp = (function (_super) {
     WebGLApp.fsGeometryES2 = "#version 100\n\tprecision mediump float;\n\n\tuniform vec3 color;\n\n\t/*http://codeflow.org/entries/2012/aug/02/easy-wireframe-display-with-barycentric-coordinates/*/\n\t/*float edgeFactor() { \n\t\tvec3 d=fwidth(bary); \n\t\tvec3 a3=smoothstep(vec3(0.0), d*1.5, bary); \n\t\treturn min(min(a3.x, a3.y), a3.z); \n\t}*/\n\tvoid main() {\n\t\t/*float edge = edgeFactor();\n\t\tif(edge==0.0) discard;\n\t\tgl_FragColor = vec4(mix(color, vec3(0.5), edge), 1.0);*/\n\t\tgl_FragColor = vec4(color, 1.0);\n\t}\n\t";
     WebGLApp.vsCircleES2 = "#version 100\n\t#define PI 3.141592653589793\n\tattribute float vertexID;\n\n\tuniform vec2 pos;\n\tuniform float radius;\n\tuniform int vertexCount; // ex) 38 = 36(points on circle) + 1(center) + 1(point enclosing circle)\n\tuniform mat4 proj_matrix;\n\n\tvarying float alphaFactor;\n  \n\tvoid main() {\n\t\t\n\t\tint ID = int(vertexID) - 1;\n\t\tif (ID == 0) {\n\t\t\tvec4 npos = proj_matrix * vec4(pos, -1, 1);\n\t\t\tgl_Position = vec4(npos.xy, 0, 1);\n\t\t\talphaFactor = 0.0;\n\t\t} else {\n\t\t\tint count = vertexCount - 2;\n\t\t\tint index = int(mod(float(ID - 1), float(count)));\n\t\t\tfloat angle = 2.0 * float(PI) * float(index) / float(count);\n\t\t\tfloat x = radius * cos(angle);\n\t\t\tfloat y = radius * sin(angle);\n\t\t\tvec4 npos = proj_matrix * vec4(pos.x + x, pos.y + y, -1, 1);\n\t\t\tgl_Position = vec4(npos.xy, 0, 1);\n\t\t\talphaFactor = 1.0;\n\t\t}\n\t}\n\t";
     WebGLApp.fsCircleES2 = "#version 100\n\tprecision mediump float;\n\t\n\tuniform vec3 color;\n\tuniform float alphaExp;\n\tuniform float alphaMin;\n\tuniform float alphaMax;\n\tvarying float alphaFactor;\n\n\tvoid main() {\n\t\tgl_FragColor = vec4(color, clamp(pow(alphaFactor, alphaExp), alphaMin, alphaMax));\n\t}\n\t";
+    WebGLApp.WIRE_SPHERE_SUBDIV = 2;
+    WebGLApp.WIRE_CYLINDER_SUBDIV = { l: 3, r: 18 };
+    WebGLApp.WIRE_CONE_SUBDIV = { l: 2, r: 18 };
+    WebGLApp.WIRE_TORUS_SUBDIV = { t: 18, p: 18 };
     WebGLApp.KEY_LEFT = 37;
     WebGLApp.KEY_RIGHT = 39;
     WebGLApp.KEY_UP = 38;

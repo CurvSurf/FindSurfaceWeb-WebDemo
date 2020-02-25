@@ -2743,7 +2743,7 @@ function GenerateWireTorusVertexData(tsubdiv: number = 36, psubdiv: number = 10)
 	return { vertices: vertices, indices: indices };
 }
 
-function GenerateTorusVertexData(tsubdiv: number = 36, psubdiv: number = 10) {
+function GenerateTorusVertexData(tsubdiv: number = 36, psubdiv: number = 10): iVertexData {
 
 	let vertices: number[] = [];
 	let indices: number[] = [];
@@ -2918,46 +2918,6 @@ function CreateVertexBufferIndexed(gl: WebGLRenderingContext, vertices: number[]
 	return { count: indices.length, vbo: VB.vbo, ibo: IBO };
 }
 
-// webgl2
-interface iVertexArrayBuffer { count: number, vao: WebGLVertexArrayObject, vbo: WebGLBuffer };
-interface iVertexArrayBufferIndexed extends iVertexArrayBuffer { ibo: WebGLBuffer };
-
-function CreateVertexArrayBuffer(gl: WebGL2RenderingContext, vertices: number[]): iVertexArrayBuffer {
-	
-	let VAO: WebGLVertexArrayObject = gl.createVertexArray();
-	gl.bindVertexArray([VAO]);
-
-	let VBO: WebGLBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, VBO);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-	gl.enableVertexAttribArray(0);
-	gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-
-	gl.bindVertexArray(null);
-
-	return { vao: VAO, vbo: VBO, count: vertices.length/3 };
-} 
-
-function CreateVertexArrayBufferIndexed(gl: WebGL2RenderingContext, vertices: number[]|iVertexData, indices?: number[]): iVertexArrayBufferIndexed {
-
-	if(indices==null) {
-		indices = (<iVertexData>vertices).indices;
-		vertices = (<iVertexData>vertices).vertices;
-	}
-
-	let VAB: iVertexArrayBuffer = CreateVertexArrayBuffer(gl, <number[]>vertices);
-
-	gl.bindVertexArray(VAB.vao);
-
-	let IBO: WebGLBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, IBO);
-	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-
-	gl.bindVertexArray(null);
-
-	return { count: indices.length, vao: VAB.vao, vbo: VAB.vbo, ibo: IBO };
-}
-
 /* webglappbase.ts */
 
 abstract class AppBase {
@@ -3078,9 +3038,6 @@ abstract class PrimitiveData {
 
 interface iPrimitiveDataMap {
 	[key: string]: PrimitiveData;
-}
-interface iVertexArrayBufferMap {
-	[key: string]: iVertexArrayBuffer;
 }
 interface iVertexBufferMap {
 	[key: string]: iVertexBuffer;
@@ -3757,6 +3714,10 @@ class WebGLApp extends WebGLAppBase {
 		};
     }
 
+	private static readonly WIRE_SPHERE_SUBDIV: number = 2;
+	private static readonly WIRE_CYLINDER_SUBDIV: { l: number, r: number } = { l: 3, r: 18 };
+	private static readonly WIRE_CONE_SUBDIV: { l: number, r: number } = { l: 2, r: 18 };
+	private static readonly WIRE_TORUS_SUBDIV: { t: number, p: number } = { t: 18, p: 18 };
     protected init(gl: WebGLRenderingContext): Boolean {
 
 		// trackball camera 
@@ -3779,10 +3740,10 @@ class WebGLApp extends WebGLAppBase {
 		this.attributeLessIndices = CreateVertexBuffer(gl, Array.apply(0, {length: 38}).map((_:number, i: number) => i + 1));
 		this.attributeLessIndices.count = 38;
 		this.plane = CreateVertexBufferIndexed(gl, [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3], [0, 1, 1, 2, 2, 3, 3, 0]);
-		this.sphere = CreateVertexBufferIndexed(gl, GenerateWireSphereVertexData(2));
-		this.cylinder = CreateVertexBufferIndexed(gl, GenerateWireCylinderVertexData(3, 18));
-		this.cone = CreateVertexBufferIndexed(gl, GenerateWireCylinderVertexData(2, 18))
-		this.torus = CreateVertexBufferIndexed(gl, GenerateWireTorusVertexData(18, 18));
+		this.sphere = CreateVertexBufferIndexed(gl, GenerateWireSphereVertexData(WebGLApp.WIRE_SPHERE_SUBDIV));
+		this.cylinder = CreateVertexBufferIndexed(gl, GenerateWireCylinderVertexData(WebGLApp.WIRE_CYLINDER_SUBDIV.l, WebGLApp.WIRE_CYLINDER_SUBDIV.r));
+		this.cone = CreateVertexBufferIndexed(gl, GenerateWireCylinderVertexData(WebGLApp.WIRE_CONE_SUBDIV.l, WebGLApp.WIRE_CONE_SUBDIV.r));
+		this.torus = CreateVertexBufferIndexed(gl, GenerateWireTorusVertexData(WebGLApp.WIRE_TORUS_SUBDIV.t, WebGLApp.WIRE_TORUS_SUBDIV.p));
 
 		this.arrowCylinder = CreateVertexBufferIndexed(gl, GenerateCylinderVertexData(1)); 
 		this.originSphere = CreateVertexBufferIndexed(gl, GenerateSphereVertexData(3)); 
@@ -4212,10 +4173,10 @@ class WebGLApp extends WebGLAppBase {
 		gl.uniform1f(gl.getUniformLocation(program, "radius0"), (<TorusData>objectData).tubeRadius);
 		gl.uniform1f(gl.getUniformLocation(program, "radius1"), (<TorusData>objectData).meanRadius);
 
-		// 8 = psubdiv at ggeometry.ts
-		let ipr: number = 8*10; // each quad of subdiv. has 8 wire points.
+		// 8 = # of indices for each quad (at ggeometry.ts)
+		let ipr: number = 8*WebGLApp.WIRE_TORUS_SUBDIV.p;
 		let ratio: number = (<TorusData>objectData).tubeAngle / (2*Math.PI);
-		let count: number = ipr * (Math.floor(ratio*this.torus.count / ipr) + 1);
+		let count: number = Math.ceil(ratio * (this.torus.count / ipr)) * ipr;
 		gl.drawElements(gl.LINES, count, gl.UNSIGNED_SHORT, 0);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 		gl.bindBuffer(gl.ARRAY_BUFFER, null);
