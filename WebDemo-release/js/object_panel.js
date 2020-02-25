@@ -414,7 +414,7 @@ function SetVisibleInliers(bShow) {
 }
 function SetDepthColorMapping(bShow) {
 	if(gApp != null && gApp instanceof WebGLApp) {
-		gApp.SetDepthColorMapping(bShow);
+		gApp.ShowDepthMap(bShow);
 	}
 }
 function _SetVisibleCheckbox(bShow, which) {

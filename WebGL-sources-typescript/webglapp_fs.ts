@@ -3648,9 +3648,9 @@ class WebGLApp extends WebGLAppBase {
 	public SetProbeRadiusCircleColor(r: number, g: number, b: number): void { this.probeRadiusCircleColor.assign(r, g, b); }
 	public GetProbeRadiusCircleColor(): number[] { return this.probeRadiusCircleColor.toArray(); }
 
-	private depthColorMappingEnabled: boolean = false;
-	public SetDepthColorMapping(enabled: boolean): void { this.depthColorMappingEnabled = enabled; }
-	public GetDepthColorMapping(): boolean { return this.depthColorMappingEnabled; }
+	private showDepthMap: boolean = false;
+	public ShowDepthMap(enabled: boolean): void { this.showDepthMap = enabled; }
+	public IsDepthMapVisible(): boolean { return this.showDepthMap; }
 
 	public Resize(width: number, height: number) { 
 		this.width = width; this.height = height;
@@ -3947,7 +3947,7 @@ class WebGLApp extends WebGLAppBase {
 
 		gl.viewport(0, 0, this.width, this.height);
 
-		if (this.depthColorMappingEnabled) this.calcDepthRange(this.trackball.viewMatrix);
+		if (this.showDepthMap) this.calcDepthRange(this.trackball.viewMatrix);
 		this.renderPointCloud(gl, this.pickedPointIndex, this.pickedPointColor);
 
 		// NOTE: Don't merge those two loops below.
@@ -4025,13 +4025,13 @@ class WebGLApp extends WebGLAppBase {
 	public SetPickedPointColor(r: number, g: number, b: number): void { this.pickedPointColor.assign(r, g, b); }
 	public GetPickedPointColor(): number[] { return this.pickedPointColor.toArray(); }
 	private renderPointCloud(gl: WebGLRenderingContext, pickedIndex: number, pickedColor: vec3): void {
-		let program: WebGLProgram = this.depthColorMappingEnabled ? this.programPointCloudDC : this.programPointCloud;
+		let program: WebGLProgram = this.showDepthMap ? this.programPointCloudDC : this.programPointCloud;
 		gl.enable(gl.DEPTH_TEST);
 		gl.useProgram(program);
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
 		gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 
-		if (this.depthColorMappingEnabled) {
+		if (this.showDepthMap) {
 			gl.uniform2f(gl.getUniformLocation(this.programPointCloudDC, "depthRange"), this.depthRange.x, this.depthRange.y);
 		}
 		gl.uniformMatrix4fv(gl.getUniformLocation(program, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
@@ -4058,13 +4058,13 @@ class WebGLApp extends WebGLAppBase {
 	}
 
 	private renderInlierPoints(gl: WebGLRenderingContext, objectData: PrimitiveData, objectVBO: iVertexBuffer): void {
-		let program: WebGLProgram = this.depthColorMappingEnabled ? this.programPointCloudDC : this.programPointCloud;
+		let program: WebGLProgram = this.showDepthMap ? this.programPointCloudDC : this.programPointCloud;
 		gl.enable(gl.DEPTH_TEST);
 		gl.useProgram(program);
 		gl.bindBuffer(gl.ARRAY_BUFFER, objectVBO.vbo);
 		gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 		
-		if (this.depthColorMappingEnabled) {
+		if (this.showDepthMap) {
 			gl.uniform2f(gl.getUniformLocation(this.programPointCloudDC, "depthRange"), this.depthRange.x, this.depthRange.y);
 		}
 		gl.uniformMatrix4fv(gl.getUniformLocation(program, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
@@ -4081,10 +4081,10 @@ class WebGLApp extends WebGLAppBase {
 		gl.enable(gl.BLEND);
 		gl.disable(gl.DEPTH_TEST);
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		let program: WebGLProgram = this.depthColorMappingEnabled ? this.programWireGeometryDC : this.programWireGeometry;
+		let program: WebGLProgram = this.showDepthMap ? this.programWireGeometryDC : this.programWireGeometry;
 		gl.useProgram(program);
 
-		if (this.depthColorMappingEnabled) {
+		if (this.showDepthMap) {
 			gl.uniform2f(gl.getUniformLocation(this.programWireGeometryDC, "depthRange"), this.depthRange.x, this.depthRange.y);
 		}
 		gl.uniformMatrix4fv(gl.getUniformLocation(program, "model_matrix"), false, objectData.modelMatrix.transpose().toArray());	
@@ -4575,7 +4575,7 @@ class WebGLApp extends WebGLAppBase {
 		this.trackball.mouse(dx, dy, Camera.TrackballMode.NOTHING);
 	}
 	public onArrowKeyUp(event: KeyboardEvent): void {
-		if (event.keyCode == WebGLApp.KEY_D) this.depthColorMappingEnabled = !this.depthColorMappingEnabled;
+		if (event.keyCode == WebGLApp.KEY_D) this.showDepthMap = !this.showDepthMap;
 		if (!this.isArrowKey(event)) return;
 
 		switch (event.keyCode) {

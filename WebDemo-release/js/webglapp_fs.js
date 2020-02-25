@@ -4454,7 +4454,7 @@ var WebGLApp = (function (_super) {
         _this.probeRadiusCircleMin = 0.1;
         _this.probeRadiusCircleMax = 1.0;
         _this.probeRadiusCircleColor = new vec3(0, 1, 1);
-        _this.depthColorMappingEnabled = false;
+        _this.showDepthMap = false;
         _this.bboxVertices = [new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3(), new vec3()];
         _this.depthRange = new vec2();
         _this.pickedPointIndex = -1;
@@ -4583,8 +4583,8 @@ var WebGLApp = (function (_super) {
     WebGLApp.prototype.GetProbeRadiusCircleMax = function () { return this.probeRadiusCircleMax; };
     WebGLApp.prototype.SetProbeRadiusCircleColor = function (r, g, b) { this.probeRadiusCircleColor.assign(r, g, b); };
     WebGLApp.prototype.GetProbeRadiusCircleColor = function () { return this.probeRadiusCircleColor.toArray(); };
-    WebGLApp.prototype.SetDepthColorMapping = function (enabled) { this.depthColorMappingEnabled = enabled; };
-    WebGLApp.prototype.GetDepthColorMapping = function () { return this.depthColorMappingEnabled; };
+    WebGLApp.prototype.ShowDepthMap = function (enabled) { this.showDepthMap = enabled; };
+    WebGLApp.prototype.IsDepthMapVisible = function () { return this.showDepthMap; };
     WebGLApp.prototype.Resize = function (width, height) {
         this.width = width;
         this.height = height;
@@ -4792,7 +4792,7 @@ var WebGLApp = (function (_super) {
         this.text.clearRect(0, 0, this.text.canvas.width, this.text.canvas.height);
         this.text.fillStyle = "white";
         gl.viewport(0, 0, this.width, this.height);
-        if (this.depthColorMappingEnabled)
+        if (this.showDepthMap)
             this.calcDepthRange(this.trackball.viewMatrix);
         this.renderPointCloud(gl, this.pickedPointIndex, this.pickedPointColor);
         this.objectNames.forEach(function (name) {
@@ -4847,12 +4847,12 @@ var WebGLApp = (function (_super) {
     WebGLApp.prototype.SetPickedPointColor = function (r, g, b) { this.pickedPointColor.assign(r, g, b); };
     WebGLApp.prototype.GetPickedPointColor = function () { return this.pickedPointColor.toArray(); };
     WebGLApp.prototype.renderPointCloud = function (gl, pickedIndex, pickedColor) {
-        var program = this.depthColorMappingEnabled ? this.programPointCloudDC : this.programPointCloud;
+        var program = this.showDepthMap ? this.programPointCloudDC : this.programPointCloud;
         gl.enable(gl.DEPTH_TEST);
         gl.useProgram(program);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-        if (this.depthColorMappingEnabled) {
+        if (this.showDepthMap) {
             gl.uniform2f(gl.getUniformLocation(this.programPointCloudDC, "depthRange"), this.depthRange.x, this.depthRange.y);
         }
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
@@ -4873,12 +4873,12 @@ var WebGLApp = (function (_super) {
         gl.useProgram(null);
     };
     WebGLApp.prototype.renderInlierPoints = function (gl, objectData, objectVBO) {
-        var program = this.depthColorMappingEnabled ? this.programPointCloudDC : this.programPointCloud;
+        var program = this.showDepthMap ? this.programPointCloudDC : this.programPointCloud;
         gl.enable(gl.DEPTH_TEST);
         gl.useProgram(program);
         gl.bindBuffer(gl.ARRAY_BUFFER, objectVBO.vbo);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-        if (this.depthColorMappingEnabled) {
+        if (this.showDepthMap) {
             gl.uniform2f(gl.getUniformLocation(this.programPointCloudDC, "depthRange"), this.depthRange.x, this.depthRange.y);
         }
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "view_matrix"), false, this.trackball.viewMatrix.transpose().toArray());
@@ -4893,9 +4893,9 @@ var WebGLApp = (function (_super) {
         gl.enable(gl.BLEND);
         gl.disable(gl.DEPTH_TEST);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        var program = this.depthColorMappingEnabled ? this.programWireGeometryDC : this.programWireGeometry;
+        var program = this.showDepthMap ? this.programWireGeometryDC : this.programWireGeometry;
         gl.useProgram(program);
-        if (this.depthColorMappingEnabled) {
+        if (this.showDepthMap) {
             gl.uniform2f(gl.getUniformLocation(this.programWireGeometryDC, "depthRange"), this.depthRange.x, this.depthRange.y);
         }
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "model_matrix"), false, objectData.modelMatrix.transpose().toArray());
@@ -5285,7 +5285,7 @@ var WebGLApp = (function (_super) {
     };
     WebGLApp.prototype.onArrowKeyUp = function (event) {
         if (event.keyCode == WebGLApp.KEY_D)
-            this.depthColorMappingEnabled = !this.depthColorMappingEnabled;
+            this.showDepthMap = !this.showDepthMap;
         if (!this.isArrowKey(event))
             return;
         switch (event.keyCode) {
