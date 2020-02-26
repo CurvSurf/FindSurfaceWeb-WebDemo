@@ -206,12 +206,14 @@ function DomContentOption(objID) {
 			root.parentNode.removeChild(root);
 			
 			if(gApp != null && gApp instanceof WebGLApp) { gApp.RemoveObject( objID ); }
+			
+			UpdateOutliersInfo(gApp.pointcloud.count);
 		});
 	});
 	
 	pElement.appendChild(delBtn);
 	div.appendChild(pElement);
-	
+
 	return div;
 }
 

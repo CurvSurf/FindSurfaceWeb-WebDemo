@@ -3025,6 +3025,7 @@ abstract class PrimitiveData {
 	public geometryColor: vec3;
 	public inlierSelected: Boolean;
 	public geometrySelected: Boolean;
+	public points: number[];
 	public constructor() {
 		this.pointVisible = true;
 		this.geometryVisible = true;
@@ -3032,6 +3033,7 @@ abstract class PrimitiveData {
 		this.geometryColor = new vec3();
 		this.inlierSelected = false;
 		this.geometrySelected = false;
+		this.points = null;
 	}
 	public abstract get modelMatrix(): mat4;
 }
@@ -3799,6 +3801,7 @@ class WebGLApp extends WebGLAppBase {
 			this.inlierObjects[key] = new TorusData(objInfo.param.c, objInfo.param.n, objInfo.param.mr, objInfo.param.tr, t.tb, t.ta); 
 			break;
 		}
+		this.inlierObjects[key].points = inlier;
 	}
 
 	public RemoveObject(key: string): void {
@@ -3806,6 +3809,13 @@ class WebGLApp extends WebGLAppBase {
 		if( index!=-1) {
 			this.objectNames.splice(index, 1);
 			this.WebGLContext.deleteBuffer(this.inlierVAO[key].vbo);
+			this._vertexData.push(...this.inlierObjects[key].points);
+			let gl: WebGLRenderingContext = this.WebGLContext;
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
+			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this._vertexData), gl.STATIC_DRAW);
+			gl.bindBuffer(gl.ARRAY_BUFFER, null);
+			this.pointcloud.count = this._vertexData.length/3;
+	
 			delete this.inlierObjects[key];
 			delete this.inlierVAO[key];
 		}

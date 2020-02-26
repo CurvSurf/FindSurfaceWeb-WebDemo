@@ -4128,6 +4128,7 @@ var PrimitiveData = (function () {
         this.geometryColor = new vec3();
         this.inlierSelected = false;
         this.geometrySelected = false;
+        this.points = null;
     }
     return PrimitiveData;
 }());
@@ -4664,12 +4665,20 @@ var WebGLApp = (function (_super) {
                 this.inlierObjects[key] = new TorusData(objInfo.param.c, objInfo.param.n, objInfo.param.mr, objInfo.param.tr, t.tb, t.ta);
                 break;
         }
+        this.inlierObjects[key].points = inlier;
     };
     WebGLApp.prototype.RemoveObject = function (key) {
+        var _a;
         var index = this.objectNames.indexOf(key);
         if (index != -1) {
             this.objectNames.splice(index, 1);
             this.WebGLContext.deleteBuffer(this.inlierVAO[key].vbo);
+            (_a = this._vertexData).push.apply(_a, this.inlierObjects[key].points);
+            var gl = this.WebGLContext;
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.pointcloud.vbo);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this._vertexData), gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            this.pointcloud.count = this._vertexData.length / 3;
             delete this.inlierObjects[key];
             delete this.inlierVAO[key];
         }
