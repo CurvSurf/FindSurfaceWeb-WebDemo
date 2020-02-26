@@ -3913,7 +3913,7 @@ class WebGLApp extends WebGLAppBase {
 		});
 		barycentric = barycentric.div(inlierPoints.length);
 
-		if (barycentric.length < 1000.0 * Number.EPSILON) return { tb: [0, 0, 0], ta: Constants.PI*2.0 };
+		if (barycentric.length < 0.1) return { tb: [0, 0, 0], ta: Constants.PI*2.0 };
 
 		let elbowMiddle: vec3 = barycentric.normalize();
 

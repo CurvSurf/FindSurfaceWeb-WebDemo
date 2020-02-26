@@ -4767,7 +4767,7 @@ var WebGLApp = (function (_super) {
             barycentric.z += v.z;
         });
         barycentric = barycentric.div(inlierPoints.length);
-        if (barycentric.length < 1000.0 * Number.EPSILON)
+        if (barycentric.length < 0.1)
             return { tb: [0, 0, 0], ta: Constants.PI * 2.0 };
         var elbowMiddle = barycentric.normalize();
         var angles = [];
