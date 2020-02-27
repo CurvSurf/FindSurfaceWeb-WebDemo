@@ -131,7 +131,16 @@ td img { max-width: none !important; }
 <p>Note: Parameter values are dependent on a measurement unit of point cloud data. For example, if a measurement unit is <em>meter</em> and measurement accuracy is less than <em>5 mm</em>, an appropriate value of <em>Accuracy</em> may be 0.005. If a measurement unit is <em>millimeter</em> and measurement accuracy is less than <em>3 mm</em>, an appropriate value of <em>Accuracy</em> may be 3.</p>
 </blockquote>
 <blockquote>
+<p>Note: The group 'Measurement Parameter' represents the two main conditions of point measurement: the accuracy and the density of point cloud. Holes in object surfaces increase the mean distance.</p>
+</blockquote>
+<blockquote>
+<p>Note: The 'Touch Radius' is to be set proportional to the size/scale (i.e., radius, length or width) of the object surface to be extracted. 1/4 ~ 1/2 of the radius/length/width of the target object surface works well. If the point measurement is accurate, also a relatively small touch radius works well, and vice versa.</p>
+</blockquote>
+<blockquote>
 <p>Note: Probe radius affects only point picking. For example, if the radius is set to 4, the topmost (in z-order) point among the points having max 4 <em>pixel screen distance</em> from the mouse cursor will be selected. To select precisely a point you should set the probe radius to a small value. To prevent an unintended selection of a point in background, you should set the probe radius to a large value.</p>
+</blockquote>
+<blockquote>
+<p>Note: The group 'Region Growing' controls the activity of the two orthogonal directional searching for inlier point candidates. The 'Radial Expansion' should be set small for noisy points. A small value suppresses the measurement noise. A large value accepts also noisy points as inlier candidates. The 'Lateral Extension' should be set proportional to the length/width of object surface. A small value shortens the length/width of object surface, and vice versa.</p>
 </blockquote>
 </li>
 </ol>
