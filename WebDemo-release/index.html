@@ -23,6 +23,14 @@
 <script src="js/webglapp_fs.js"></script>
 <script src="js/window_event.js"></script>
 </head>
+<style>
+	span.subscript {
+		position: relative;
+		left: 16px;
+		bottom: 16px;
+		font-weight: bold;
+	}
+</style>
 <body>
 
 <!-- TOP PANEL -->
@@ -51,11 +59,11 @@
 
 	<span id="STYPE_BTN_GROUP" class="btn_grp">
 		<!--<button type="button" name="auto" title="Find Any" onclick="javascript:onClickSurfaceType('auto');"><img src="img/icon_auto.png" /></button>--><!--
-		--><button type="button" name="plane" title="Find Plane" onclick="javascript:onClickSurfaceType('plane');"><img src="img/icon_plane.png" /></button><!--
-		--><button type="button" name="sphere" title="Find Sphere" onclick="javascript:onClickSurfaceType('sphere');"><img src="img/icon_sphere.png" /></button><!--
-		--><button type="button" name="cylinder" title="Find Cylinder" onclick="javascript:onClickSurfaceType('cylinder');"><img src="img/icon_cylinder.png" /></button><!--
-		--><button type="button" name="cone" title="Find Cone" onclick="javascript:onClickSurfaceType('cone');"><img src="img/icon_cone.png" /></button><!--
-		--><button type="button" name="torus" title="Find Torus" onclick="javascript:onClickSurfaceType('torus');"><img src="img/icon_torus.png" /></button>
+		--><button type="button" name="plane" title="Find Plane" onclick="javascript:onClickSurfaceType('plane');"><img src="img/icon_plane.png" /><span class="subscript">1</span></button><!--
+		--><button type="button" name="sphere" title="Find Sphere" onclick="javascript:onClickSurfaceType('sphere');"><img src="img/icon_sphere.png" /><span class="subscript">2</span></button><!--
+		--><button type="button" name="cylinder" title="Find Cylinder" onclick="javascript:onClickSurfaceType('cylinder');"><img src="img/icon_cylinder.png" /><span class="subscript">3</span></button><!--
+		--><button type="button" name="cone" title="Find Cone" onclick="javascript:onClickSurfaceType('cone');"><img src="img/icon_cone.png" /><span class="subscript">4</span></button><!--
+		--><button type="button" name="torus" title="Find Torus" onclick="javascript:onClickSurfaceType('torus');"><img src="img/icon_torus.png" /><span class="subscript">5</span></button>
 	</span>
 	
 	<span id="VISIBLE_BTN_GROUP" class="btn_grp">

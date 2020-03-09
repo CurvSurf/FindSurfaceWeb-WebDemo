@@ -120,9 +120,25 @@ window.onload = function() {
 				case 38/*up*/:
 				case 39/*right*/:
 				case 40/*down*/: gApp.onArrowKeyUp(e); break;
+				case 49/*1*/: if (!isMouseDragging) { this.document.querySelector("button[name=plane]").click(); } break;
+				case 50/*2*/: if (!isMouseDragging) { this.document.querySelector("button[name=sphere]").click(); } break;
+				case 51/*3*/: if (!isMouseDragging) { this.document.querySelector("button[name=cylinder]").click(); } break;
+				case 52/*4*/: if (!isMouseDragging) { this.document.querySelector("button[name=cone]").click(); } break;
+				case 53/*5*/: if (!isMouseDragging) { this.document.querySelector("button[name=torus]").click(); } break;
+				case 27/*ESC*/: onCancelCanvas(this.document.getElementById("GL_CANVAS")); break;
 			}
 		}
 	});
 
+	var canvas = this.document.getElementById("GL_CANVAS");
+	canvas.addEventListener("mousedown", function(evt){
+		if (evt.button == 0 || evt.button == 1) isMouseDragging = true;
+	});
+	canvas.addEventListener("mouseup", function(evt){
+		if (evt.button == 0 || evt.button == 1) isMouseDragging = false;
+	});
+	canvas.addEventListener("mouseleave", function(evt){
+		if (evt.button == 0 || evt.button == 1) isMouseDragging = false;
+	});
 	OpenHelpDialog();
 }

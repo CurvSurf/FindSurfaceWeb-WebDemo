@@ -40,30 +40,14 @@ function MakeRequestBody( accuracy, meanDist, touchR, seedIdx, radExp, latExt, p
 	return requestBody;
 }
 
-function RequestFindSurface(type, requestData)
+function RequestFindSurface(type, requestData, onsend, onprogress, onload, ontimeout, onloadend)
 {
 	if( !(requestData instanceof ArrayBuffer) ) { return; }
 	var reqURL = "https://developers.curvsurf.com/FindSurface/"+type+".json";
 
 	var xhttp = new XMLHttpRequest();
 	
-	xhttp.upload.onprogress = function(event) {
-		var progress_div = document.getElementById("REQ_UPLOAD_PROGRESS_BAR");
-		if(event.loaded < event.total) {
-			var progress = document.getElementById("REQ_UPLOAD_PROGRESS");
-			if(progress) { progress.style.display = "block"; }
-			if(progress_div) {
-				var pct = ((event.loaded / event.total) * 100);
-				progress_div.style.width = Math.floor( pct ) + '%';
-				progress_div.innerHTML = Math.floor( pct ) + '%';
-			}
-		}
-		else { // upload complete
-			var title = document.getElementById("REQ_UPLOAD_TITLE");
-			if(title) { title.innerHTML = "Wait for Server Response"; }
-			if(progress_div) { progress_div.parentNode.removeChild(progress_div); }
-		}
-	}
+	xhttp.upload.onprogress = onprogress;
 	
 	xhttp.onload = function() {
 		var resp = null;
@@ -78,25 +62,14 @@ function RequestFindSurface(type, requestData)
 			resp = { "header" : "FSWEB", "version" : "1.0", "code" : -2, "result" : ("Response Error: " + this.statusText + '(' + this.status + ')') };
 		}
 		
-		switch(resp.code) {
-			case 0: AppendInfo(resp.result); break;
-			case 1: myAlert(ERR_MSG_NOT_FOUND); break;
-			case -2: myAlert(ERR_MSG_INVALID_REQUEST(resp.result)); break;
-			case -1: default: myAlert(ERR_MSG_UNKNOWN_ERROR(resp.result)); break;
-		}
+		onload(resp);
 	}
 	
-	xhttp.ontimeout = function() { myAlert(ERR_MSG_TIMEOUT); }
-	xhttp.onloadend = function() { 
-		CloseProgressDialog();
-		if(gApp != null && gApp instanceof WebGLApp) {
-			gApp.ShowTouchArea(false);
-		}
-	}
-
+	xhttp.ontimeout = ontimeout;
+	xhttp.onloadend = onloadend;
 	xhttp.open("POST", reqURL, true);
 	xhttp.setRequestHeader("Content-type", "application/x-findsurface-request");
 
-	OpenProgressDialog('<div>Request FindSurface to Server<br/>Please Wait a few minutes</div><div><h3 id="REQ_UPLOAD_TITLE">Request Uploading...</h3><div id="REQ_UPLOAD_PROGRESS"><div id="REQ_UPLOAD_PROGRESS_BAR">Uploading...</div></div></div>');
+	onsend();
 	xhttp.send(requestData);
 }

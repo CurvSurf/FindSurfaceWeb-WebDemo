@@ -43,6 +43,14 @@ function _getCursorMode() {
 	return (node && node.length > 0) ? node[0].name : '';
 }
 
+function _isTypeButtonSelected() {
+	var node = document.querySelectorAll('#STYPE_BTN_GROUP button');
+	for (var i = 0; i < node.length; i++) {
+		if (node[i].classList.contains('active')) return true;
+	}
+	return false;
+}
+
 function _selectTypeButton(typeName) {
 	var node = document.querySelectorAll('#STYPE_BTN_GROUP button');
 	var _name = typeName.toLowerCase();
@@ -68,6 +76,45 @@ function _resetCanvasSetting(canvas) {
 
 function CancelFindSurface() { _deselectTypeButton(); _resetCanvasSetting(document.getElementById('GL_CANVAS')); }
 
+function _onSendRequest() { 
+	OpenProgressDialog('<div>Request FindSurface to Server<br/>Please Wait a few minutes</div><div><h3 id="REQ_UPLOAD_TITLE">Request Uploading...</h3><div id="REQ_UPLOAD_PROGRESS"><div id="REQ_UPLOAD_PROGRESS_BAR">Uploading...</div></div></div>');
+}
+function _onProgress(event) {
+	var progress_div = document.getElementById("REQ_UPLOAD_PROGRESS_BAR");
+	if(event.loaded < event.total) {
+		var progress = document.getElementById("REQ_UPLOAD_PROGRESS");
+		if(progress) { progress.style.display = "block"; }
+		if(progress_div) {
+			var pct = ((event.loaded / event.total) * 100);
+			progress_div.style.width = Math.floor( pct ) + '%';
+			progress_div.innerHTML = Math.floor( pct ) + '%';
+		}
+	}
+	else { // upload complete
+		var title = document.getElementById("REQ_UPLOAD_TITLE");
+		if(title) { title.innerHTML = "Wait for Server Response"; }
+		if(progress_div) { progress_div.parentNode.removeChild(progress_div); }
+	}
+}
+function _onLoad(resp) {
+	switch(resp.code) {
+		case 0: AppendInfo(resp.result); break;
+		case 1: myAlert(ERR_MSG_NOT_FOUND); break;
+		case -2: myAlert(ERR_MSG_INVALID_REQUEST(resp.result)); break;
+		case -1: default: myAlert(ERR_MSG_UNKNOWN_ERROR(resp.result)); break;
+	}
+}
+function _onTimeout() {
+	myAlert(ERR_MSG_TIMEOUT);
+}
+function _onLoadEnd() {
+	CloseProgressDialog();
+	if(gApp != null && gApp instanceof WebGLApp) {
+		gApp.ShowTouchArea(false);
+	}
+	onClickCursorType(lastCursorMode);
+}
+
 function _callFindSurface(x_normal, y_normal, typeName) {
 	OpenProgressDialog('');
 	setTimeout(function(){
@@ -77,7 +124,7 @@ function _callFindSurface(x_normal, y_normal, typeName) {
 		gApp.ShowTouchArea(true, gFSParam.touchR);
 		
 		var reqData = MakeRequestBody( gFSParam.accuracy, gFSParam.meanDist, gFSParam.touchR, idx, gFSParam.radExp, gFSParam.latExt, gApp.GetOutliers() );
-		RequestFindSurface( typeName, reqData );
+		RequestFindSurface( typeName, reqData, _onSendRequest, _onProgress, _onLoad, _onTimeout, _onLoadEnd );
 	});
 }
 
@@ -103,11 +150,18 @@ function onClickCanvas(evt) {
 	}
 }
 
-function onCancelCanvas() { _deselectTypeButton(); _resetCanvasSetting(this); }
+function onCancelCanvas(canvas) { 
+	if (_isTypeButtonSelected()) {
+		_deselectTypeButton(); 
+		_resetCanvasSetting(canvas instanceof HTMLCanvasElement? canvas : this); 
+		onClickCursorType(lastCursorMode);
+	}
+}
 
 function onClickSurfaceType(type) {
 	if(gApp === null || !(gApp instanceof WebGLApp)) { myAlert(ERR_MSG_OPEN_POINT_FIRST); return; }
-	if( _getCursorMode() != 'normal' ) onClickCursorType('normal');
+	lastCursorMode = _getCursorMode();
+	if( lastCursorMode != 'normal' ) onClickCursorType('normal');
 	if( _selectTypeButton(type) ) {
 		var canvas = document.getElementById('GL_CANVAS');
 		canvas.userData = type;
