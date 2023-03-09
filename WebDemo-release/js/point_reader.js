@@ -10,7 +10,7 @@ function parseLineListAscii(lineList) {
 	var ret = [];
 	for(var i = 0; i < lineList.length; i++) {
 		if(lineList[i].length > 0) {
-			var list = lineList[i].trim().split(/\s+/);
+			var list = lineList[i].trim().split(/\s*,?\s+/);
 			if(list.length > 2) {
 				var x = Number(list[0]);
 				var y = Number(list[1]);
