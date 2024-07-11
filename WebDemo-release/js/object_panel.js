@@ -206,7 +206,7 @@ function DomContentOption(objID) {
 			root.parentNode.removeChild(root);
 			
 			if(gApp != null && gApp instanceof WebGLApp) { gApp.RemoveObject( objID ); }
-			
+			checkExportButtonDisabledState()
 			UpdateOutliersInfo(gApp.pointcloud.count);
 		});
 	});
@@ -328,7 +328,7 @@ function AppendInfo(obj_param) {
 			break;
 		default: return;
 	}
-	
+
 	var inliers_cnt = 0;
 	for(var i = 0; i < obj_param.flags.length; i++) {
 		if(obj_param.flags[i] == 0) ++inliers_cnt;
@@ -342,6 +342,8 @@ function AppendInfo(obj_param) {
 	}
 	else { console.log('gApp is not initialized!!'); }
 	
+	checkExportButtonDisabledState();
+
 	// Outliers
 	UpdateOutliersInfo( gApp.pointcloud.count );
 	
@@ -400,6 +402,7 @@ function UpdateOutliersInfo(cnt) {
 function ClearInfoList() {
 	gOPID = 1;
 	document.getElementById('INFO_WINDOW').innerHTML = '';
+	disableExportButton();
 }
 
 function SetVisibleMesh(bShow) { 
